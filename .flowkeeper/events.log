@@ -1,0 +1,9 @@
+{"eventId":"evt_bd8703ce9947","type":"init","at":"2026-02-23T05:35:10.234Z","files":[],"summary":"Initialized FlowKeeper","patchPath":""}
+{"eventId":"evt_5c3ba384da0a","type":"goal_updated","at":"2026-02-23T05:37:26.905Z","files":[],"summary":"Updated goal","patchPath":""}
+{"eventId":"evt_f90b7711d43d","type":"lock_added","at":"2026-02-23T05:37:38.932Z","files":[],"summary":"Added SpecLock item","patchPath":""}
+{"eventId":"evt_c173bf61dae0","type":"lock_added","at":"2026-02-23T05:37:41.557Z","files":[],"summary":"Added SpecLock item","patchPath":""}
+{"eventId":"evt_0d1dd0233440","type":"fact_updated","at":"2026-02-23T05:37:53.605Z","files":[],"summary":"Updated deploy facts","patchPath":""}
+{"eventId":"evt_4c80a4cfc35e","type":"context_generated","at":"2026-02-23T05:38:04.962Z","files":[".flowkeeper/context/latest.md"],"summary":"Generated context pack","patchPath":""}
+{"eventId":"evt_29149a374eac","type":"file_created","at":"2026-02-23T05:43:56.577Z","files":["sample.txt"],"summary":"file created: sample.txt","patchPath":""}
+{"eventId":"evt_388898b09afb","type":"file_changed","at":"2026-02-23T05:43:56.605Z","files":["sample.txt"],"summary":"file changed: sample.txt","patchPath":""}
+{"eventId":"evt_66d5c27fb09f","type":"file_deleted","at":"2026-02-23T05:43:57.879Z","files":["sample.txt"],"summary":"file deleted: sample.txt","patchPath":""}

@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "project": {
+    "id": "fk_20c24122941e",
+    "name": "my-first-codex-project",
+    "root": "C:\\Users\\HR-02\\Desktop\\my-first-codex-project",
+    "createdAt": "2026-02-23T05:35:10.228Z",
+    "updatedAt": "2026-02-23T05:43:57.880Z"
+  },
+  "goal": {
+    "text": "Ship FlowKeeper V1 engine-only",
+    "updatedAt": "2026-02-23T05:37:26.899Z"
+  },
+  "specLock": {
+    "items": [
+      {
+        "id": "lock_3fac41680992",
+        "text": "Language-agnostic. No AST parsing in V1.",
+        "createdAt": "2026-02-23T05:37:41.556Z",
+        "source": "user",
+        "tags": [
+          "speclock",
+          "v1"
+        ]
+      },
+      {
+        "id": "lock_bc64b5d9996a",
+        "text": "Engine-first. No integrations in V1.",
+        "createdAt": "2026-02-23T05:37:38.931Z",
+        "source": "user",
+        "tags": [
+          "speclock",
+          "v1"
+        ]
+      }
+    ]
+  },
+  "decisions": [],
+  "facts": {
+    "deploy": {
+      "provider": "railway",
+      "autoDeploy": false,
+      "branch": "main",
+      "notes": "V1 local CLI only"
+    },
+    "repo": {
+      "defaultBranch": "",
+      "hasGit": false
+    }
+  },
+  "importance": {
+    "pinnedFiles": [],
+    "pinnedNotes": []
+  },
+  "state": {
+    "head": {
+      "gitBranch": "",
+      "gitCommit": "",
+      "capturedAt": "2026-02-23T05:35:10.228Z"
+    },
+    "recentChanges": [
+      {
+        "eventId": "evt_66d5c27fb09f",
+        "summary": "file deleted: sample.txt",
+        "files": [
+          "sample.txt"
+        ],
+        "at": "2026-02-23T05:43:57.879Z"
+      },
+      {
+        "eventId": "evt_388898b09afb",
+        "summary": "file changed: sample.txt",
+        "files": [
+          "sample.txt"
+        ],
+        "at": "2026-02-23T05:43:56.605Z"
+      },
+      {
+        "eventId": "evt_29149a374eac",
+        "summary": "file created: sample.txt",
+        "files": [
+          "sample.txt"
+        ],
+        "at": "2026-02-23T05:43:56.577Z"
+      }
+    ],
+    "reverts": []
+  },
+  "events": {
+    "lastEventId": "evt_66d5c27fb09f",
+    "count": 9
+  }
+}
