@@ -1,4 +1,5 @@
-﻿const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -191,6 +192,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
   createWindow();
 
   app.on('activate', () => {

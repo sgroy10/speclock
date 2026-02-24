@@ -29,4 +29,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flowkeeper-mac
-          path: ide/dist/*.dmg
+          path: ide/dist/*
