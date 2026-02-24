@@ -1,0 +1,46 @@
+{
+  "name": "flowkeeper",
+  "version": "1.0.0",
+  "description": "AI continuity engine — MCP server + CLI for maintaining project memory across AI coding sessions",
+  "type": "module",
+  "main": "src/mcp/server.js",
+  "bin": {
+    "flowkeeper": "./bin/flowkeeper.js"
+  },
+  "scripts": {
+    "start": "node src/mcp/server.js",
+    "serve": "node src/mcp/server.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "continuity",
+    "context",
+    "memory",
+    "claude",
+    "cursor",
+    "codex",
+    "flowkeeper"
+  ],
+  "author": "Sandeep Roy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sgroy10/flowkeeper.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "chokidar": "^3.6.0",
+    "zod": "^3.25.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ]
+}
