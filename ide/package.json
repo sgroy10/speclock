@@ -1,13 +1,40 @@
-﻿{
+{
   "name": "flowkeeper-ide",
   "version": "0.1.0",
   "private": true,
   "description": "FlowKeeper IDE (MVP)",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
   },
-  "dependencies": {
-    "electron": "^30.0.0"
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.flowkeeper.ide",
+    "productName": "FlowKeeper",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "../src/**/*",
+      "../.flowkeeper/**/*",
+      "../package.json",
+      "../package-lock.json",
+      "../website/**/*",
+      "../ide/templates/**/*",
+      "../ide/data/**/*"
+    ],
+    "asar": true,
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    }
   }
 }
