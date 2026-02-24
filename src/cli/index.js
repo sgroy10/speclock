@@ -56,12 +56,13 @@ function rootDir() {
 
 function printHelp() {
   console.log(`
-FlowKeeper v1.0.0 — AI Continuity Engine
+SpecLock v1.1.0 — AI Continuity Engine
+Developed by Sandeep Roy (github.com/sgroy10)
 
-Usage: flowkeeper <command> [options]
+Usage: speclock <command> [options]
 
 Commands:
-  init                          Initialize FlowKeeper in current directory
+  init                          Initialize SpecLock in current directory
   goal <text>                   Set or update the project goal
   lock <text> [--tags a,b]      Add a non-negotiable constraint (SpecLock)
   lock remove <id>              Remove a lock by ID
@@ -84,12 +85,17 @@ Options:
   --project <path>              Project root (for serve)
 
 Examples:
-  flowkeeper init
-  flowkeeper goal "Ship v1 of the continuity engine"
-  flowkeeper lock "No external database in v1" --tags scope
-  flowkeeper decide "Use MCP as primary integration" --tags architecture
-  flowkeeper context
-  flowkeeper serve --project /path/to/repo
+  speclock init
+  speclock goal "Ship v1 of the continuity engine"
+  speclock lock "No external database in v1" --tags scope
+  speclock decide "Use MCP as primary integration" --tags architecture
+  speclock context
+  speclock serve --project /path/to/repo
+
+MCP Tools (19): init, get_context, set_goal, add_lock, remove_lock,
+  add_decision, add_note, set_deploy_facts, log_change, get_changes,
+  get_events, check_conflict, session_briefing, session_summary,
+  checkpoint, repo_status, suggest_locks, detect_drift, health
 `);
 }
 
@@ -98,13 +104,13 @@ Examples:
 function showStatus(root) {
   const brain = readBrain(root);
   if (!brain) {
-    console.log("FlowKeeper not initialized. Run: flowkeeper init");
+    console.log("SpecLock not initialized. Run: speclock init");
     return;
   }
 
   const activeLocks = brain.specLock.items.filter((l) => l.active !== false);
 
-  console.log(`\nFlowKeeper Status — ${brain.project.name}`);
+  console.log(`\nSpecLock Status — ${brain.project.name}`);
   console.log("=".repeat(50));
   console.log(`Goal: ${brain.goal.text || "(not set)"}`);
   console.log(`SpecLocks: ${activeLocks.length} active`);
@@ -144,7 +150,7 @@ async function main() {
 
   if (cmd === "init") {
     ensureInit(root);
-    console.log("FlowKeeper initialized.");
+    console.log("SpecLock initialized.");
     return;
   }
 
@@ -152,7 +158,7 @@ async function main() {
     const text = args.join(" ").trim();
     if (!text) {
       console.error("Error: Goal text is required.");
-      console.error("Usage: flowkeeper goal <text>");
+      console.error("Usage: speclock goal <text>");
       process.exit(1);
     }
     setGoal(root, text);
@@ -166,7 +172,7 @@ async function main() {
       const lockId = args[1];
       if (!lockId) {
         console.error("Error: Lock ID is required.");
-        console.error("Usage: flowkeeper lock remove <lockId>");
+        console.error("Usage: speclock lock remove <lockId>");
         process.exit(1);
       }
       const result = removeLock(root, lockId);
@@ -183,7 +189,7 @@ async function main() {
     const text = flags._.join(" ").trim();
     if (!text) {
       console.error("Error: Lock text is required.");
-      console.error("Usage: flowkeeper lock <text> [--tags a,b] [--source user]");
+      console.error("Usage: speclock lock <text> [--tags a,b] [--source user]");
       process.exit(1);
     }
     const { lockId } = addLock(root, text, parseTags(flags.tags), flags.source || "user");
@@ -196,7 +202,7 @@ async function main() {
     const text = flags._.join(" ").trim();
     if (!text) {
       console.error("Error: Decision text is required.");
-      console.error("Usage: flowkeeper decide <text> [--tags a,b]");
+      console.error("Usage: speclock decide <text> [--tags a,b]");
       process.exit(1);
     }
     const { decId } = addDecision(root, text, parseTags(flags.tags), flags.source || "user");
@@ -209,7 +215,7 @@ async function main() {
     const text = flags._.join(" ").trim();
     if (!text) {
       console.error("Error: Note text is required.");
-      console.error("Usage: flowkeeper note <text> [--pinned]");
+      console.error("Usage: speclock note <text> [--pinned]");
       process.exit(1);
     }
     const pinned = flags.pinned !== false;
@@ -223,7 +229,7 @@ async function main() {
     if (sub !== "deploy") {
       console.error("Error: Only 'facts deploy' is supported.");
       console.error(
-        "Usage: flowkeeper facts deploy --provider X --branch Y"
+        "Usage: speclock facts deploy --provider X --branch Y"
       );
       process.exit(1);
     }
@@ -258,7 +264,7 @@ async function main() {
     // Start MCP server — pass through --project if provided
     const flags = parseFlags(args);
     const projectArg = flags.project || root;
-    process.env.FLOWKEEPER_PROJECT_ROOT = projectArg;
+    process.env.SPECLOCK_PROJECT_ROOT = projectArg;
     await import("../mcp/server.js");
     return;
   }
@@ -269,11 +275,11 @@ async function main() {
   }
 
   console.error(`Unknown command: ${cmd}`);
-  console.error("Run 'flowkeeper --help' for usage.");
+  console.error("Run 'speclock --help' for usage.");
   process.exit(1);
 }
 
 main().catch((err) => {
-  console.error("FlowKeeper error:", err.message);
+  console.error("SpecLock error:", err.message);
   process.exit(1);
 });

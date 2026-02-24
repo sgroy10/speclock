@@ -14,6 +14,8 @@ import {
   checkConflict,
   getSessionBriefing,
   endSession,
+  suggestLocks,
+  detectDrift,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -45,14 +47,17 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv);
 const PROJECT_ROOT =
-  args.project || process.env.FLOWKEEPER_PROJECT_ROOT || process.cwd();
+  args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
+const VERSION = "1.1.0";
+const AUTHOR = "Sandeep Roy";
+
 const server = new McpServer(
-  { name: "flowkeeper", version: "1.0.0" },
+  { name: "speclock", version: VERSION },
   {
     instructions:
-      "FlowKeeper is an AI continuity engine. Call flowkeeper_session_briefing at the start of a new session, and flowkeeper_session_summary before ending. Use flowkeeper_get_context to refresh your project understanding at any time.",
+      `SpecLock is an AI continuity engine. Developed by ${AUTHOR}. Call speclock_session_briefing at the start of a new session, and speclock_session_summary before ending. Use speclock_get_context to refresh your project understanding at any time.`,
   }
 );
 
@@ -60,10 +65,10 @@ const server = new McpServer(
 // MEMORY MANAGEMENT TOOLS
 // ========================================
 
-// Tool 1: flowkeeper_init
+// Tool 1: speclock_init
 server.tool(
-  "flowkeeper_init",
-  "Initialize FlowKeeper in the current project directory. Creates .flowkeeper/ with brain.json, events.log, and supporting directories.",
+  "speclock_init",
+  "Initialize SpecLock in the current project directory. Creates .speclock/ with brain.json, events.log, and supporting directories.",
   {},
   async () => {
     const brain = ensureInit(PROJECT_ROOT);
@@ -71,16 +76,16 @@ server.tool(
       content: [
         {
           type: "text",
-          text: `FlowKeeper initialized for "${brain.project.name}" at ${brain.project.root}`,
+          text: `SpecLock initialized for "${brain.project.name}" at ${brain.project.root}`,
         },
       ],
     };
   }
 );
 
-// Tool 2: flowkeeper_get_context — THE KEY TOOL
+// Tool 2: speclock_get_context — THE KEY TOOL
 server.tool(
-  "flowkeeper_get_context",
+  "speclock_get_context",
   "THE KEY TOOL. Returns the full structured context pack including goal, locks, decisions, recent changes, deploy facts, reverts, session history, and notes. Call this at the start of every session or whenever you need to refresh your understanding of the project.",
   {
     format: z
@@ -101,9 +106,9 @@ server.tool(
   }
 );
 
-// Tool 3: flowkeeper_set_goal
+// Tool 3: speclock_set_goal
 server.tool(
-  "flowkeeper_set_goal",
+  "speclock_set_goal",
   "Set or update the project goal. This is the high-level objective that guides all work.",
   {
     text: z.string().min(1).describe("The project goal text"),
@@ -116,9 +121,9 @@ server.tool(
   }
 );
 
-// Tool 4: flowkeeper_add_lock
+// Tool 4: speclock_add_lock
 server.tool(
-  "flowkeeper_add_lock",
+  "speclock_add_lock",
   "Add a non-negotiable constraint (SpecLock). These are rules that must NEVER be violated during development.",
   {
     text: z.string().min(1).describe("The constraint text"),
@@ -143,9 +148,9 @@ server.tool(
   }
 );
 
-// Tool 5: flowkeeper_remove_lock
+// Tool 5: speclock_remove_lock
 server.tool(
-  "flowkeeper_remove_lock",
+  "speclock_remove_lock",
   "Remove (deactivate) a SpecLock by its ID. The lock is soft-deleted and kept in history.",
   {
     lockId: z.string().min(1).describe("The lock ID to remove"),
@@ -169,9 +174,9 @@ server.tool(
   }
 );
 
-// Tool 6: flowkeeper_add_decision
+// Tool 6: speclock_add_decision
 server.tool(
-  "flowkeeper_add_decision",
+  "speclock_add_decision",
   "Record an architectural or design decision. Decisions guide future work and prevent contradictory changes.",
   {
     text: z.string().min(1).describe("The decision text"),
@@ -191,9 +196,9 @@ server.tool(
   }
 );
 
-// Tool 7: flowkeeper_add_note
+// Tool 7: speclock_add_note
 server.tool(
-  "flowkeeper_add_note",
+  "speclock_add_note",
   "Add a pinned note for reference. Notes persist across sessions as reminders.",
   {
     text: z.string().min(1).describe("The note text"),
@@ -213,9 +218,9 @@ server.tool(
   }
 );
 
-// Tool 8: flowkeeper_set_deploy_facts
+// Tool 8: speclock_set_deploy_facts
 server.tool(
-  "flowkeeper_set_deploy_facts",
+  "speclock_set_deploy_facts",
   "Record deployment configuration facts (provider, branch, auto-deploy settings).",
   {
     provider: z
@@ -242,9 +247,9 @@ server.tool(
 // CHANGE TRACKING TOOLS
 // ========================================
 
-// Tool 9: flowkeeper_log_change
+// Tool 9: speclock_log_change
 server.tool(
-  "flowkeeper_log_change",
+  "speclock_log_change",
   "Manually log a significant change. Use this when you make an important modification that should be tracked in the context.",
   {
     summary: z
@@ -267,10 +272,10 @@ server.tool(
   }
 );
 
-// Tool 10: flowkeeper_get_changes
+// Tool 10: speclock_get_changes
 server.tool(
-  "flowkeeper_get_changes",
-  "Get recent file changes tracked by FlowKeeper.",
+  "speclock_get_changes",
+  "Get recent file changes tracked by SpecLock.",
   {
     limit: z
       .number()
@@ -287,7 +292,7 @@ server.tool(
         content: [
           {
             type: "text",
-            text: "FlowKeeper not initialized. Run flowkeeper_init first.",
+            text: "SpecLock not initialized. Run speclock_init first.",
           },
         ],
         isError: true,
@@ -316,9 +321,9 @@ server.tool(
   }
 );
 
-// Tool 11: flowkeeper_get_events
+// Tool 11: speclock_get_events
 server.tool(
-  "flowkeeper_get_events",
+  "speclock_get_events",
   "Get the event log, optionally filtered by type. Event types: init, goal_updated, lock_added, lock_removed, decision_added, note_added, fact_updated, file_created, file_changed, file_deleted, revert_detected, context_generated, session_started, session_ended, manual_change, checkpoint_created.",
   {
     type: z.string().optional().describe("Filter by event type"),
@@ -362,9 +367,9 @@ server.tool(
 // CONTINUITY PROTECTION TOOLS
 // ========================================
 
-// Tool 12: flowkeeper_check_conflict
+// Tool 12: speclock_check_conflict
 server.tool(
-  "flowkeeper_check_conflict",
+  "speclock_check_conflict",
   "Check if a proposed action conflicts with any active SpecLock. Use before making significant changes.",
   {
     proposedAction: z
@@ -380,9 +385,9 @@ server.tool(
   }
 );
 
-// Tool 13: flowkeeper_session_briefing
+// Tool 13: speclock_session_briefing
 server.tool(
-  "flowkeeper_session_briefing",
+  "speclock_session_briefing",
   "Start a new session and get a full briefing. Returns context pack plus what happened since the last session. Call this at the very beginning of a new conversation.",
   {
     toolName: z
@@ -398,7 +403,7 @@ server.tool(
     const parts = [];
 
     // Session info
-    parts.push(`# FlowKeeper Session Briefing`);
+    parts.push(`# SpecLock Session Briefing`);
     parts.push(`Session started (${toolName}). ID: ${briefing.session.id}`);
     parts.push("");
 
@@ -437,9 +442,9 @@ server.tool(
   }
 );
 
-// Tool 14: flowkeeper_session_summary
+// Tool 14: speclock_session_summary
 server.tool(
-  "flowkeeper_session_summary",
+  "speclock_session_summary",
   "End the current session and record what was accomplished. Call this before ending a conversation.",
   {
     summary: z
@@ -478,9 +483,9 @@ server.tool(
 // GIT INTEGRATION TOOLS
 // ========================================
 
-// Tool 15: flowkeeper_checkpoint
+// Tool 15: speclock_checkpoint
 server.tool(
-  "flowkeeper_checkpoint",
+  "speclock_checkpoint",
   "Create a named git tag checkpoint for easy rollback.",
   {
     name: z
@@ -490,7 +495,7 @@ server.tool(
   },
   async ({ name }) => {
     const safeName = name.replace(/[^a-zA-Z0-9_-]/g, "_");
-    const tag = `fk_${safeName}_${Date.now()}`;
+    const tag = `sl_${safeName}_${Date.now()}`;
     const result = createTag(PROJECT_ROOT, tag);
 
     if (!result.ok) {
@@ -530,9 +535,9 @@ server.tool(
   }
 );
 
-// Tool 16: flowkeeper_repo_status
+// Tool 16: speclock_repo_status
 server.tool(
-  "flowkeeper_repo_status",
+  "speclock_repo_status",
   "Get current git repository status including branch, commit, changed files, and diff summary.",
   {},
   async () => {
@@ -566,10 +571,160 @@ server.tool(
   }
 );
 
+// ========================================
+// INTELLIGENCE TOOLS
+// ========================================
+
+// Tool 17: speclock_suggest_locks
+server.tool(
+  "speclock_suggest_locks",
+  "Analyze project decisions, notes, and patterns to suggest new SpecLock constraints. Returns auto-generated lock suggestions based on commitment language, prohibitive patterns, and common best practices.",
+  {},
+  async () => {
+    const result = suggestLocks(PROJECT_ROOT);
+
+    if (result.suggestions.length === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `No suggestions at this time. You have ${result.totalLocks} active lock(s). Add more decisions and notes to get AI-powered lock suggestions.`,
+          },
+        ],
+      };
+    }
+
+    const formatted = result.suggestions
+      .map(
+        (s, i) =>
+          `${i + 1}. **"${s.text}"**\n   Source: ${s.source}${s.sourceId ? ` (${s.sourceId})` : ""}\n   Reason: ${s.reason}`
+      )
+      .join("\n\n");
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `## Lock Suggestions (${result.suggestions.length})\n\nCurrent active locks: ${result.totalLocks}\n\n${formatted}\n\nTo add any suggestion as a lock, call \`speclock_add_lock\` with the text.`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool 18: speclock_detect_drift
+server.tool(
+  "speclock_detect_drift",
+  "Scan recent changes and events against active SpecLock constraints to detect potential violations or drift. Use this proactively to ensure project integrity.",
+  {},
+  async () => {
+    const result = detectDrift(PROJECT_ROOT);
+
+    if (result.status === "no_locks") {
+      return {
+        content: [{ type: "text", text: result.message }],
+      };
+    }
+
+    if (result.status === "clean") {
+      return {
+        content: [{ type: "text", text: result.message }],
+      };
+    }
+
+    const formatted = result.drifts
+      .map(
+        (d) =>
+          `- [${d.severity.toUpperCase()}] Change: "${d.changeSummary}" (${d.changeAt.substring(0, 19)})\n  Lock: "${d.lockText}"\n  Matched: ${d.matchedTerms.join(", ")}`
+      )
+      .join("\n\n");
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `## Drift Report\n\n${result.message}\n\n${formatted}\n\nReview each drift and take corrective action if needed.`,
+        },
+      ],
+    };
+  }
+);
+
+// Tool 19: speclock_health
+server.tool(
+  "speclock_health",
+  "Get a health check of the SpecLock setup including completeness score, missing recommended items, and multi-agent session timeline.",
+  {},
+  async () => {
+    const brain = ensureInit(PROJECT_ROOT);
+    const activeLocks = brain.specLock.items.filter((l) => l.active !== false);
+
+    // Calculate health score
+    let score = 0;
+    const checks = [];
+
+    if (brain.goal.text) { score += 20; checks.push("[PASS] Goal is set"); }
+    else checks.push("[MISS] No project goal set");
+
+    if (activeLocks.length > 0) { score += 25; checks.push(`[PASS] ${activeLocks.length} active lock(s)`); }
+    else checks.push("[MISS] No SpecLock constraints defined");
+
+    if (brain.decisions.length > 0) { score += 15; checks.push(`[PASS] ${brain.decisions.length} decision(s) recorded`); }
+    else checks.push("[MISS] No decisions recorded");
+
+    if (brain.notes.length > 0) { score += 10; checks.push(`[PASS] ${brain.notes.length} note(s)`); }
+    else checks.push("[MISS] No notes added");
+
+    if (brain.sessions.history.length > 0) { score += 15; checks.push(`[PASS] ${brain.sessions.history.length} session(s) in history`); }
+    else checks.push("[MISS] No session history yet");
+
+    if (brain.state.recentChanges.length > 0) { score += 10; checks.push(`[PASS] ${brain.state.recentChanges.length} change(s) tracked`); }
+    else checks.push("[MISS] No changes tracked");
+
+    if (brain.facts.deploy.provider !== "unknown") { score += 5; checks.push("[PASS] Deploy facts configured"); }
+    else checks.push("[MISS] Deploy facts not configured");
+
+    // Multi-agent timeline
+    const agentMap = {};
+    for (const session of brain.sessions.history) {
+      const tool = session.toolUsed || "unknown";
+      if (!agentMap[tool]) agentMap[tool] = { count: 0, lastUsed: "", summaries: [] };
+      agentMap[tool].count++;
+      if (!agentMap[tool].lastUsed || session.endedAt > agentMap[tool].lastUsed) {
+        agentMap[tool].lastUsed = session.endedAt || session.startedAt;
+      }
+      if (session.summary && agentMap[tool].summaries.length < 3) {
+        agentMap[tool].summaries.push(session.summary.substring(0, 80));
+      }
+    }
+
+    let agentTimeline = "";
+    if (Object.keys(agentMap).length > 0) {
+      agentTimeline = "\n\n## Multi-Agent Timeline\n" +
+        Object.entries(agentMap)
+          .map(([tool, info]) =>
+            `- **${tool}**: ${info.count} session(s), last active ${info.lastUsed ? info.lastUsed.substring(0, 16) : "unknown"}\n  Recent: ${info.summaries.length > 0 ? info.summaries.map(s => `"${s}"`).join(", ") : "(no summaries)"}`
+          )
+          .join("\n");
+    }
+
+    const grade = score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : score >= 20 ? "D" : "F";
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `## SpecLock Health Check\n\nScore: **${score}/100** (Grade: ${grade})\nEvents: ${brain.events.count} | Reverts: ${brain.state.reverts.length}\n\n### Checks\n${checks.join("\n")}${agentTimeline}\n\n---\n*SpecLock v${VERSION} — Developed by ${AUTHOR}*`,
+        },
+      ],
+    };
+  }
+);
+
 // --- Start server ---
 const transport = new StdioServerTransport();
 await server.connect(transport);
 
 process.stderr.write(
-  `FlowKeeper MCP v1.0.0 running (stdio). Root: ${PROJECT_ROOT}${os.EOL}`
+  `SpecLock MCP v${VERSION} running (stdio) — Developed by ${AUTHOR}. Root: ${PROJECT_ROOT}${os.EOL}`
 );

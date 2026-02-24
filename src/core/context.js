@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {
-  flowkeeperDir,
+  speclockDir,
   readBrain,
   newId,
   nowIso,
@@ -58,7 +58,7 @@ export function generateContext(root) {
   const brain = ensureInit(root);
   const pack = generateContextPack(root);
   const contextPath = path.join(
-    flowkeeperDir(root),
+    speclockDir(root),
     "context",
     "latest.md"
   );
@@ -66,7 +66,7 @@ export function generateContext(root) {
   const lines = [];
 
   // Header
-  lines.push("# FlowKeeper Context Pack");
+  lines.push("# SpecLock Context Pack");
   lines.push(`> Generated: ${pack.generatedAt}`);
   lines.push(`> Project: **${pack.project.name}**`);
   if (pack.project.branch) {
@@ -172,8 +172,12 @@ export function generateContext(root) {
   lines.push("1. Follow ALL SpecLock items strictly — they are non-negotiable.");
   lines.push("2. Do not contradict recorded decisions without explicit user approval.");
   lines.push("3. If you detect drift from constraints, stop and flag it.");
-  lines.push("4. Call `flowkeeper_get_context` to refresh this context at any time.");
-  lines.push("5. Call `flowkeeper_session_summary` before ending your session.");
+  lines.push("4. Call `speclock_detect_drift` proactively to check for constraint violations.");
+  lines.push("5. Call `speclock_get_context` to refresh this context at any time.");
+  lines.push("6. Call `speclock_session_summary` before ending your session.");
+  lines.push("");
+  lines.push("---");
+  lines.push("*Powered by [SpecLock](https://github.com/sgroy10/speclock) — Developed by Sandeep Roy*");
   lines.push("");
 
   const markdown = lines.join("\n");
@@ -185,7 +189,7 @@ export function generateContext(root) {
     eventId,
     type: "context_generated",
     at: nowIso(),
-    files: [".flowkeeper/context/latest.md"],
+    files: [".speclock/context/latest.md"],
     summary: "Generated context pack",
     patchPath: "",
   };

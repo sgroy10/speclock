@@ -6,23 +6,23 @@ export function nowIso() {
   return new Date().toISOString();
 }
 
-export function flowkeeperDir(root) {
-  return path.join(root, ".flowkeeper");
+export function speclockDir(root) {
+  return path.join(root, ".speclock");
 }
 
-export function ensureFlowkeeperDirs(root) {
-  const base = flowkeeperDir(root);
+export function ensureSpeclockDirs(root) {
+  const base = speclockDir(root);
   fs.mkdirSync(base, { recursive: true });
   fs.mkdirSync(path.join(base, "patches"), { recursive: true });
   fs.mkdirSync(path.join(base, "context"), { recursive: true });
 }
 
 export function brainPath(root) {
-  return path.join(flowkeeperDir(root), "brain.json");
+  return path.join(speclockDir(root), "brain.json");
 }
 
 export function eventsPath(root) {
-  return path.join(flowkeeperDir(root), "events.log");
+  return path.join(speclockDir(root), "events.log");
 }
 
 export function newId(prefix) {
@@ -36,7 +36,7 @@ export function makeBrain(root, hasGitRepo, defaultBranch) {
   return {
     version: 2,
     project: {
-      id: newId("fk"),
+      id: newId("sl"),
       name: folderName,
       root,
       createdAt,

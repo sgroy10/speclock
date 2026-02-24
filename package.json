@@ -1,11 +1,11 @@
 {
-  "name": "flowkeeper",
-  "version": "1.0.0",
-  "description": "AI continuity engine — MCP server + CLI for maintaining project memory across AI coding sessions",
+  "name": "speclock",
+  "version": "1.1.0",
+  "description": "AI continuity engine — MCP server + CLI that kills AI amnesia. Maintains project memory, enforces constraints, and detects drift across AI coding sessions.",
   "type": "module",
   "main": "src/mcp/server.js",
   "bin": {
-    "flowkeeper": "./bin/flowkeeper.js"
+    "speclock": "./bin/speclock.js"
   },
   "scripts": {
     "start": "node src/mcp/server.js",
@@ -14,20 +14,33 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "ai",
-    "continuity",
+    "ai-memory",
+    "ai-continuity",
     "context",
     "memory",
     "claude",
+    "claude-code",
     "cursor",
     "codex",
-    "flowkeeper"
+    "windsurf",
+    "cline",
+    "speclock",
+    "ai-amnesia",
+    "model-context-protocol",
+    "drift-detection",
+    "constraint-enforcement"
   ],
-  "author": "Sandeep Roy",
+  "author": "Sandeep Roy (https://github.com/sgroy10)",
   "license": "MIT",
+  "homepage": "https://github.com/sgroy10/speclock#readme",
+  "bugs": {
+    "url": "https://github.com/sgroy10/speclock/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sgroy10/flowkeeper.git"
+    "url": "git+https://github.com/sgroy10/speclock.git"
   },
   "engines": {
     "node": ">=18"
