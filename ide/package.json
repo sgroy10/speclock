@@ -34,14 +34,16 @@
                   "asar":  true,
                   "win":  {
                               "target":  "nsis",
-                              "artifactName":  "FlowKeeper-Setup.exe"
+                              "artifactName":  "FlowKeeper-Setup.exe",
+                              "icon":  "assets/icon.ico"
                           },
                   "mac":  {
                               "target":  [
                                              "dmg",
                                              "zip"
                                          ],
-                              "artifactName":  "FlowKeeper-mac-universal.${ext}"
+                              "artifactName":  "FlowKeeper-mac-universal.${ext}",
+                              "icon":  "assets/icon.icns"
                           },
                   "publish":  [
                                   {
@@ -49,6 +51,7 @@
                                       "owner":  "sgroy10",
                                       "repo":  "flowkeeper"
                                   }
-                              ]
+                              ],
+                  "icon":  "assets/icon.png"
               }
 }
