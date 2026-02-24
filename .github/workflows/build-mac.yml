@@ -24,6 +24,8 @@ jobs:
         run: |
           cd ide
           npm run build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
