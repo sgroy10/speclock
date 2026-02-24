@@ -1,0 +1,13 @@
+﻿{
+  "name": "flowkeeper-ide",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FlowKeeper IDE (MVP)",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^30.0.0"
+  }
+}

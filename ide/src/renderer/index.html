@@ -1,0 +1,200 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowKeeper IDE</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">FK</div>
+        <div>
+          <div class="brand-title">FlowKeeper IDE</div>
+          <div class="brand-sub">Continuity Engine</div>
+        </div>
+      </div>
+      <div class="repo-info">
+        <div class="label">Repo</div>
+        <div id="repoPath" class="value">Not connected</div>
+      </div>
+      <div class="model-select">
+        <label for="providerPicker">Provider</label>
+        <select id="providerPicker">
+          <option>OpenAI</option>
+          <option>Anthropic</option>
+          <option>Gemini</option>
+          <option>Grok</option>
+          <option>Kimi</option>
+          <option>Custom</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button id="newProject" class="btn">New Project</button>
+        <button id="selectRepo" class="btn primary">Open Repo</button>
+        <button id="genContext" class="btn">Generate Context</button>
+        <button id="copyContext" class="btn ghost">Copy Context</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel left">
+        <div class="panel-title">Workspace</div>
+        <div class="section">
+          <div class="section-title">Files</div>
+          <div id="fileList" class="list muted">Open a repo to view files</div>
+        </div>
+        <div class="section">
+          <div class="section-title">Recent Activity</div>
+          <div id="eventList" class="list"></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Session History</div>
+          <div id="sessionList" class="list muted">No sessions yet</div>
+        </div>
+      </aside>
+
+      <section class="editor">
+        <div class="editor-header">
+          <div class="tab active">main.ts</div>
+          <div class="tab">engine.js</div>
+          <div class="tab">context.md</div>
+        </div>
+        <div class="editor-body">
+          <div class="editor-placeholder">
+            <div class="code-line">// FlowKeeper IDE — Continuity-aware coding</div>
+            <div class="code-line">const memory = flowkeeper.state();</div>
+            <div class="code-line">const context = flowkeeper.context();</div>
+            <div class="code-line">prompt.inject(context);</div>
+          </div>
+        </div>
+
+        <div class="preview-pane">
+          <div class="preview-header">
+            <div>Live Preview</div>
+            <div class="preview-controls">
+              <input id="devCommand" placeholder="npm run dev" />
+              <input id="previewUrl" placeholder="http://localhost:3000" />
+              <button id="startPreview" class="btn primary">Start</button>
+              <button id="stopPreview" class="btn ghost">Stop</button>
+            </div>
+          </div>
+          <webview id="previewFrame" class="preview-frame" src="about:blank"></webview>
+        </div>
+
+        <div class="prompt-pane">
+          <div class="prompt-header">
+            <div>AI Prompt</div>
+            <div class="model-pill" id="modelLabel">Provider: OpenAI</div>
+          </div>
+          <div class="model-grid">
+            <select id="modelPicker"></select>
+            <input id="apiKey" type="password" placeholder="API key" />
+            <input id="baseUrl" placeholder="Custom base URL (optional)" />
+            <input id="customModel" placeholder="Custom model name" />
+          </div>
+          <textarea id="promptInput" placeholder="Ask the agent to implement a change..." rows="3"></textarea>
+          <div class="prompt-actions">
+            <button id="runPrompt" class="btn primary">Run With Continuity</button>
+            <button class="btn ghost">Save Note</button>
+          </div>
+          <div class="response">
+            <div class="response-title">Response</div>
+            <pre id="responseText" class="response-box">No response yet.</pre>
+          </div>
+          <div class="estimator">
+            <div class="estimator-head">
+              <div class="response-title">Usage Cost Estimator</div>
+              <button id="refreshPricing" class="btn ghost">Refresh Rates</button>
+            </div>
+            <div class="estimator-grid">
+              <input id="inputTokens" placeholder="Input tokens" />
+              <input id="outputTokens" placeholder="Output tokens" />
+              <input id="inputRate" placeholder="Input $/1M" />
+              <input id="outputRate" placeholder="Output $/1M" />
+            </div>
+            <div id="estimateResult" class="estimate-result">Estimated cost: $0.00</div>
+            <div id="pricingMeta" class="estimate-result">Rates updated: unknown</div>
+          </div>
+          <div class="diff-panel">
+            <div class="response-title">Git Diff</div>
+            <div class="diff-actions">
+              <button id="loadDiff" class="btn">Load Diff</button>
+            </div>
+            <pre id="diffBox" class="response-box">No diff loaded.</pre>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel right">
+        <div class="panel-title">Memory Spine</div>
+        <div class="memory">
+          <div class="memory-block">
+            <div class="memory-title">Goal</div>
+            <div id="goalText" class="memory-value">Not set</div>
+          </div>
+          <div class="memory-block">
+            <div class="memory-title">SpecLock</div>
+            <div id="lockList" class="memory-list"></div>
+          </div>
+          <div class="memory-block">
+            <div class="memory-title">Decisions</div>
+            <div id="decisionList" class="memory-list"></div>
+          </div>
+          <div class="memory-block">
+            <div class="memory-title">Reverts</div>
+            <div id="revertList" class="memory-list"></div>
+          </div>
+          <div class="memory-block">
+            <div class="memory-title">Recent Changes</div>
+            <div id="recentList" class="memory-list"></div>
+          </div>
+          <div class="memory-block">
+            <div class="memory-title">Context Pack</div>
+            <pre id="contextPreview" class="context-box">No context generated yet.</pre>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="statusbar">
+      <div id="continuityStatus">Continuity: idle</div>
+      <div class="status-right">
+        <span id="previewStatus">Preview: stopped</span>
+        <span class="dot"></span>
+        <span id="eventCount">0 events</span>
+        <span class="dot"></span>
+        <span id="engineStatus">Engine: offline</span>
+      </div>
+    </footer>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-title">Create New Project</div>
+        <div class="modal-grid">
+          <label>Project name</label>
+          <input id="projectName" placeholder="my-new-product" />
+          <label>Location</label>
+          <div class="modal-row">
+            <input id="projectPath" placeholder="Select folder" />
+            <button id="pickFolder" class="btn">Browse</button>
+          </div>
+          <label>Template</label>
+          <div id="templateGrid" class="template-grid"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="cancelProject" class="btn ghost">Cancel</button>
+          <button id="createProject" class="btn primary">Create</button>
+        </div>
+        <div id="projectError" class="modal-error"></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+.flowkeeper/
+node_modules/
+*.log
+fk_*.txt
+test.txt

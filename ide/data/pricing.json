@@ -1,0 +1,28 @@
+﻿{
+  "updatedAt": "2026-02-23",
+  "providers": {
+    "OpenAI": {
+      "gpt-4o": { "in": 2.5, "out": 10 },
+      "gpt-4o-mini": { "in": 0.15, "out": 0.6 },
+      "gpt-4.1": { "in": 2, "out": 8 },
+      "gpt-4.1-mini": { "in": 0.4, "out": 1.6 }
+    },
+    "Anthropic": {
+      "claude-sonnet-4": { "in": 3, "out": 15 },
+      "claude-haiku-3-5": { "in": 0.8, "out": 4 },
+      "claude-opus-4": { "in": 15, "out": 75 }
+    },
+    "Gemini": {
+      "gemini-2.5-pro": { "in": 1.25, "out": 10 },
+      "gemini-2.5-flash": { "in": 0.3, "out": 2.5 },
+      "gemini-2.5-flash-lite": { "in": 0.1, "out": 0.4 }
+    },
+    "Grok": {
+      "grok-4": { "in": 3, "out": 15 },
+      "grok-code-fast-1": { "in": 0.2, "out": 1.5 }
+    },
+    "Kimi": {
+      "kimi-k2-0711-preview": { "in": null, "out": null }
+    }
+  }
+}

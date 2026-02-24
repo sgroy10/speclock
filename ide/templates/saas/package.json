@@ -1,0 +1,7 @@
+﻿{
+  "name": "flowkeeper-saas",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js"
+  }
+}
