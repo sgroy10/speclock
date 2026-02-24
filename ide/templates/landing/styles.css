@@ -1,4 +1,4 @@
-﻿* {
+* {
   box-sizing: border-box;
 }
 
@@ -233,4 +233,4 @@ h1 {
   .stories {
     grid-template-columns: 1fr;
   }
-}
+}\n\n.footer-note {\n  text-align: center;\n  padding: 40px 20px 60px;\n  color: #9fb0c6;\n  font-size: 12px;\n  letter-spacing: 0.2em;\n  text-transform: uppercase;\n}\n

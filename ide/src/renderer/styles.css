@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #0b0f14;
   --panel: rgba(19, 24, 31, 0.9);
   --panel-strong: rgba(28, 34, 44, 0.95);
@@ -610,4 +610,4 @@ textarea {
   .panel.right {
     display: none;
   }
-}
+}\n\n.status-left {\n  display: flex;\n  gap: 16px;\n  align-items: center;\n}\n\n.credit {\n  font-size: 11px;\n  letter-spacing: 0.2em;\n  text-transform: uppercase;\n  color: #9fb0c6;\n}\n

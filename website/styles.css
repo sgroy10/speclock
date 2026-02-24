@@ -310,3 +310,4 @@ h1 {
     display: none;
   }
 }\n\n.checksum {\n  color: #9fb0c6;\n  text-decoration: none;\n  border-bottom: 1px dashed #2e3a4a;\n}\n
+\n\n.site-footer {\n  text-align: center;\n  padding: 30px 20px 50px;\n  color: #9fb0c6;\n  font-size: 12px;\n  letter-spacing: 0.2em;\n  text-transform: uppercase;\n}\n

@@ -1,4 +1,4 @@
-﻿* {
+* {
   box-sizing: border-box;
 }
 
@@ -167,4 +167,4 @@ h1 {
   .table-row {
     grid-template-columns: 1fr;
   }
-}
+}\n\n.footer-note {\n  text-align: center;\n  padding: 30px 20px 50px;\n  color: #9fb0c6;\n  font-size: 12px;\n  letter-spacing: 0.2em;\n  text-transform: uppercase;\n}\n
