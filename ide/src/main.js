@@ -1,9 +1,16 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
-let autoUpdater = null;\ntry {\n  autoUpdater = require('electron-updater').autoUpdater;\n} catch {\n  autoUpdater = null;\n}
+﻿const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const { spawnSync } = require('child_process');
+
+function getAutoUpdater() {
+  try {
+    return require('electron-updater').autoUpdater;
+  } catch {
+    return null;
+  }
+}
 
 let mainWindow = null;
 let currentRepo = null;
@@ -192,7 +199,13 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  if (app.isPackaged && autoUpdater) {\n    autoUpdater.checkForUpdatesAndNotify();\n  }
+  if (app.isPackaged) {
+    const updater = getAutoUpdater();
+    if (updater) {
+      updater.checkForUpdatesAndNotify();
+    }
+  }
+
   createWindow();
 
   app.on('activate', () => {
@@ -351,4 +364,3 @@ ipcMain.handle('run-model', async (_evt, payload) => {
     return { ok: false, error: err.message || 'Request failed' };
   }
 });
-
