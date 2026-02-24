@@ -1,0 +1,32 @@
+﻿name: Build macOS installer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node
+      
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install deps
+        run: |
+          cd ide
+          npm install
+
+      - name: Build macOS
+        run: |
+          cd ide
+          npm run build:mac
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flowkeeper-mac
+          path: ide/dist/*.dmg
