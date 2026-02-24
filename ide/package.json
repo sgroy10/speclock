@@ -12,8 +12,7 @@
                 },
     "devDependencies":  {
                             "electron":  "^30.0.0",
-                            "electron-builder":  "^24.13.3",
-                            "electron-updater":  "^6.1.8"
+                            "electron-builder":  "^24.13.3"
                         },
     "build":  {
                   "appId":  "com.flowkeeper.ide",
@@ -53,5 +52,8 @@
                                   }
                               ],
                   "icon":  "assets/icon.png"
-              }
+              },
+    "dependencies":  {
+
+                     }
 }

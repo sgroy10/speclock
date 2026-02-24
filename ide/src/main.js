@@ -1,5 +1,5 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
-const { autoUpdater } = require('electron-updater');
+let autoUpdater = null;\ntry {\n  autoUpdater = require('electron-updater').autoUpdater;\n} catch {\n  autoUpdater = null;\n}
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -192,9 +192,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify();
-  }
+  if (app.isPackaged && autoUpdater) {\n    autoUpdater.checkForUpdatesAndNotify();\n  }
   createWindow();
 
   app.on('activate', () => {
@@ -353,3 +351,4 @@ ipcMain.handle('run-model', async (_evt, payload) => {
     return { ok: false, error: err.message || 'Request failed' };
   }
 });
+
