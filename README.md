@@ -1,5 +1,7 @@
 # FlowKeeper
 
+[![smithery badge](https://smithery.ai/badge/sgroy10/speclock)](https://smithery.ai/servers/sgroy10/speclock)
+
 FlowKeeper is a repo-level continuity engine for AI coding agents. It maintains structured project memory, an append-only event log, and context packs to prevent loss of critical decisions and constraints.
 
 ## Install
