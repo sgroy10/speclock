@@ -56,8 +56,40 @@ const AUTHOR = "Sandeep Roy";
 const server = new McpServer(
   { name: "speclock", version: VERSION },
   {
-    instructions:
-      `SpecLock is an AI continuity engine. Developed by ${AUTHOR}. Call speclock_session_briefing at the start of a new session, and speclock_session_summary before ending. Use speclock_get_context to refresh your project understanding at any time.`,
+    instructions: [
+      `You have SpecLock connected — an AI Continuity Engine by ${AUTHOR}. Follow these rules AUTOMATICALLY without the user ever having to ask:`,
+      ``,
+      `## ON EVERY NEW CONVERSATION / SESSION START:`,
+      `1. IMMEDIATELY call speclock_session_briefing BEFORE responding to the user's first message.`,
+      `2. If it returns "not initialized", call speclock_init first, then proceed normally.`,
+      `3. Use the briefing context to understand the project's goal, constraints, decisions, and history.`,
+      `4. Never ask the user to "initialize SpecLock" or "start a session" — just do it silently.`,
+      ``,
+      `## AUTOMATIC CONTEXT CAPTURE (do this silently as you work):`,
+      `- When the user describes what they're building → call speclock_set_goal with a concise summary.`,
+      `- When the user says something is non-negotiable (e.g., "always use Supabase", "never remove auth", "must support mobile") → call speclock_add_lock to save it as an immutable constraint.`,
+      `- When the user makes a technology/architecture choice (e.g., "let's use React Query", "we'll go with Stripe") → call speclock_add_decision.`,
+      `- When you complete a significant piece of work → call speclock_log_change.`,
+      `- Look for keywords like "always", "never", "must", "don't ever", "make sure to keep" — these signal constraints that should be locked.`,
+      ``,
+      `## BEFORE MAKING SIGNIFICANT CHANGES:`,
+      `- Call speclock_check_conflict with a description of what you're about to do.`,
+      `- If a conflict is detected (confidence HIGH), WARN the user and explain which constraint would be violated.`,
+      `- Do NOT proceed with the change unless the user explicitly says to override or remove the lock.`,
+      ``,
+      `## WHEN THE USER ASKS TO REMOVE SOMETHING THEY PREVIOUSLY LOCKED:`,
+      `- Remind them: "You previously locked this constraint: [constraint text]. Want me to remove the lock and proceed?"`,
+      `- If they confirm, call speclock_remove_lock, then proceed.`,
+      ``,
+      `## AT THE END OF A CONVERSATION (when the user says goodbye, or the conversation naturally ends):`,
+      `- Call speclock_session_summary with a brief description of what was accomplished.`,
+      ``,
+      `## IMPORTANT:`,
+      `- NEVER mention "SpecLock" to the user unless they ask about it. Just use it silently in the background.`,
+      `- The user should feel like the AI simply "remembers everything" — SpecLock is invisible infrastructure.`,
+      `- If the user asks "how do you remember this?" you can explain SpecLock is connected as a memory layer.`,
+      `- When showing the user what you know from previous sessions, present it naturally, not as a data dump.`,
+    ].join("\n"),
   }
 );
 
