@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecLock — Kill AI Amnesia Forever</title>
+    <meta name="description" content="SpecLock is the AI Continuity Engine that maintains project memory across coding sessions. 19 MCP tools. Semantic conflict detection. Works with Lovable, Claude Code, Cursor, Windsurf, Cline, Codex.">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface-2: #1a1a26;
+            --border: #2a2a3a;
+            --text: #e8e8f0;
+            --text-dim: #8888a0;
+            --accent: #ff4d4d;
+            --accent-glow: #ff4d4d40;
+            --green: #00e676;
+            --green-glow: #00e67640;
+            --blue: #448aff;
+            --yellow: #ffd740;
+            --purple: #b388ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glow orbs */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-orb.red { width: 500px; height: 500px; background: var(--accent); opacity: 0.06; top: -100px; right: -100px; }
+        .glow-orb.green { width: 400px; height: 400px; background: var(--green); opacity: 0.04; bottom: 20%; left: -100px; }
+
+        section { position: relative; z-index: 1; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px;
+        }
+        .nav-logo .lock-icon {
+            width: 32px; height: 32px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: white;
+        }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-smithery {
+            background: var(--accent); color: white; padding: 8px 20px;
+            border-radius: 8px; text-decoration: none; font-weight: 600;
+            font-size: 0.85rem; transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-smithery:hover { background: #ff6666; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            padding: 120px 24px 80px;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            padding: 6px 16px; border-radius: 100px; font-size: 0.8rem;
+            color: var(--green); margin-bottom: 32px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .badge .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem); font-weight: 900;
+            line-height: 1.05; letter-spacing: -2px; max-width: 900px;
+            margin-bottom: 24px;
+        }
+        h1 .strike { text-decoration: line-through; color: var(--text-dim); opacity: 0.4; }
+        h1 .red { color: var(--accent); }
+
+        .hero-sub {
+            font-size: 1.2rem; color: var(--text-dim); max-width: 620px;
+            line-height: 1.7; margin-bottom: 48px; font-weight: 300;
+        }
+        .hero-sub strong { color: var(--text); font-weight: 500; }
+
+        .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+        .btn-primary {
+            background: var(--accent); color: white; padding: 14px 32px;
+            border-radius: 12px; text-decoration: none; font-weight: 700;
+            font-size: 1rem; transition: all 0.2s; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { background: #ff6666; transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .btn-secondary {
+            background: var(--surface-2); color: var(--text); padding: 14px 32px;
+            border-radius: 12px; text-decoration: none; font-weight: 600;
+            font-size: 1rem; border: 1px solid var(--border); transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); }
+
+        /* TOOLS COUNTER */
+        .tools-strip {
+            margin-top: 64px; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+        }
+        .tool-stat { text-align: center; }
+        .tool-stat .num { font-size: 2.5rem; font-weight: 800; color: var(--accent); }
+        .tool-stat .label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* LIVE DEMO */
+        .demo {
+            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        .demo h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+        .demo .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 700px; }
+
+        .demo-terminal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+        }
+        .terminal-header {
+            display: flex; gap: 8px; padding: 14px 18px;
+            background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
+        }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .terminal-dot.r { background: #FF5F57; }
+        .terminal-dot.y { background: #FFBD2E; }
+        .terminal-dot.g { background: #28CA41; }
+        .terminal-body {
+            padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            line-height: 1.9; overflow-x: auto;
+        }
+        .t-comment { color: var(--text-dim); }
+        .t-cmd { color: var(--green); }
+        .t-lock { color: var(--yellow); }
+        .t-blocked { color: var(--accent); font-weight: 600; }
+        .t-ok { color: var(--green); font-weight: 600; }
+        .t-dim { color: var(--text-dim); }
+
+        /* PROBLEM SECTION */
+        .problem {
+            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        .section-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 16px;
+        }
+        .problem h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 48px; max-width: 700px; }
+
+        .amnesia-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2px; background: var(--border); border-radius: 16px; overflow: hidden;
+        }
+        .amnesia-card { background: var(--surface); padding: 32px; }
+        .amnesia-card .emoji { font-size: 2rem; margin-bottom: 12px; }
+        .amnesia-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .amnesia-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+
+        /* TOOLS SECTION */
+        .tools-section {
+            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        .tools-section h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+        .tools-section .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 600px; }
+
+        .tools-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .tool-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px; transition: all 0.2s;
+        }
+        .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .tool-card .tool-cat {
+            font-size: 0.65rem; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 4px; font-weight: 600;
+        }
+        .tool-card .tool-name {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            color: var(--green); margin-bottom: 6px; font-weight: 600;
+        }
+        .tool-card .tool-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+
+        /* INTEGRATION SECTION */
+        .integrations {
+            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        .integrations h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+        .integrations .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 700px; }
+
+        .platform-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px;
+        }
+        .platform-tab {
+            padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-dim); cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .platform-tab.active, .platform-tab:hover {
+            border-color: var(--accent); color: var(--text); background: var(--surface-2);
+        }
+        .platform-tab .status {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px;
+        }
+        .platform-tab .status.live { background: var(--green); }
+        .platform-tab .status.soon { background: var(--yellow); }
+        .platform-tab .status.manual { background: var(--blue); }
+
+        .platform-content { display: none; }
+        .platform-content.active { display: block; }
+
+        .install-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+        }
+        .install-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .install-header h3 { font-size: 1.1rem; font-weight: 700; }
+        .install-header .diff-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+            padding: 4px 10px; border-radius: 6px; font-weight: 600;
+        }
+        .diff-easy { background: #00e67620; color: var(--green); }
+        .diff-medium { background: #ffd74020; color: var(--yellow); }
+
+        .install-steps { padding: 24px; }
+        .step { display: flex; gap: 16px; margin-bottom: 24px; }
+        .step:last-child { margin-bottom: 0; }
+        .step-num {
+            width: 28px; height: 28px; min-width: 28px;
+            background: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; color: white;
+        }
+        .step-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+        .step-content p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+
+        .code-block {
+            background: #0d0d14; border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px 20px; margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            color: var(--green); overflow-x: auto; line-height: 1.8;
+            position: relative;
+        }
+        .code-block .comment { color: var(--text-dim); }
+        .code-block .string { color: var(--yellow); }
+        .code-block .key { color: var(--blue); }
+
+        .copy-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            color: var(--text-dim); padding: 4px 10px; border-radius: 6px;
+            font-size: 0.7rem; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+        /* COMPATIBILITY TABLE */
+        .compat-section {
+            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        }
+        .compat-section h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 48px; }
+
+        .compat-table {
+            width: 100%; border-collapse: collapse;
+            background: var(--surface); border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .compat-table th {
+            padding: 16px 20px; text-align: left; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim);
+            background: var(--surface-2); border-bottom: 1px solid var(--border);
+        }
+        .compat-table td {
+            padding: 14px 20px; border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .compat-table tr:last-child td { border-bottom: none; }
+        .compat-table .platform-name { font-weight: 600; }
+        .compat-table .check { color: var(--green); font-size: 1.2rem; }
+        .compat-table .cross { color: var(--text-dim); opacity: 0.3; }
+        .compat-table .coming { color: var(--yellow); font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .compat-table .audience { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* FOOTER CTA */
+        .footer-cta {
+            padding: 100px 24px; text-align: center;
+        }
+        .footer-cta h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+        .footer-cta p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 40px; }
+        .footer-cta .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        footer {
+            padding: 40px 24px; text-align: center; border-top: 1px solid var(--border);
+            color: var(--text-dim); font-size: 0.8rem;
+        }
+        footer a { color: var(--text-dim); text-decoration: none; }
+        footer a:hover { color: var(--text); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 12px 16px; }
+            .nav-links { display: none; }
+            h1 { font-size: 2.5rem; letter-spacing: -1px; }
+            .hero-sub { font-size: 1rem; }
+            .tools-strip { gap: 24px; }
+            .problem h2, .demo h2, .tools-section h2, .integrations h2, .compat-section h2, .footer-cta h2 {
+                font-size: 2rem;
+            }
+            .compat-table { font-size: 0.8rem; display: block; overflow-x: auto; }
+            .terminal-body { font-size: 0.7rem; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-orb red"></div>
+    <div class="glow-orb green"></div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-logo">
+            <div class="lock-icon">&#x1f512;</div>
+            SpecLock
+        </div>
+        <div class="nav-links">
+            <a href="#demo">Live Demo</a>
+            <a href="#problem">Problem</a>
+            <a href="#tools">19 Tools</a>
+            <a href="#connect">Connect</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-smithery">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="badge">
+            <span class="dot"></span>
+            LIVE ON SMITHERY &mdash; 19 MCP TOOLS
+        </div>
+        <h1>
+            <span class="strike">AI Amnesia</span><br>
+            <span class="red">Killed.</span>
+        </h1>
+        <p class="hero-sub">
+            SpecLock is the <strong>AI Continuity Engine</strong> that maintains project memory across coding sessions.
+            Your AI never forgets your constraints, decisions, or architecture &mdash; even when the context window resets.
+        </p>
+        <div class="hero-cta">
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">
+                Install from Smithery
+            </a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">
+                View on GitHub
+            </a>
+        </div>
+        <div class="tools-strip">
+            <div class="tool-stat">
+                <div class="num">19</div>
+                <div class="label">MCP Tools</div>
+            </div>
+            <div class="tool-stat">
+                <div class="num">6+</div>
+                <div class="label">Platforms</div>
+            </div>
+            <div class="tool-stat">
+                <div class="num">0</div>
+                <div class="label">Context Lost</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section class="demo" id="demo">
+        <div class="section-label">Live Test</div>
+        <h2>4 locks set. 4 violations attempted. 4 blocked.</h2>
+        <p class="subtitle">A real test on a client jewelry wholesale project. SpecLock caught every constraint violation before any code was changed.</p>
+
+        <div class="demo-terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot r"></div>
+                <div class="terminal-dot y"></div>
+                <div class="terminal-dot g"></div>
+            </div>
+            <div class="terminal-body">
+                <div class="t-comment"># Session 1: Developer sets project constraints</div>
+                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Colors: Gold #C5A572, Black #1A1A1A only. NO bright colors, NO neon."</span></div>
+                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Tagline: Crafted in Guangzhou. Trusted Worldwide. Do NOT change."</span></div>
+                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Contact must include WeChat QR + WhatsApp + Alibaba."</span></div>
+                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"All prices in USD. This is B2B wholesale, NOT retail."</span></div>
+                <br>
+                <div class="t-comment"># Session 2: Context compacted. New AI session. Client requests changes.</div>
+                <div class="t-comment"># SpecLock session_briefing loads all locks automatically.</div>
+                <br>
+                <div class="t-dim">Checking: "Add blue gradient and neon green accent buttons"</div>
+                <div class="t-blocked">BLOCKED [HIGH 100%] Violates: NO bright colors, NO neon, NO blue/green</div>
+                <br>
+                <div class="t-dim">Checking: "Change the tagline to something more modern"</div>
+                <div class="t-blocked">BLOCKED [HIGH 100%] Synonym match: change/modify/alter/rewrite</div>
+                <br>
+                <div class="t-dim">Checking: "Remove WeChat from the contact section"</div>
+                <div class="t-blocked">BLOCKED [HIGH 100%] Destructive action against locked constraint</div>
+                <br>
+                <div class="t-dim">Checking: "Convert all prices from USD to CNY"</div>
+                <div class="t-blocked">BLOCKED [HIGH 100%] Violates: All prices in USD</div>
+                <br>
+                <div class="t-ok">Result: 4/4 violations caught. Zero damage to codebase.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="problem" id="problem">
+        <div class="section-label">The Problem</div>
+        <h2>Every AI coding session starts from zero. Yours won't.</h2>
+        <div class="amnesia-grid">
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f9e0;</div>
+                <h3>Session Amnesia</h3>
+                <p>Your AI forgets everything when you start a new chat. Architecture decisions, constraints, what you tried before &mdash; all gone.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f500;</div>
+                <h3>Semantic Drift</h3>
+                <p>AI slowly diverges from your original requirements. By session 5, it's building something completely different than what you specified.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f4a5;</div>
+                <h3>Constraint Violations</h3>
+                <p>"Don't use Redux" &mdash; you said it 10 times. The AI adds Redux anyway because it has no memory of your non-negotiable rules.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f504;</div>
+                <h3>Repeat Yourself Loop</h3>
+                <p>You paste the same context, the same rules, the same architecture docs at the start of every single session. Hours wasted.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f47b;</div>
+                <h3>Multi-Agent Chaos</h3>
+                <p>Using Claude + Cursor + Copilot? None of them know what the others decided. You're the only thread of continuity.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1f3af;</div>
+                <h3>Vibe Coder Pain</h3>
+                <p>Non-technical founders suffer most. They can't re-explain complex requirements. SpecLock remembers so they don't have to.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="tools-section" id="tools">
+        <div class="section-label">Capabilities</div>
+        <h2>19 tools. Zero amnesia.</h2>
+        <p class="subtitle">Every tool is designed to lock context, enforce constraints, and maintain continuity across sessions.</p>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-cat">Memory</div>
+                <div class="tool-name">speclock_init</div>
+                <div class="tool-desc">Initialize SpecLock in your project directory</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Memory</div>
+                <div class="tool-name">speclock_get_context</div>
+                <div class="tool-desc">THE KEY TOOL. Returns full structured context pack</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Memory</div>
+                <div class="tool-name">speclock_set_goal</div>
+                <div class="tool-desc">Set or update the high-level project goal</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Protection</div>
+                <div class="tool-name">speclock_add_lock</div>
+                <div class="tool-desc">Add a non-negotiable constraint (SpecLock)</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Protection</div>
+                <div class="tool-name">speclock_remove_lock</div>
+                <div class="tool-desc">Deactivate a constraint by ID (soft-delete)</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Memory</div>
+                <div class="tool-name">speclock_add_decision</div>
+                <div class="tool-desc">Record an architectural or design decision</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Memory</div>
+                <div class="tool-name">speclock_add_note</div>
+                <div class="tool-desc">Add a pinned note that persists across sessions</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Tracking</div>
+                <div class="tool-name">speclock_log_change</div>
+                <div class="tool-desc">Log a significant change with affected files</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Tracking</div>
+                <div class="tool-name">speclock_get_changes</div>
+                <div class="tool-desc">Get recent file changes tracked by SpecLock</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Tracking</div>
+                <div class="tool-name">speclock_get_events</div>
+                <div class="tool-desc">Get the event log, filterable by type</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Tracking</div>
+                <div class="tool-name">speclock_set_deploy_facts</div>
+                <div class="tool-desc">Record deployment config (provider, branch, URL)</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Protection</div>
+                <div class="tool-name">speclock_check_conflict</div>
+                <div class="tool-desc">Check if an action conflicts with any active lock</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Session</div>
+                <div class="tool-name">speclock_session_briefing</div>
+                <div class="tool-desc">Start a session with full context briefing</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Session</div>
+                <div class="tool-name">speclock_session_summary</div>
+                <div class="tool-desc">End session and record what was accomplished</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Git</div>
+                <div class="tool-name">speclock_checkpoint</div>
+                <div class="tool-desc">Create a named git tag for safe rollback</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Git</div>
+                <div class="tool-name">speclock_repo_status</div>
+                <div class="tool-desc">Get current git status, branch, and diff summary</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Intel</div>
+                <div class="tool-name">speclock_suggest_locks</div>
+                <div class="tool-desc">AI suggests new constraints from project patterns</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Intel</div>
+                <div class="tool-name">speclock_detect_drift</div>
+                <div class="tool-desc">Detect semantic drift from original spec</div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-cat">Intel</div>
+                <div class="tool-name">speclock_health</div>
+                <div class="tool-desc">Project health score with actionable insights</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTEGRATIONS -->
+    <section class="integrations" id="connect">
+        <div class="section-label">Connect</div>
+        <h2>Works where you work.</h2>
+        <p class="subtitle">Connect SpecLock to any MCP-compatible platform in under 2 minutes. Here's how for each one.</p>
+
+        <div class="platform-tabs">
+            <button class="platform-tab active" onclick="showPlatform('lovable')">Lovable <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('claude-code')">Claude Code <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('cursor')">Cursor <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('windsurf')">Windsurf <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('cline')">Cline <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('codex')">Codex <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('boltdiy')">bolt.diy <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('boltnew')">Bolt.new <span class="status soon"></span></button>
+        </div>
+
+        <!-- LOVABLE -->
+        <div class="platform-content active" id="platform-lovable">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Lovable &mdash; Custom MCP Server</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Open Connectors Settings</h4>
+                            <p>In your Lovable workspace, go to <strong>Settings &rarr; Connectors &rarr; Personal connectors</strong></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add New MCP Server</h4>
+                            <p>Click <strong>"New MCP server"</strong>. Enter the following:</p>
+                            <div class="code-block">
+<span class="key">Server name:</span>  <span class="string">SpecLock</span>
+<span class="key">Server URL:</span>   <span class="string">https://speclock-mcp-production.up.railway.app/mcp</span>
+<span class="key">Auth:</span>         <span class="string">No authentication</span>
+                                <button class="copy-btn" onclick="copyText('https://speclock-mcp-production.up.railway.app/mcp')">Copy URL</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Start Using It</h4>
+                            <p>In any Lovable project, click <strong>+</strong> in the prompt box &rarr; <strong>Connectors</strong> &rarr; enable SpecLock. Then tell the AI: <em>"Initialize SpecLock and set a goal for this project"</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top:16px; color: var(--text-dim); font-size:0.85rem;">Requires Lovable <strong>paid plan</strong> (Pro $25/mo) for custom MCP servers. Prebuilt connectors available on all plans.</p>
+        </div>
+
+        <!-- CLAUDE CODE -->
+        <div class="platform-content" id="platform-claude-code">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Claude Code</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 1 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Install via Smithery</h4>
+                            <p>Run this in your terminal:</p>
+                            <div class="code-block">
+npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
+                                <button class="copy-btn" onclick="copyText('npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Or add to ~/.claude.json manually</h4>
+                            <div class="code-block">
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"speclock"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"speclock"</span>, <span class="string">"serve"</span>, <span class="string">"--project"</span>, <span class="string">"."</span>]
+    }
+  }
+}
+                                <button class="copy-btn" onclick="copyText('{&quot;mcpServers&quot;:{&quot;speclock&quot;:{&quot;command&quot;:&quot;npx&quot;,&quot;args&quot;:[&quot;-y&quot;,&quot;speclock&quot;,&quot;serve&quot;,&quot;--project&quot;,&quot;.&quot;]}}}')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CURSOR -->
+        <div class="platform-content" id="platform-cursor">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Cursor</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Open MCP Settings</h4>
+                            <p>Go to <strong>Cursor Settings &rarr; Tools &amp; MCP</strong> &rarr; click <strong>"Add new MCP server"</strong></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add SpecLock config</h4>
+                            <p>Add to your <strong>.cursor/mcp.json</strong>:</p>
+                            <div class="code-block">
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"speclock"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"speclock"</span>, <span class="string">"serve"</span>, <span class="string">"--project"</span>, <span class="string">"."</span>]
+    }
+  }
+}
+                                <button class="copy-btn" onclick="copyText('{&quot;mcpServers&quot;:{&quot;speclock&quot;:{&quot;command&quot;:&quot;npx&quot;,&quot;args&quot;:[&quot;-y&quot;,&quot;speclock&quot;,&quot;serve&quot;,&quot;--project&quot;,&quot;.&quot;]}}}')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Start Coding</h4>
+                            <p>In Cursor's AI chat, type: <em>"Use SpecLock to initialize this project and set constraints"</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WINDSURF -->
+        <div class="platform-content" id="platform-windsurf">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Windsurf</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Open MCP Configuration</h4>
+                            <p>Go to <strong>Windsurf Settings &rarr; Cascade &rarr; MCP Servers</strong></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add SpecLock Server</h4>
+                            <p>Add to your <strong>~/.codeium/windsurf/mcp_config.json</strong>:</p>
+                            <div class="code-block">
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"speclock"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"speclock"</span>, <span class="string">"serve"</span>, <span class="string">"--project"</span>, <span class="string">"."</span>]
+    }
+  }
+}
+                                <button class="copy-btn" onclick="copyText('{&quot;mcpServers&quot;:{&quot;speclock&quot;:{&quot;command&quot;:&quot;npx&quot;,&quot;args&quot;:[&quot;-y&quot;,&quot;speclock&quot;,&quot;serve&quot;,&quot;--project&quot;,&quot;.&quot;]}}}')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLINE -->
+        <div class="platform-content" id="platform-cline">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Cline (VS Code Extension)</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Open Cline MCP Settings</h4>
+                            <p>Click the <strong>MCP Servers</strong> icon in the Cline sidebar &rarr; click <strong>"Configure MCP Servers"</strong></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add SpecLock</h4>
+                            <p>Add to the MCP settings JSON:</p>
+                            <div class="code-block">
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"speclock"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"speclock"</span>, <span class="string">"serve"</span>, <span class="string">"--project"</span>, <span class="string">"."</span>]
+    }
+  }
+}
+                                <button class="copy-btn" onclick="copyText('{&quot;mcpServers&quot;:{&quot;speclock&quot;:{&quot;command&quot;:&quot;npx&quot;,&quot;args&quot;:[&quot;-y&quot;,&quot;speclock&quot;,&quot;serve&quot;,&quot;--project&quot;,&quot;.&quot;]}}}')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CODEX -->
+        <div class="platform-content" id="platform-codex">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>OpenAI Codex</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Via Smithery</h4>
+                            <p>Visit <a href="https://smithery.ai/servers/sgroy10/speclock" style="color: var(--accent);" target="_blank">smithery.ai/servers/sgroy10/speclock</a> &rarr; click <strong>Codex</strong> and follow the auto-generated configuration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOLT.DIY -->
+        <div class="platform-content" id="platform-boltdiy">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>bolt.diy (Open Source Bolt)</h3>
+                    <span class="diff-tag diff-medium">Medium &mdash; 5 min</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Open MCP Settings</h4>
+                            <p>In your bolt.diy instance, go to <strong>Settings &rarr; MCP</strong></p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add Remote MCP Server</h4>
+                            <p>Add SpecLock as a Streamable HTTP server:</p>
+                            <div class="code-block">
+{
+  <span class="key">"speclock"</span>: {
+    <span class="key">"type"</span>: <span class="string">"streamable-http"</span>,
+    <span class="key">"url"</span>: <span class="string">"https://speclock-mcp-production.up.railway.app/mcp"</span>
+  }
+}
+                                <button class="copy-btn" onclick="copyText('https://speclock-mcp-production.up.railway.app/mcp')">Copy URL</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOLT.NEW -->
+        <div class="platform-content" id="platform-boltnew">
+            <div class="install-box">
+                <div class="install-header">
+                    <h3>Bolt.new (StackBlitz)</h3>
+                    <span class="diff-tag diff-medium">Coming Soon</span>
+                </div>
+                <div class="install-steps">
+                    <div class="step">
+                        <div class="step-num">&mdash;</div>
+                        <div class="step-content">
+                            <h4>MCP Support Incoming</h4>
+                            <p>Bolt.new has announced MCP server support on their roadmap. Once live, you'll be able to connect SpecLock directly. In the meantime, use <strong>bolt.diy</strong> (the open-source version) which already supports MCP, or use <strong>Lovable</strong> which has full custom MCP support today.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPATIBILITY TABLE -->
+    <section class="compat-section" id="platforms">
+        <div class="section-label">Platform Matrix</div>
+        <h2>Where SpecLock works today</h2>
+        <table class="compat-table">
+            <thead>
+                <tr>
+                    <th>Platform</th>
+                    <th>MCP Support</th>
+                    <th>SpecLock Status</th>
+                    <th>Primary Audience</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="platform-name">Lovable</td>
+                    <td><span class="check">&#x2713;</span> Custom MCP (Paid)</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Non-technical founders, vibe coders</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Claude Code</td>
+                    <td><span class="check">&#x2713;</span> Native MCP</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Developers, power users</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Cursor</td>
+                    <td><span class="check">&#x2713;</span> Native MCP</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Professional developers</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Windsurf</td>
+                    <td><span class="check">&#x2713;</span> Native MCP</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Developers, teams</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Cline</td>
+                    <td><span class="check">&#x2713;</span> Native MCP</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">VS Code power users</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Codex (OpenAI)</td>
+                    <td><span class="check">&#x2713;</span> Via Smithery</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Developers</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">bolt.diy</td>
+                    <td><span class="check">&#x2713;</span> MCP Support</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td class="audience">Self-hosters, tinkerers</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">Bolt.new</td>
+                    <td><span class="coming">ROADMAP</span></td>
+                    <td><span class="coming">PLANNED</span></td>
+                    <td class="audience">Non-technical builders</td>
+                </tr>
+                <tr>
+                    <td class="platform-name">v0 (Vercel)</td>
+                    <td><span class="cross">&#x2717;</span> Not yet</td>
+                    <td><span class="coming">MONITORING</span></td>
+                    <td class="audience">Frontend developers</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- FOOTER CTA -->
+    <section class="footer-cta">
+        <div class="section-label">Get Started</div>
+        <h2>Your AI's memory starts now.</h2>
+        <p>Stop re-explaining. Start building. SpecLock remembers everything.</p>
+        <div class="cta-buttons">
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">
+                Get SpecLock on Smithery
+            </a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">
+                GitHub Repository
+            </a>
+            <a href="https://www.npmjs.com/package/speclock" target="_blank" class="btn-secondary">
+                npm Package
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock &mdash; AI Continuity Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+    </footer>
+
+    <script>
+        function showPlatform(id) {
+            document.querySelectorAll('.platform-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.platform-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('platform-' + id).classList.add('active');
+            event.target.closest('.platform-tab').classList.add('active');
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
