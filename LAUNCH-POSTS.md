@@ -320,7 +320,7 @@ Add to Claude Code (`~/.claude.json`):
 
 - **npm**: [speclock](https://www.npmjs.com/package/speclock)
 - **Smithery**: [sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
-- **GitHub**: [sgroy10/flowkeeper](https://github.com/sgroy10/speclock)
+- **GitHub**: [sgroy10/speclock](https://github.com/sgroy10/speclock)
 
 Free, open-source, MIT licensed, fully offline. Works with Claude Code, Cursor, Windsurf, Cline, and Codex.
 
@@ -350,24 +350,212 @@ I'd love your feedback. What constraints do you wish your AI coding agent would 
 
 ---
 
-## 8. DIRECTORIES TO SUBMIT TO
+## 8. LOVABLE DISCORD POST (PRIMARY TARGET)
+
+**Channel:** #showcase or #general in discord.com/invite/lovable-dev (156K+ members)
+
+**Post:**
+
+Hey everyone! I built an MCP server that solves the #1 pain point I keep seeing here — **losing project context between Lovable sessions**.
+
+You know the drill: you spend 30 minutes explaining your architecture, constraints, and design decisions to the AI. Next session? Gone. You're re-explaining everything from scratch and burning credits.
+
+**SpecLock** is an MCP server (19 tools) that acts as a **persistent brain** for your Lovable projects:
+
+- **Set locks** — non-negotiable constraints like "never change the auth flow" or "all API routes must be protected"
+- **Track decisions** — every architectural choice is logged and survives session resets
+- **Detect violations** — if you (or a collaborator) accidentally try to contradict a locked constraint, SpecLock flags it before any damage is done
+- **Session briefings** — start every new chat with full context automatically loaded. No more copy-pasting your project spec.
+
+**Setup takes 2 minutes:**
+1. Go to **Settings → Connectors → Personal connectors**
+2. Click "New MCP server"
+3. Enter:
+   - Name: `SpecLock`
+   - URL: `https://speclock-mcp-production.up.railway.app/mcp`
+   - Auth: No authentication
+4. In any project, enable SpecLock via the + menu → Connectors
+
+Then just tell Lovable: *"Initialize SpecLock, set a goal for this project, and add locks for my key constraints."*
+
+It's basically the `memory.md` / `docs/` folder approach that many of you already use — but automated, enforced, and conflict-checked.
+
+Free, open-source, MIT licensed.
+- Smithery: https://smithery.ai/servers/sgroy10/speclock
+- GitHub: https://github.com/sgroy10/speclock
+- Landing page: https://sgroy10.github.io/speclock/
+
+What constraints do you wish Lovable would respect across sessions? Would love to hear your use cases.
+
+---
+
+## 9. LOVABLE-SPECIFIC X/TWITTER THREAD
+
+**Tweet 1:**
+The #1 complaint from @lovable_dev users:
+
+"My AI forgets everything between sessions."
+
+You spend 30 minutes explaining your architecture. Next session? All gone. Credits burned re-explaining.
+
+I built something to fix this. [1/5]
+
+**Tweet 2:**
+SpecLock is an MCP server that gives your Lovable projects a persistent brain.
+
+Set it up in 2 minutes:
+Settings → Connectors → New MCP server
+URL: https://speclock-mcp-production.up.railway.app/mcp
+Auth: None
+
+That's it. 19 tools. Zero config. [2/5]
+
+**Tweet 3:**
+What it does:
+
+- Locks constraints: "Never change the auth flow"
+- Tracks decisions: Every architectural choice survives
+- Session briefings: Full context loaded on every new chat
+- Conflict detection: Flags violations before damage
+
+Think memory.md, but automated + enforced. [3/5]
+
+**Tweet 4:**
+Real test: Set 4 locks on a project (colors, tagline, contacts, pricing).
+
+Tried to violate all 4 in a new session.
+
+SpecLock caught every one. 4/4 blocked. Zero damage.
+
+Synonym detection caught "change" = "modify" = "alter".
+Destructive action detection caught "remove WeChat". [4/5]
+
+**Tweet 5:**
+SpecLock works with:
+- Lovable (via custom MCP connector)
+- Claude Code
+- Cursor
+- Windsurf
+- Cline
+- Codex
+
+Free. Open source. No accounts.
+
+Landing page: https://sgroy10.github.io/speclock/
+Smithery: https://smithery.ai/servers/sgroy10/speclock
+
+Stop re-explaining. Start building. [5/5]
+
+---
+
+## 10. LOVABLE DEV.TO TUTORIAL
+
+**Title:** Stop Losing Context in Lovable: How SpecLock Gives Your AI Builder Persistent Memory
+
+**Tags:** #lovable #mcp #ai #webdev
+
+**Body:**
+
+### The Problem Every Lovable User Hits
+
+If you've built anything non-trivial with [Lovable](https://lovable.dev), you've hit this wall:
+
+Session 1: You spend 20 minutes explaining your project architecture, design constraints, tech stack decisions, and non-negotiable rules.
+
+Session 2: The AI has no idea what you talked about. You're back to square one.
+
+The popular workaround is creating a `docs/` folder with `memory.md`, `architecture.md`, and `development-notes.md` (if you've read [The Untitled Handbook guide](https://www.theuntitledhandbook.com/p/artificial-ai-memory-system-context), you know what I mean). It works — but it's manual, it's not enforced, and nothing stops the AI from contradicting what's written there.
+
+### SpecLock: The Automated, Enforced Version
+
+SpecLock is an MCP server with 19 tools that connects to Lovable as a custom connector. It does three things the manual approach can't:
+
+1. **Persistent memory** — goals, decisions, constraints, and session history are stored in a structured `brain.json` that survives any session reset
+2. **Active enforcement** — when someone tries to violate a locked constraint, SpecLock flags the conflict using semantic analysis (synonym matching, negation detection, confidence scoring)
+3. **Session continuity** — call `session_briefing` at the start of any new chat to load full project context instantly
+
+### Setup (2 Minutes)
+
+**Requirements:** Lovable paid plan (Pro $25/mo or higher for custom MCP servers)
+
+**Step 1:** In Lovable, go to **Settings → Connectors → Personal connectors**
+
+**Step 2:** Click **"New MCP server"** and enter:
+- **Name:** SpecLock
+- **URL:** `https://speclock-mcp-production.up.railway.app/mcp`
+- **Auth:** No authentication
+
+**Step 3:** In any project, click **+** in the prompt box → **Connectors** → enable SpecLock
+
+**Step 4:** Tell Lovable:
+> "Initialize SpecLock for this project. Set the goal to 'Build a customer portal with authentication and file uploads'. Add locks: 'All routes must require authentication', 'Use Supabase for the database — never switch to another DB', 'Design system uses Tailwind with shadcn/ui components only'."
+
+### What Happens Next
+
+Every subsequent session, just tell Lovable:
+> "Start a SpecLock session briefing"
+
+The AI gets a full dump of:
+- Your project goal
+- All locked constraints
+- Every architectural decision made so far
+- Recent changes and session history
+- Deployment facts
+
+No more copy-pasting. No more re-explaining. No more wasted credits.
+
+### Manual memory.md vs. SpecLock
+
+| Feature | Manual docs/ folder | SpecLock |
+|---------|-------------------|----------|
+| Persists across sessions | Yes (if AI reads it) | Yes (loaded automatically) |
+| Enforces constraints | No | Yes (semantic conflict detection) |
+| Catches violations | No | Yes (synonym + negation analysis) |
+| Tracks session history | No | Yes (append-only event log) |
+| Auto-loads on new session | No (must prompt) | Yes (session_briefing) |
+| Git checkpoints | Manual | One command |
+| Setup time | 15+ minutes | 2 minutes |
+
+### Links
+
+- **Landing page:** [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/)
+- **Smithery:** [smithery.ai/servers/sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
+- **GitHub:** [github.com/sgroy10/speclock](https://github.com/sgroy10/speclock)
+- **npm:** [speclock](https://www.npmjs.com/package/speclock)
+
+Free, open-source, MIT licensed. Works with Lovable, Claude Code, Cursor, Windsurf, Cline, and Codex.
+
+Built by [Sandeep Roy](https://github.com/sgroy10).
+
+---
+
+## 11. DIRECTORIES TO SUBMIT TO
 
 - [x] Smithery — DONE (smithery.ai/servers/sgroy10/speclock)
 - [x] npm — DONE (speclock@1.1.1)
-- [ ] PulseMCP — pulsemcp.com (submit server listing)
-- [ ] mcpservers.org — Submit listing
+- [x] GitHub Pages — DONE (sgroy10.github.io/speclock)
+- [ ] PulseMCP — pulsemcp.com/submit (submit server listing)
+- [ ] mcpservers.org — mcpservers.org/submit
 - [ ] Glama — glama.ai/mcp/servers (submit)
 - [ ] MCP.so — mcp.so (submit)
+- [ ] awesome-remote-mcp-servers — GitHub PR to github.com/jaw9c/awesome-remote-mcp-servers
+- [ ] remote-mcp.com — Listed from awesome-remote-mcp-servers repo
+- [ ] LobeHub MCP Marketplace — lobehub.com/mcp
+- [ ] Cline MCP Marketplace — GitHub PR to github.com/cline/mcp-marketplace
+- [ ] MCP Server Finder — mcpserverfinder.com
+- [ ] MCP Market — mcpmarket.com/server
 - [ ] Futurepedia — futurepedia.io (AI tools directory)
 - [ ] There's An AI For That — theresanaiforthat.com
 - [ ] BetaList — betalist.com/submit
 - [ ] Indie Hackers — indiehackers.com (Show IH post)
 - [ ] Product Hunt — producthunt.com (schedule for Week 4)
 - [ ] Hacker News — news.ycombinator.com/submitlink
+- [ ] Lovable Discord — discord.com/invite/lovable-dev (#showcase)
+- [ ] Lovable Partner Program — lovable.dev/partners/apply
 
 ---
 
-## 9. KEY PEOPLE TO TAG ON X/TWITTER
+## 12. KEY PEOPLE TO TAG ON X/TWITTER
 
 | Person | Handle | Why |
 |--------|--------|-----|
@@ -377,11 +565,27 @@ I'd love your feedback. What constraints do you wish your AI coding agent would 
 | Alex Albert | @alexalbert__ | Anthropic head of DevRel |
 | Steve Yegge | @steveyegge | Built Beads (complementary tool) |
 | Logan Kilpatrick | @OfficialLoganK | Google DeepMind DevRel |
+| Lovable | @lovable_dev | Primary target platform (8M users) |
 
 ---
 
-## 10. CRITICAL FIRST ACTION
+## 13. COMPLETED ACTIONS
 
-**Rename GitHub repo from `flowkeeper` to `speclock`.**
+- [x] Rename GitHub repo from `flowkeeper` to `speclock` — DONE
+- [x] GitHub Pages enabled at sgroy10.github.io/speclock — DONE
+- [x] Railway HTTP deployment live at speclock-mcp-production.up.railway.app — DONE
+- [x] Smithery listing at smithery.ai/servers/sgroy10/speclock — DONE
+- [x] npm published at v1.1.1 — DONE
 
-Brand confusion is the #1 self-inflicted problem right now. npm says speclock, Smithery says speclock, but GitHub says flowkeeper. Fix this before any launch activity.
+---
+
+## 14. KEY URLS (REFERENCE)
+
+| Resource | URL |
+|----------|-----|
+| Landing Page | https://sgroy10.github.io/speclock/ |
+| GitHub | https://github.com/sgroy10/speclock |
+| npm | https://www.npmjs.com/package/speclock |
+| Smithery | https://smithery.ai/servers/sgroy10/speclock |
+| Railway (HTTP MCP) | https://speclock-mcp-production.up.railway.app/mcp |
+| Lovable MCP URL | https://speclock-mcp-production.up.railway.app/mcp |
