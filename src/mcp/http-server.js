@@ -41,7 +41,7 @@ import {
 } from "../core/git.js";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const AUTHOR = "Sandeep Roy";
 
 function createSpecLockServer() {

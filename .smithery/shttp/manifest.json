@@ -1,0 +1,460 @@
+{
+  "payload": {
+    "type": "hosted",
+    "stateful": false,
+    "hasAuthAdapter": false,
+    "serverCard": {
+      "serverInfo": {
+        "name": "speclock",
+        "version": "1.1.0"
+      },
+      "tools": [
+        {
+          "name": "speclock_init",
+          "description": "Initialize SpecLock in the current project directory. Creates .speclock/ with brain.json, events.log, and supporting directories.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_get_context",
+          "description": "THE KEY TOOL. Returns the full structured context pack including goal, locks, decisions, recent changes, deploy facts, reverts, session history, and notes. Call this at the start of every session or whenever you need to refresh your understanding of the project.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "markdown",
+                  "json"
+                ],
+                "default": "markdown",
+                "description": "Output format: markdown (readable) or json (structured)"
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_set_goal",
+          "description": "Set or update the project goal. This is the high-level objective that guides all work.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The project goal text"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_add_lock",
+          "description": "Add a non-negotiable constraint (SpecLock). These are rules that must NEVER be violated during development.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The constraint text"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [],
+                "description": "Category tags"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "agent"
+                ],
+                "default": "agent",
+                "description": "Who created this lock"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_remove_lock",
+          "description": "Remove (deactivate) a SpecLock by its ID. The lock is soft-deleted and kept in history.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "lockId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The lock ID to remove"
+              }
+            },
+            "required": [
+              "lockId"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_add_decision",
+          "description": "Record an architectural or design decision. Decisions guide future work and prevent contradictory changes.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The decision text"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "agent"
+                ],
+                "default": "agent"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_add_note",
+          "description": "Add a pinned note for reference. Notes persist across sessions as reminders.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The note text"
+              },
+              "pinned": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to pin this note in context"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_set_deploy_facts",
+          "description": "Record deployment configuration facts (provider, branch, auto-deploy settings).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "description": "Deploy provider (vercel, railway, aws, netlify, etc.)"
+              },
+              "branch": {
+                "type": "string",
+                "description": "Deploy branch"
+              },
+              "autoDeploy": {
+                "type": "boolean",
+                "description": "Whether auto-deploy is enabled"
+              },
+              "url": {
+                "type": "string",
+                "description": "Deployment URL"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional deploy notes"
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_log_change",
+          "description": "Manually log a significant change. Use this when you make an important modification that should be tracked in the context.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Brief description of the change"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [],
+                "description": "Files affected"
+              }
+            },
+            "required": [
+              "summary"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_get_changes",
+          "description": "Get recent file changes tracked by SpecLock.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_get_events",
+          "description": "Get the event log, optionally filtered by type. Event types: init, goal_updated, lock_added, lock_removed, decision_added, note_added, fact_updated, file_created, file_changed, file_deleted, revert_detected, context_generated, session_started, session_ended, manual_change, checkpoint_created.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Filter by event type"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 50
+              },
+              "since": {
+                "type": "string",
+                "description": "ISO timestamp; only return events after this time"
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_check_conflict",
+          "description": "Check if a proposed action conflicts with any active SpecLock. Use before making significant changes.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "proposedAction": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Description of the action you plan to take"
+              }
+            },
+            "required": [
+              "proposedAction"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_session_briefing",
+          "description": "Start a new session and get a full briefing. Returns context pack plus what happened since the last session. Call this at the very beginning of a new conversation.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "toolName": {
+                "type": "string",
+                "enum": [
+                  "claude-code",
+                  "cursor",
+                  "codex",
+                  "windsurf",
+                  "cline",
+                  "unknown"
+                ],
+                "default": "unknown",
+                "description": "Which AI tool is being used"
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_session_summary",
+          "description": "End the current session and record what was accomplished. Call this before ending a conversation.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Summary of what was accomplished in this session"
+              }
+            },
+            "required": [
+              "summary"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_checkpoint",
+          "description": "Create a named git tag checkpoint for easy rollback.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Checkpoint name (alphanumeric, hyphens, underscores)"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_repo_status",
+          "description": "Get current git repository status including branch, commit, changed files, and diff summary.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_suggest_locks",
+          "description": "Analyze project decisions, notes, and patterns to suggest new SpecLock constraints. Returns auto-generated lock suggestions based on commitment language, prohibitive patterns, and common best practices.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_detect_drift",
+          "description": "Scan recent changes and events against active SpecLock constraints to detect potential violations or drift. Use this proactively to ensure project integrity.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "speclock_health",
+          "description": "Get a health check of the SpecLock setup including completeness score, missing recommended items, and multi-agent session timeline.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        }
+      ],
+      "resources": [],
+      "prompts": []
+    },
+    "source": {
+      "commit": "4dec4c49614069e2be60a7dc2d1171dca5e771ce",
+      "branch": "main"
+    }
+  },
+  "artifacts": {
+    "module": "module.js",
+    "sourcemap": "module.js.map"
+  }
+}
