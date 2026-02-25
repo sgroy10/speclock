@@ -721,10 +721,22 @@ server.tool(
   }
 );
 
-// --- Start server ---
-const transport = new StdioServerTransport();
-await server.connect(transport);
+// --- Smithery sandbox export ---
+export default function createSandboxServer() {
+  return server;
+}
 
-process.stderr.write(
-  `SpecLock MCP v${VERSION} running (stdio) — Developed by ${AUTHOR}. Root: ${PROJECT_ROOT}${os.EOL}`
-);
+// --- Start server (skip when bundled as CJS for Smithery scanning) ---
+const isScanMode = typeof import.meta.url === "undefined";
+
+if (!isScanMode) {
+  const transport = new StdioServerTransport();
+  server.connect(transport).then(() => {
+    process.stderr.write(
+      `SpecLock MCP v${VERSION} running (stdio) — Developed by ${AUTHOR}. Root: ${PROJECT_ROOT}${os.EOL}`
+    );
+  }).catch((err) => {
+    process.stderr.write(`SpecLock fatal: ${err.message}${os.EOL}`);
+    process.exit(1);
+  });
+}
