@@ -368,7 +368,8 @@
             <a href="#demo">Live Demo</a>
             <a href="#problem">Problem</a>
             <a href="#tools">19 Tools</a>
-            <a href="#connect">Connect</a>
+            <a href="#connect">Setup</a>
+            <a href="#how-it-works">How It Works</a>
             <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
             <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-smithery">Get on Smithery</a>
         </div>
@@ -385,8 +386,8 @@
             <span class="red">Killed.</span>
         </h1>
         <p class="hero-sub">
-            SpecLock is the <strong>AI Continuity Engine</strong> that maintains project memory across coding sessions.
-            Your AI never forgets your constraints, decisions, or architecture &mdash; even when the context window resets.
+            SpecLock is the <strong>AI Continuity Engine</strong> that remembers your project across sessions and <strong>actively prevents</strong> your AI from breaking what works.
+            MCP server for memory + project instructions for enforcement = your AI never forgets and never violates your constraints.
         </p>
         <div class="hero-cta">
             <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">
@@ -641,8 +642,35 @@
                     <div class="step">
                         <div class="step-num">3</div>
                         <div class="step-content">
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
+                            <p>Go to <strong>Project Settings &rarr; Knowledge</strong> and paste these rules. This makes the AI use SpecLock automatically on every message:</p>
+                            <div class="code-block" style="font-size:0.72em; line-height:1.5;">
+## SpecLock Rules (MANDATORY &mdash; follow on every message)
+
+1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST.
+   Show: "🔒 Memory loaded &mdash; X locks, Y decisions."
+
+2. BEFORE MODIFYING CODE: Call speclock_check_conflict.
+   If HIGH conflict, STOP and warn me.
+
+3. WHEN I SAY "lock this" / "never touch" / "don't change":
+   Call speclock_add_lock. Confirm: "🔒 Locked: [constraint]"
+
+4. AFTER COMPLETING FEATURES: Call speclock_log_change +
+   speclock_add_decision for architectural choices.
+
+5. LOCKED ITEMS: Warn before changing. Only unlock if I confirm.
+
+6. END OF CONVERSATION: Call speclock_session_summary.
+                                <button class="copy-btn" onclick="copyText('## SpecLock Rules (MANDATORY — follow on every message)\n\n1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST. Read all locks, decisions, and goals before doing anything else. Show a brief summary: &quot;🔒 Memory loaded — X locks, Y decisions.&quot;\n\n2. BEFORE WRITING OR MODIFYING ANY CODE: Call speclock_check_conflict with a description of what you\'re about to change. If a conflict is found with HIGH confidence, STOP and tell me which lock would be violated. Do NOT proceed unless I explicitly say to override it.\n\n3. WHEN I SAY &quot;lock this&quot;, &quot;never touch this&quot;, &quot;don\'t ever change this&quot;, &quot;this is critical&quot;, or similar: Immediately call speclock_add_lock with my exact constraint. Confirm with: &quot;🔒 Locked: [constraint]&quot;\n\n4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call speclock_log_change with a summary of what was built/changed and which files were affected. Also call speclock_add_decision if an architectural choice was made.\n\n5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED: Warn me first: &quot;⚠️ You locked this: [constraint]. Want me to unlock it and proceed?&quot; Only proceed if I confirm.\n\n6. END OF CONVERSATION: Call speclock_session_summary with what was accomplished.')">Copy Rules</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
                             <h4>Start Using It</h4>
-                            <p>In any Lovable project, click <strong>+</strong> in the prompt box &rarr; <strong>Connectors</strong> &rarr; enable SpecLock. Then tell the AI: <em>"Initialize SpecLock and set a goal for this project"</em></p>
+                            <p>That's it! Now every time you chat, the AI will automatically load your project memory, check constraints before changing code, and log what it builds. Say <em>"Initialize SpecLock and set a goal for this project"</em> in your first chat.</p>
                         </div>
                     </div>
                 </div>
@@ -686,6 +714,13 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                             </div>
                         </div>
                     </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
+                            <p>Add the SpecLock rules to <strong>CLAUDE.md</strong> in your project root. This makes Claude use SpecLock automatically. <a href="https://github.com/sgroy10/speclock/blob/main/SPECLOCK-INSTRUCTIONS.md" target="_blank" style="color:var(--accent);">Get the rules &rarr;</a></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -726,8 +761,8 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">3</div>
                         <div class="step-content">
-                            <h4>Start Coding</h4>
-                            <p>In Cursor's AI chat, type: <em>"Use SpecLock to initialize this project and set constraints"</em></p>
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
+                            <p>Add the SpecLock rules to <strong>.cursorrules</strong> in your project root. This makes Cursor use SpecLock automatically. <a href="https://github.com/sgroy10/speclock/blob/main/SPECLOCK-INSTRUCTIONS.md" target="_blank" style="color:var(--accent);">Get the rules &rarr;</a></p>
                         </div>
                     </div>
                 </div>
@@ -877,6 +912,59 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                             <p>Bolt.new has announced MCP server support on their roadmap. Once live, you'll be able to connect SpecLock directly. In the meantime, use <strong>bolt.diy</strong> (the open-source version) which already supports MCP, or use <strong>Lovable</strong> which has full custom MCP support today.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS IN PRACTICE -->
+    <section class="compat-section" id="how-it-works">
+        <div class="section-label">Real-World Protection</div>
+        <h2>See SpecLock in action</h2>
+        <p style="color: var(--text-dim); max-width: 700px; margin: 0 auto 40px;">Here's what happens when SpecLock + Project Instructions are active. The AI automatically protects your work.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 900px; margin: 0 auto;">
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+                <div style="color: var(--accent); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 1</div>
+                <h4 style="margin-bottom: 12px;">You lock something important</h4>
+                <div class="code-block" style="font-size: 0.8em; text-align: left;">
+<span class="string">You:</span>  "Don't ever touch the auth files"
+<span class="key">AI:</span>   🔒 Locked: "Never modify auth files"
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+                <div style="color: var(--yellow); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 2</div>
+                <h4 style="margin-bottom: 12px;">AI checks before every change</h4>
+                <div class="code-block" style="font-size: 0.8em; text-align: left;">
+<span class="string">You:</span>  "Add social login"
+<span class="key">AI:</span>   ⚠️ This conflicts with your lock:
+      "Never modify auth files"
+      Should I proceed or find another way?
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+                <div style="color: var(--green); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 3</div>
+                <h4 style="margin-bottom: 12px;">New session, full memory</h4>
+                <div class="code-block" style="font-size: 0.8em; text-align: left;">
+<span class="string">You:</span>  "Let's work on the dashboard"
+<span class="key">AI:</span>   🔒 Memory loaded &mdash; 5 locks,
+      3 decisions, 2 sessions tracked.
+      Last time you added the payment page.
+      Ready to continue.
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+                <div style="color: var(--purple); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 4</div>
+                <h4 style="margin-bottom: 12px;">You change your mind</h4>
+                <div class="code-block" style="font-size: 0.8em; text-align: left;">
+<span class="string">You:</span>  "Unlock the auth files"
+<span class="key">AI:</span>   You locked: "Never modify auth files"
+      Want me to unlock and proceed?
+<span class="string">You:</span>  "Yes"
+<span class="key">AI:</span>   🔓 Unlocked. Proceeding.
                 </div>
             </div>
         </div>

@@ -35,9 +35,11 @@ SpecLock maintains a `.speclock/` directory inside your repo that gives every AI
     └── latest.md      # Always-fresh context pack for any AI agent
 ```
 
-Any AI tool calls `speclock_session_briefing` → gets **full project context** → works with complete memory → calls `speclock_session_summary` → next session continues seamlessly.
+**SpecLock = MCP Server + Project Instructions.**
 
-**No context is ever lost again.**
+The MCP server gives the AI tools for memory and constraint checking. The project instructions force the AI to use them on every action — automatically. Together, they create an active guardrail that prevents AI coding tools from breaking your work.
+
+**No context is ever lost. No constraints ever violated.**
 
 ## Why SpecLock Wins
 
@@ -56,31 +58,15 @@ Any AI tool calls `speclock_session_briefing` → gets **full project context** 
 
 ## Quick Start
 
-### 1. Install
+### 1. Connect SpecLock to Your AI Tool
 
-```bash
-npm install -g speclock
-```
+**Lovable** (no install needed):
 
-Or use directly with npx:
+1. Go to **Settings → Connectors → Personal connectors → New MCP server**
+2. Enter URL: `https://speclock-mcp-production.up.railway.app/mcp` — No auth
+3. Enable it in your project's prompt box
 
-```bash
-npx speclock init
-```
-
-### 2. Initialize in Your Project
-
-```bash
-cd your-project
-speclock init
-speclock goal "Ship v1 of the product"
-speclock lock "No breaking changes to public API"
-speclock decide "Use PostgreSQL for persistence"
-```
-
-### 3. Connect to Your AI Tool
-
-**Claude Code** — Add to `.claude/settings.json`:
+**Claude Code** — Add to `.claude/settings.json` or `.mcp.json`:
 
 ```json
 {
@@ -106,27 +92,81 @@ speclock decide "Use PostgreSQL for persistence"
 }
 ```
 
-**Windsurf / Cline / Any MCP tool** — Same pattern:
+**Windsurf / Cline / Any MCP tool** — Same pattern as above.
 
-```json
-{
-  "mcpServers": {
-    "speclock": {
-      "command": "npx",
-      "args": ["-y", "speclock", "serve", "--project", "."]
-    }
-  }
-}
+### 2. Add Project Instructions (Required)
+
+> **This is the critical step.** Without project instructions, the AI has the tools but won't use them automatically. With them, SpecLock becomes an active guardrail.
+
+Copy-paste the rules below into your platform's project instruction settings:
+
+| Platform | Where to paste |
+|----------|----------------|
+| **Lovable** | Project Settings → Knowledge |
+| **Cursor** | `.cursorrules` file in project root |
+| **Claude Code** | `CLAUDE.md` file in project root |
+| **Windsurf** | `.windsurfrules` file in project root |
+
+**The rules to paste:**
+
+```
+## SpecLock Rules (MANDATORY — follow on every message)
+
+1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST. Read all locks, decisions, and goals before doing anything else. Show a brief summary: "🔒 Memory loaded — X locks, Y decisions."
+
+2. BEFORE WRITING OR MODIFYING ANY CODE: Call speclock_check_conflict with a description of what you're about to change. If a conflict is found with HIGH confidence, STOP and tell me which lock would be violated. Do NOT proceed unless I explicitly say to override it.
+
+3. WHEN I SAY "lock this", "never touch this", "don't ever change this", "this is critical", or similar: Immediately call speclock_add_lock with my exact constraint. Confirm with: "🔒 Locked: [constraint]"
+
+4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call speclock_log_change with a summary of what was built/changed and which files were affected. Also call speclock_add_decision if an architectural choice was made.
+
+5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED: Warn me first: "⚠️ You locked this: [constraint]. Want me to unlock it and proceed?" Only proceed if I confirm.
+
+6. END OF CONVERSATION: Call speclock_session_summary with what was accomplished.
 ```
 
-### 4. Use It
+See [SPECLOCK-INSTRUCTIONS.md](SPECLOCK-INSTRUCTIONS.md) for platform-specific versions and detailed examples.
 
-The AI tool now has access to **19 SpecLock tools**. The key workflow:
+### 3. Start Building
 
-1. **Start session**: AI calls `speclock_session_briefing` — gets full context + what changed
-2. **During work**: AI uses `add_decision`, `log_change`, `check_conflict`, `detect_drift`
-3. **End session**: AI calls `speclock_session_summary` — records what was accomplished
-4. **Next session (any tool)**: Step 1 repeats — full continuity preserved
+That's it. Now when you chat with your AI tool:
+
+1. **Every session starts**: AI auto-loads your project memory — goals, constraints, decisions, history
+2. **During work**: AI auto-captures decisions, logs changes, checks constraints before modifying code
+3. **Constraint protection**: If the AI tries to break something you locked, it stops and warns you
+4. **Every session ends**: AI records what was accomplished
+5. **Next session**: Full continuity — the AI remembers everything from all previous sessions
+
+## How It Works In Practice
+
+### You lock something important:
+```
+You:  "Don't ever touch the auth files"
+AI:   🔒 Locked: "Never modify auth files"
+```
+
+### AI checks before every change:
+```
+You:  "Add social login to the login page"
+AI:   ⚠️ This conflicts with your lock: "Never modify auth files"
+      Should I proceed anyway, or find another approach?
+```
+
+### New session, full memory:
+```
+You:  "Let's keep working on the dashboard"
+AI:   🔒 Memory loaded — 5 locks, 3 decisions, 2 sessions tracked.
+      Last session you added the payment page and locked the auth files.
+      Ready to work on the dashboard.
+```
+
+### You change your mind:
+```
+You:  "Actually, unlock the auth files, I need to change them"
+AI:   You locked: "Never modify auth files". Want me to unlock this?
+You:  "Yes"
+AI:   🔓 Unlocked. Proceeding with auth file changes.
+```
 
 ## MCP Tools (19)
 
