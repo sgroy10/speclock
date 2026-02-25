@@ -1,0 +1,21 @@
+{
+  "manifest_version": "0.2",
+  "name": "speclock",
+  "version": "1.1.0",
+  "description": "AI continuity engine — MCP server + CLI that kills AI amnesia. Maintains project memory, enforces constraints, and detects drift across AI coding sessions.",
+  "author": {
+    "name": "Sandeep Roy (https://github.com/sgroy10)"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "src/mcp/server.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/src/mcp/server.js"
+      ],
+      "env": {}
+    }
+  },
+  "license": "MIT"
+}

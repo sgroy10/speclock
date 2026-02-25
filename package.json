@@ -55,5 +55,8 @@
     "src/",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "devDependencies": {
+    "esbuild": "^0.27.3"
+  }
 }
