@@ -202,6 +202,64 @@
         .sc-user { color: #93c5fd; }
         .sc-ai { color: #4ade80; }
 
+        /* BOLT SHOWCASE */
+        .bolt-showcase {
+            background: linear-gradient(135deg, #fef3c7 0%, #fff7ed 50%, #fee2e2 100%);
+            border-top: 1px solid #fde68a;
+            border-bottom: 1px solid #fde68a;
+            max-width: 100%;
+            padding: 70px calc((100% - 1000px) / 2 + 24px);
+        }
+        .bolt-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: white; border: 1px solid #f59e0b;
+            border-radius: 20px; padding: 6px 16px; margin-bottom: 18px;
+            font-size: 0.78rem; font-weight: 700; color: #d97706;
+        }
+        .bolt-badge .pulse {
+            width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;
+            animation: pulse-anim 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .bolt-showcase h2 {
+            font-size: 2.2rem; font-weight: 800; letter-spacing: -1px;
+            margin-bottom: 12px; color: #1a1d23;
+        }
+        .bolt-showcase .bolt-sub {
+            color: #6b7280; font-size: 1.05rem; margin-bottom: 36px; max-width: 650px;
+        }
+        .bolt-flow {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+        }
+        @media (max-width: 700px) { .bolt-flow { grid-template-columns: 1fr; } }
+        .bolt-step {
+            background: white; border-radius: 14px; padding: 28px;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .bolt-step-num {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .bolt-step h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+        .bolt-step p { font-size: 0.88rem; color: #6b7280; line-height: 1.65; }
+        .bolt-step code {
+            background: var(--code-bg); color: #4ade80; padding: 2px 8px;
+            border-radius: 5px; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+        }
+        .bolt-step .mini-terminal {
+            background: var(--code-bg); border-radius: 8px; padding: 14px 16px;
+            margin-top: 12px; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.73rem; line-height: 1.8; color: var(--code-text);
+        }
+        .bolt-cta {
+            margin-top: 30px; text-align: center; font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .bolt-cta strong { color: #1a1d23; }
+
         /* TOOLS GRID */
         .tools-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -393,6 +451,7 @@
             SpecLock
         </div>
         <div class="nav-links">
+            <a href="#bolt">Bolt.new</a>
             <a href="#demo">Demo</a>
             <a href="#problem">Problem</a>
             <a href="#how-it-works">How It Works</a>
@@ -424,6 +483,45 @@
             <div class="tool-stat"><div class="num">19</div><div class="label">MCP Tools</div></div>
             <div class="tool-stat"><div class="num">8</div><div class="label">Platforms</div></div>
             <div class="tool-stat"><div class="num">0</div><div class="label">Config Needed</div></div>
+        </div>
+    </section>
+
+    <!-- BOLT.NEW SHOWCASE -->
+    <section class="bolt-showcase" id="bolt">
+        <div class="bolt-badge"><div class="pulse"></div> NEW IN v1.3.0</div>
+        <h2>Bolt.new now has memory.</h2>
+        <p class="bolt-sub">Millions of Bolt.new users can now have persistent AI memory across sessions. No MCP needed. No config. Just say <strong>"install speclock"</strong>.</p>
+
+        <div class="bolt-flow">
+            <div class="bolt-step">
+                <div class="bolt-step-num" style="color: var(--blue);">Session 1 &mdash; Setup</div>
+                <h4>Say "install speclock" &mdash; done.</h4>
+                <p>Bolt automatically runs <code>npx speclock setup</code>, reads the generated rules, and starts capturing your project memory.</p>
+                <div class="mini-terminal">
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Install speclock and set up memory for Lumina"</span>
+<span style="color:#64748b;">Bolt:</span> <span style="color:#4ade80;">&#10003; Set goal: "Build B2B Lumina API"</span>
+      <span style="color:#4ade80;">&#10003; Added 6 locks (auth, security, rate limiting...)</span>
+      <span style="color:#4ade80;">&#10003; Recorded 7 decisions (Gemini, Stripe...)</span>
+      <span style="color:#4ade80;">&#10003; Context file generated</span>
+                </div>
+            </div>
+
+            <div class="bolt-step">
+                <div class="bolt-step-num" style="color: var(--green);">Session 2 &mdash; Full Memory</div>
+                <h4>New chat. Everything remembered.</h4>
+                <p>Bolt reads <code>.speclock/context/latest.md</code> and picks up exactly where you left off. All locks, decisions, and history intact.</p>
+                <div class="mini-terminal">
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Create a plan for the API endpoints"</span>
+<span style="color:#64748b;">Bolt:</span> <span style="color:#4ade80;">&#10003; Read project context (6 locks, 7 decisions)</span>
+      <span style="color:#4ade80;">&#10003; Created 10-phase plan respecting ALL constraints</span>
+      <span style="color:#4ade80;">&#10003; All plans use Supabase (locked), Bearer auth (locked)</span>
+      <span style="color:#4ade80;">&#10003; Logged planning phase back to SpecLock</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bolt-cta">
+            <strong>Works on Bolt.new free and paid plans.</strong> Also works with Aider, Rocket.new, and any platform with npm.
         </div>
     </section>
 
@@ -570,7 +668,7 @@
             <button class="platform-tab" onclick="showPlatform('cline')">Cline <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('codex')">Codex <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('boltdiy')">bolt.diy <span class="status live"></span></button>
-            <button class="platform-tab" onclick="showPlatform('boltnew')">Bolt.new <span class="status soon"></span></button>
+            <button class="platform-tab" onclick="showPlatform('boltnew')">Bolt.new <span class="status live"></span></button>
         </div>
 
         <!-- LOVABLE -->
@@ -813,19 +911,31 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
         <div class="platform-content" id="platform-boltnew">
             <div class="install-box">
                 <div class="install-header">
-                    <h3>Bolt.new (StackBlitz)</h3>
-                    <span class="diff-tag diff-medium">Coming Soon</span>
+                    <h3>Bolt.new &mdash; npm File-Based Mode</h3>
+                    <span class="diff-tag diff-easy">Easy &mdash; 1 min</span>
                 </div>
                 <div class="install-steps">
                     <div class="step">
-                        <div class="step-num">&mdash;</div>
+                        <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>MCP Support Incoming</h4>
-                            <p>Bolt.new has MCP on their roadmap. Once live, SpecLock will work. In the meantime, use <strong>bolt.diy</strong> (open-source) or <strong>Lovable</strong> which support MCP today.</p>
+                            <h4>Just tell Bolt to install it</h4>
+                            <p>In any Bolt.new project, type this in the chat:</p>
+                            <div class="code-block">
+Install speclock and set up project memory for my app
+                                <button class="copy-btn" onclick="copyText('Install speclock and set up project memory')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>That's it. Bolt does the rest.</h4>
+                            <p>Bolt will run <code>npx speclock setup</code>, read the generated <strong>SPECLOCK.md</strong> rules file, and start using SpecLock automatically. It will add locks when you say "never/always/don't touch", check constraints before changes, and log what it builds. <strong>No MCP needed. No config. No paste.</strong></p>
                         </div>
                     </div>
                 </div>
             </div>
+            <p style="margin-top:14px; color: var(--text-dim); font-size:0.82rem;">Works on Bolt.new free and paid plans. No MCP support required &mdash; uses npm file-based mode.</p>
         </div>
     </section>
 
@@ -983,9 +1093,9 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                 </tr>
                 <tr>
                     <td class="platform-name">Bolt.new</td>
-                    <td><span class="coming">ROADMAP</span></td>
-                    <td><span class="coming">PLANNED</span></td>
-                    <td>&mdash;</td>
+                    <td><span class="check">&#x2713;</span> npm file-based</td>
+                    <td><span class="check">&#x2713;</span> Ready</td>
+                    <td>No &mdash; reads SPECLOCK.md</td>
                 </tr>
             </tbody>
         </table>
