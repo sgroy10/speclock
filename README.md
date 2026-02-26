@@ -1,6 +1,6 @@
 # SpecLock
 
-**AI Continuity Engine** — The MCP server that kills AI amnesia.
+**AI Continuity Engine** — MCP server + npm package that kills AI amnesia. Works with Lovable, Claude Code, Cursor, Bolt.new, and more.
 
 > Developed by **Sandeep Roy** ([github.com/sgroy10](https://github.com/sgroy10))
 
@@ -94,7 +94,28 @@ The MCP server gives the AI tools for memory and constraint checking. The projec
 
 **Windsurf / Cline / Any MCP tool** — Same pattern as above.
 
-### 2. Add Project Instructions (Required)
+**Bolt.new / Aider / Any platform with npm** (NEW in v1.3.0):
+
+No MCP needed. Just tell the AI:
+
+```
+"Install speclock and set up project memory"
+```
+
+Or run it yourself:
+
+```bash
+npx speclock setup --goal "Build my app"
+```
+
+This creates:
+- `SPECLOCK.md` — AI rules file (the AI reads this automatically)
+- `.speclock/brain.json` — Project memory
+- `.speclock/context/latest.md` — Context file for the AI
+
+**That's it.** The AI reads `SPECLOCK.md`, follows the rules, and uses CLI commands (`npx speclock lock "..."`, `npx speclock check "..."`, etc.) instead of MCP tools. Tested and working on Bolt.new — the AI ran 17 commands automatically on first install.
+
+### 2. Add Project Instructions (Required for MCP platforms)
 
 > **This is the critical step.** Without project instructions, the AI has the tools but won't use them automatically. With them, SpecLock becomes an active guardrail.
 
@@ -202,7 +223,7 @@ AI:   🔓 Unlocked. Proceeding with auth file changes.
 | `speclock_checkpoint` | Create named git tag for rollback |
 | `speclock_repo_status` | Branch, commit, changed files, diff |
 
-### Intelligence (NEW in v1.1)
+### Intelligence
 | Tool | Purpose |
 |------|---------|
 | `speclock_suggest_locks` | AI-powered lock suggestions from patterns |
@@ -262,50 +283,67 @@ Multi-Agent Timeline:
 
 ## CLI Commands
 
-```
+```bash
+# Setup (NEW in v1.3.0)
+speclock setup --goal "Build my app"   Full one-shot setup (init + SPECLOCK.md + context)
+
+# Memory Management
 speclock init                          Initialize SpecLock
 speclock goal <text>                   Set project goal
 speclock lock <text> [--tags a,b]      Add a SpecLock constraint
 speclock lock remove <id>              Remove a lock
 speclock decide <text>                 Record a decision
 speclock note <text>                   Add a note
-speclock facts deploy --provider X     Set deploy facts
+
+# Change Tracking
+speclock log-change <text> --files x   Log a significant change (NEW in v1.3.0)
 speclock context                       Generate and print context pack
+
+# Protection
+speclock check <text>                  Check for lock conflicts (NEW in v1.3.0)
+
+# Other
+speclock facts deploy --provider X     Set deploy facts
 speclock watch                         Start file watcher
 speclock serve [--project <path>]      Start MCP server
 speclock status                        Show brain summary
 ```
 
-## Why MCP?
+## Three Integration Modes
 
-MCP (Model Context Protocol) is the universal integration standard for AI tools. One SpecLock MCP server works with:
+SpecLock works everywhere because it adapts to your platform:
 
-- Claude Code
-- Cursor
-- Windsurf
-- Cline
-- Codex
-- Any MCP-compatible tool
+| Mode | Platforms | How It Works |
+|------|-----------|--------------|
+| **MCP Remote** | Lovable, bolt.diy, Base44 | Connect via URL — no install needed |
+| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 19 tools via MCP |
+| **npm File-Based** | Bolt.new, Aider, Rocket.new | `npx speclock setup` — AI reads SPECLOCK.md + uses CLI |
 
 SpecLock is infrastructure, not a competitor. It makes **every** AI coding tool better.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│            AI Tool (Claude Code, Cursor, etc.)          │
-└────────────────────┬────────────────────────────────────┘
-                     │ MCP Protocol (stdio)
-┌────────────────────▼────────────────────────────────────┐
-│           SpecLock MCP Server (19 tools)                │
-│   Memory | Tracking | Protection | Git | Intelligence   │
-└────────────────────┬────────────────────────────────────┘
-                     │
-              .speclock/
-              ├── brain.json      (structured memory)
-              ├── events.log      (immutable audit trail)
-              ├── patches/        (git diffs per event)
-              └── context/        (generated context packs)
+┌─────────────────────────────────────────────────────┐
+│       AI Tool (Bolt.new, Lovable, Claude Code)       │
+└──────────────┬──────────────────┬────────────────────┘
+               │                  │
+     MCP Protocol          File-Based (npm)
+    (19 tool calls)      (reads SPECLOCK.md +
+                        .speclock/context/latest.md,
+                         runs CLI commands)
+               │                  │
+┌──────────────▼──────────────────▼────────────────────┐
+│              SpecLock Core Engine                      │
+│   Memory | Tracking | Protection | Git | Intelligence │
+└──────────────────────┬───────────────────────────────┘
+                       │
+                .speclock/
+                ├── brain.json         (structured memory)
+                ├── events.log         (immutable audit trail)
+                ├── patches/           (git diffs per event)
+                └── context/
+                    └── latest.md      (human-readable context)
 ```
 
 ## Contributing
@@ -326,4 +364,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-*SpecLock — Because no AI session should ever forget.*
+*SpecLock v1.3.0 — Because no AI session should ever forget.*
