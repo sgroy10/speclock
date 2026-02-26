@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpecLock — AI Remembers. SpecLock Enforces.</title>
     <meta name="description" content="SpecLock is the AI Constraint Engine — memory + enforcement for AI coding tools. The only solution that stops AI from breaking what you locked. Works with Bolt.new, Lovable, Claude Code, Cursor.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:title" content="SpecLock — AI Remembers. SpecLock Enforces.">
+    <meta property="og:description" content="Memory + enforcement for AI coding tools. The only solution that stops AI from breaking what you locked. Works with Bolt.new, Lovable, Claude Code, Cursor. Free &amp; open source.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SpecLock — AI Remembers. SpecLock Enforces.">
+    <meta name="twitter:description" content="Memory + enforcement for AI coding tools. Works with Bolt.new, Lovable, Claude Code, Cursor. Free &amp; open source.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -446,6 +455,41 @@
         footer a { color: var(--text-dim); text-decoration: none; }
         footer a:hover { color: var(--text); }
 
+        /* FOUNDER STORY */
+        .founder-section {
+            background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            max-width: 100%; padding: 70px calc((100% - 1000px) / 2 + 24px);
+        }
+        .founder-quote {
+            background: white; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0;
+            padding: 32px 36px; margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .founder-quote p {
+            font-size: 1.1rem; line-height: 1.8; color: var(--text);
+            font-style: italic;
+        }
+        .founder-quote p strong { font-style: normal; color: var(--accent); }
+        .founder-attribution {
+            display: flex; align-items: center; gap: 14px; margin-top: 16px;
+        }
+        .founder-avatar {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--accent-light);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; font-weight: 800; color: var(--accent);
+        }
+        .founder-name { font-weight: 700; font-size: 0.95rem; }
+        .founder-title { color: var(--text-dim); font-size: 0.82rem; }
+        .founder-badges {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;
+        }
+        .founder-badges a {
+            display: inline-block; text-decoration: none;
+        }
+        .founder-badges img {
+            height: 22px; vertical-align: middle;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             nav { padding: 12px 16px; }
@@ -455,6 +499,10 @@
             .tools-strip { gap: 24px; }
             .section-wrap h2 { font-size: 1.8rem; }
             .compat-table { font-size: 0.78rem; display: block; overflow-x: auto; }
+            .compare-table { font-size: 0.72rem; display: block; overflow-x: auto; }
+            .founder-quote { padding: 24px 20px; }
+            .founder-quote p { font-size: 0.95rem; }
+            .bolt-flow { grid-template-columns: 1fr; }
             .terminal-body { font-size: 0.68rem; padding: 16px; }
             .knowledge-rules { font-size: 0.68rem; }
         }
@@ -493,13 +541,14 @@
             Memory alone isn't enough &mdash; AI tools forget constraints, ignore decisions, and break what works. SpecLock is the <strong>AI Constraint Engine</strong> that gives your AI <strong>memory + active enforcement</strong>.
         </p>
         <div class="hero-cta">
-            <a href="#setup" class="btn-primary">Get Started</a>
-            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">View on GitHub</a>
+            <a href="#bolt" class="btn-primary">Bolt.new Setup</a>
+            <a href="#setup" class="btn-secondary">All Platforms</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary" style="gap:6px; display:inline-flex; align-items:center;">&#x2B50; Star on GitHub</a>
         </div>
         <div class="tools-strip">
             <div class="tool-stat"><div class="num">19</div><div class="label">MCP Tools</div></div>
             <div class="tool-stat"><div class="num">8</div><div class="label">Platforms</div></div>
-            <div class="tool-stat"><div class="num">0</div><div class="label">Config Needed</div></div>
+            <div class="tool-stat"><div class="num">Free</div><div class="label">Open Source</div></div>
         </div>
     </section>
 
@@ -766,18 +815,18 @@
         <p class="subtitle">Choose your platform. Follow the steps. Done.</p>
 
         <div class="platform-tabs">
-            <button class="platform-tab active" onclick="showPlatform('lovable')">Lovable <span class="status live"></span></button>
+            <button class="platform-tab active" onclick="showPlatform('boltnew')">Bolt.new <span class="status live"></span></button>
+            <button class="platform-tab" onclick="showPlatform('lovable')">Lovable <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('claude-code')">Claude Code <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('cursor')">Cursor <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('windsurf')">Windsurf <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('cline')">Cline <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('codex')">Codex <span class="status live"></span></button>
             <button class="platform-tab" onclick="showPlatform('boltdiy')">bolt.diy <span class="status live"></span></button>
-            <button class="platform-tab" onclick="showPlatform('boltnew')">Bolt.new <span class="status live"></span></button>
         </div>
 
         <!-- LOVABLE -->
-        <div class="platform-content active" id="platform-lovable">
+        <div class="platform-content" id="platform-lovable">
             <div class="install-box">
                 <div class="install-header">
                     <h3>Lovable &mdash; Custom MCP Server</h3>
@@ -1013,7 +1062,7 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
         </div>
 
         <!-- BOLT.NEW -->
-        <div class="platform-content" id="platform-boltnew">
+        <div class="platform-content active" id="platform-boltnew">
             <div class="install-box">
                 <div class="install-header">
                     <h3>Bolt.new &mdash; npm File-Based Mode</h3>
@@ -1204,6 +1253,31 @@ Install speclock and set up project memory for my app
                 </tr>
             </tbody>
         </table>
+    </section>
+
+    <!-- FOUNDER STORY -->
+    <section class="founder-section" id="story">
+        <div class="section-label">Why I Built This</div>
+        <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px;">Built from 1 year of AI frustration.</h2>
+
+        <div class="founder-quote">
+            <p>"I spent a year building products with AI coding tools. Every session, my AI forgot what we agreed on. <strong>'Never touch auth'</strong> became 'oops, I rewrote your login flow.' I chose PostgreSQL &mdash; three sessions later, the AI migrated to MongoDB. I built SpecLock because <strong>memory without enforcement is useless</strong>. Other tools remember. SpecLock is the only one that says <strong>NO</strong> when you're about to break something."</p>
+        </div>
+
+        <div class="founder-attribution">
+            <div class="founder-avatar">SR</div>
+            <div>
+                <div class="founder-name">Sandeep Roy</div>
+                <div class="founder-title">Founder &middot; <a href="https://github.com/sgroy10" target="_blank" style="color: var(--blue); text-decoration: none;">github.com/sgroy10</a></div>
+            </div>
+        </div>
+
+        <div class="founder-badges">
+            <a href="https://www.npmjs.com/package/speclock" target="_blank"><img src="https://img.shields.io/npm/v/speclock.svg?label=npm&color=cb3837" alt="npm version"></a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank"><img src="https://img.shields.io/github/stars/sgroy10/speclock?style=social" alt="GitHub stars"></a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank"><img src="https://img.shields.io/npm/dm/speclock.svg?label=downloads&color=brightgreen" alt="npm downloads"></a>
+        </div>
     </section>
 
     <!-- FOOTER CTA -->
