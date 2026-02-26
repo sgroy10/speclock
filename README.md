@@ -1,6 +1,6 @@
 # SpecLock
 
-**AI Continuity Engine** — MCP server + npm package that kills AI amnesia. Works with Lovable, Claude Code, Cursor, Bolt.new, and more.
+**AI Constraint Engine** — Memory + enforcement for AI coding tools. The only solution that makes your AI **respect boundaries**, not just remember things.
 
 > Developed by **Sandeep Roy** ([github.com/sgroy10](https://github.com/sgroy10))
 
@@ -15,90 +15,56 @@
 
 ## The Problem
 
-Every AI coding tool forgets. Every. Single. Session.
+AI tools now have memory. Claude Code has auto-memory. Cursor has Memory Bank. Mem0 exists.
 
-- Claude Code forgets the decisions you made yesterday
-- Cursor forgets the constraints you set last week
-- Codex rebuilds what another agent already built
-- Your AI agent violates rules it agreed to 3 sessions ago
+**But memory without enforcement is dangerous.**
 
-**AI amnesia is the #1 productivity killer in AI-assisted development.**
+- Your AI remembers you use PostgreSQL — then switches to MongoDB because it "seemed better"
+- Your AI remembers your auth setup — then rewrites it while "fixing" a bug
+- Your AI remembers your constraints — then ignores them when they're inconvenient
+- You said "never touch auth files" 3 sessions ago — the AI doesn't care
+
+**Remembering is not the same as respecting.** AI tools need guardrails, not just memory.
 
 ## The Solution
 
-SpecLock maintains a `.speclock/` directory inside your repo that gives every AI agent perfect memory — across sessions, across tools, across time.
+SpecLock adds **active constraint enforcement** on top of persistent memory. When your AI tries to break something you locked, SpecLock **stops it before the damage is done**.
 
 ```
-.speclock/
-├── brain.json         # Structured project memory
-├── events.log         # Append-only event ledger (JSONL)
-├── patches/           # Git diffs captured per event
-└── context/
-    └── latest.md      # Always-fresh context pack for any AI agent
+You:    "Don't ever touch the auth files"
+AI:     🔒 Locked: "Never modify auth files"
+
+... 5 sessions later ...
+
+You:    "Add social login to the login page"
+AI:     ⚠️ CONFLICT: This violates your lock "Never modify auth files"
+        Should I proceed or find another approach?
 ```
 
-**SpecLock = MCP Server + Project Instructions.**
+No other tool does this. Not Claude's native memory. Not Mem0. Not CLAUDE.md files.
 
-The MCP server gives the AI tools for memory and constraint checking. The project instructions force the AI to use them on every action — automatically. Together, they create an active guardrail that prevents AI coding tools from breaking your work.
+## How SpecLock Is Different
 
-**No context is ever lost. No constraints ever violated.**
-
-## Why SpecLock Wins
-
-| Feature | CLAUDE.md / .cursorrules | Chat History | Memory Plugins | **SpecLock** |
-|---------|--------------------------|--------------|----------------|--------------|
-| Structured memory | Static files | Noise-heavy | Generic | **Structured brain.json** |
-| Constraint enforcement | None | None | None | **Active lock checking** |
-| Conflict detection | None | None | None | **Semantic + synonym matching** |
-| Drift detection | None | None | None | **Auto-scan against locks** |
-| Git-aware | No | No | No | **Checkpoints, diffs, reverts** |
-| Multi-agent | No | No | Partial | **Full session timeline** |
-| Auto-suggestions | No | No | No | **AI-powered lock suggestions** |
-| Cross-tool | Tool-specific | Tool-specific | Tool-specific | **Universal MCP** |
+| Feature | Claude Native Memory | Mem0 | CLAUDE.md / .cursorrules | **SpecLock** |
+|---------|---------------------|------|--------------------------|--------------|
+| Remembers context | Yes | Yes | Manual | **Yes** |
+| **Stops the AI from breaking things** | No | No | No | **Yes — active enforcement** |
+| **Semantic conflict detection** | No | No | No | **Yes — synonym + negation analysis** |
+| Works on Bolt.new | No | No | No | **Yes — npm file-based mode** |
+| Works on Lovable | No | No | No | **Yes — MCP remote** |
+| Structured decisions/locks | No | Tags only | Flat text | **Goals, locks, decisions, changes** |
+| Git-aware (checkpoints, rollback) | No | No | No | **Yes** |
+| Drift detection | No | No | No | **Yes — scans changes against locks** |
+| Multi-agent timeline | No | No | No | **Yes** |
+| Cross-platform | Claude only | MCP only | Tool-specific | **Universal (MCP + npm)** |
 
 **Other tools remember. SpecLock enforces.**
 
 ## Quick Start
 
-### 1. Connect SpecLock to Your AI Tool
+### Bolt.new / Aider / Any npm Platform (No MCP Needed)
 
-**Lovable** (no install needed):
-
-1. Go to **Settings → Connectors → Personal connectors → New MCP server**
-2. Enter URL: `https://speclock-mcp-production.up.railway.app/mcp` — No auth
-3. Enable it in your project's prompt box
-
-**Claude Code** — Add to `.claude/settings.json` or `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "speclock": {
-      "command": "npx",
-      "args": ["-y", "speclock", "serve", "--project", "."]
-    }
-  }
-}
-```
-
-**Cursor** — Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "speclock": {
-      "command": "npx",
-      "args": ["-y", "speclock", "serve", "--project", "."]
-    }
-  }
-}
-```
-
-**Windsurf / Cline / Any MCP tool** — Same pattern as above.
-
-**Bolt.new / Aider / Any platform with npm** (NEW in v1.3.0):
-
-No MCP needed. Just tell the AI:
+Just tell the AI:
 
 ```
 "Install speclock and set up project memory"
@@ -110,88 +76,108 @@ Or run it yourself:
 npx speclock setup --goal "Build my app"
 ```
 
-This creates:
-- `SPECLOCK.md` — AI rules file (the AI reads this automatically)
-- `.speclock/brain.json` — Project memory
-- `.speclock/context/latest.md` — Context file for the AI
+**That's it.** The AI reads `SPECLOCK.md`, follows the rules, and uses CLI commands. Tested on Bolt.new — the AI ran 17 commands automatically on first install, setting up goals, locks, and decisions without any configuration.
 
-**That's it.** The AI reads `SPECLOCK.md`, follows the rules, and uses CLI commands (`npx speclock lock "..."`, `npx speclock check "..."`, etc.) instead of MCP tools. Tested and working on Bolt.new — the AI ran 17 commands automatically on first install.
+### Lovable (MCP Remote — No Install)
 
-### 2. Add Project Instructions (Required for MCP platforms)
+1. Go to **Settings → Connectors → Personal connectors → New MCP server**
+2. Enter URL: `https://speclock-mcp-production.up.railway.app/mcp` — No auth
+3. Paste [Project Instructions](#project-instructions) into Knowledge
 
-> **This is the critical step.** Without project instructions, the AI has the tools but won't use them automatically. With them, SpecLock becomes an active guardrail.
+### Claude Code (MCP Local)
 
-Copy-paste the rules below into your platform's project instruction settings:
+Add to `.claude/settings.json` or `.mcp.json`:
 
-| Platform | Where to paste |
-|----------|----------------|
-| **Lovable** | Project Settings → Knowledge |
-| **Cursor** | `.cursorrules` file in project root |
-| **Claude Code** | `CLAUDE.md` file in project root |
-| **Windsurf** | `.windsurfrules` file in project root |
+```json
+{
+  "mcpServers": {
+    "speclock": {
+      "command": "npx",
+      "args": ["-y", "speclock", "serve", "--project", "."]
+    }
+  }
+}
+```
 
-**The rules to paste:**
+### Cursor / Windsurf / Cline
+
+Same MCP config as Claude Code. Add to `.cursor/mcp.json` or equivalent.
+
+### Project Instructions
+
+For MCP platforms, paste these rules into your platform's instruction settings (Lovable Knowledge, .cursorrules, CLAUDE.md, etc.):
 
 ```
 ## SpecLock Rules (MANDATORY — follow on every message)
 
-1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST. Read all locks, decisions, and goals before doing anything else. Show a brief summary: "🔒 Memory loaded — X locks, Y decisions."
-
-2. BEFORE WRITING OR MODIFYING ANY CODE: Call speclock_check_conflict with a description of what you're about to change. If a conflict is found with HIGH confidence, STOP and tell me which lock would be violated. Do NOT proceed unless I explicitly say to override it.
-
-3. WHEN I SAY "lock this", "never touch this", "don't ever change this", "this is critical", or similar: Immediately call speclock_add_lock with my exact constraint. Confirm with: "🔒 Locked: [constraint]"
-
-4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call speclock_log_change with a summary of what was built/changed and which files were affected. Also call speclock_add_decision if an architectural choice was made.
-
-5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED: Warn me first: "⚠️ You locked this: [constraint]. Want me to unlock it and proceed?" Only proceed if I confirm.
-
-6. END OF CONVERSATION: Call speclock_session_summary with what was accomplished.
+1. START: Call speclock_session_briefing FIRST. Show: "🔒 Memory loaded — X locks, Y decisions."
+2. BEFORE CHANGES: Call speclock_check_conflict. If HIGH conflict, STOP and warn.
+3. LOCK: When user says "never/always/don't touch" → call speclock_add_lock immediately.
+4. AFTER FEATURES: Call speclock_log_change with summary + files affected.
+5. UNLOCK: When user wants to change something locked → warn first, only proceed on confirm.
+6. END: Call speclock_session_summary with what was accomplished.
 ```
 
-See [SPECLOCK-INSTRUCTIONS.md](SPECLOCK-INSTRUCTIONS.md) for platform-specific versions and detailed examples.
+See [SPECLOCK-INSTRUCTIONS.md](SPECLOCK-INSTRUCTIONS.md) for platform-specific versions.
 
-### 3. Start Building
+## What It Looks Like In Practice
 
-That's it. Now when you chat with your AI tool:
-
-1. **Every session starts**: AI auto-loads your project memory — goals, constraints, decisions, history
-2. **During work**: AI auto-captures decisions, logs changes, checks constraints before modifying code
-3. **Constraint protection**: If the AI tries to break something you locked, it stops and warns you
-4. **Every session ends**: AI records what was accomplished
-5. **Next session**: Full continuity — the AI remembers everything from all previous sessions
-
-## How It Works In Practice
-
-### You lock something important:
+### Bolt.new — Session 1 (Setup)
 ```
-You:  "Don't ever touch the auth files"
-AI:   🔒 Locked: "Never modify auth files"
+User: "Install speclock and set up memory for my SaaS"
+
+Bolt: ✓ Ran npx speclock setup
+      ✓ Set goal: "Build B2B SaaS API"
+      ✓ Added 6 locks (auth, security, rate limiting...)
+      ✓ Recorded 7 decisions (Supabase, Stripe, Gemini...)
+      ✓ Context file generated — project memory active
 ```
 
-### AI checks before every change:
+### Bolt.new — Session 2 (Full Memory)
 ```
-You:  "Add social login to the login page"
-AI:   ⚠️ This conflicts with your lock: "Never modify auth files"
-      Should I proceed anyway, or find another approach?
+User: "Create a plan for the API endpoints"
+
+Bolt: ✓ Read project context (6 locks, 7 decisions)
+      ✓ Created 10-phase plan respecting ALL constraints
+      ✓ All plans use Supabase (locked), Bearer auth (locked)
+      ✓ Logged planning phase back to SpecLock
 ```
 
-### New session, full memory:
+### Any Platform — Constraint Enforcement
 ```
-You:  "Let's keep working on the dashboard"
-AI:   🔒 Memory loaded — 5 locks, 3 decisions, 2 sessions tracked.
-      Last session you added the payment page and locked the auth files.
-      Ready to work on the dashboard.
+You:    "Add social login to the login page"
+AI:     ⚠️ CONFLICT (HIGH — 100%): Violates lock "Never modify auth files"
+        Reasons:
+        - Direct keyword match: auth
+        - Synonym match: security, authentication
+        - Lock prohibits this action (negation detected)
+
+        Should I proceed or find another approach?
 ```
 
-### You change your mind:
+## Killer Feature: Semantic Conflict Detection
+
+Not just keyword matching. SpecLock uses **synonym expansion** (15 groups), **negation detection**, and **destructive action flagging**:
+
 ```
-You:  "Actually, unlock the auth files, I need to change them"
-AI:   You locked: "Never modify auth files". Want me to unlock this?
-You:  "Yes"
-AI:   🔓 Unlocked. Proceeding with auth file changes.
+Lock:   "No breaking changes to public API"
+Action: "Remove the external endpoints"
+
+Result: [HIGH] Conflict detected (confidence: 85%)
+  - synonym match: remove/delete, external/public, endpoints/api
+  - lock prohibits this action (negation detected)
+  - destructive action against locked constraint
 ```
 
-## MCP Tools (19)
+## Three Integration Modes
+
+| Mode | Platforms | How It Works |
+|------|-----------|--------------|
+| **MCP Remote** | Lovable, bolt.diy, Base44 | Connect via URL — no install needed |
+| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 19 tools via MCP |
+| **npm File-Based** | Bolt.new, Aider, Rocket.new | `npx speclock setup` — AI reads SPECLOCK.md + uses CLI |
+
+## 19 MCP Tools
 
 ### Memory Management
 | Tool | Purpose |
@@ -208,11 +194,11 @@ AI:   🔓 Unlocked. Proceeding with auth file changes.
 ### Change Tracking
 | Tool | Purpose |
 |------|---------|
-| `speclock_log_change` | Manually log a significant change |
+| `speclock_log_change` | Log a significant change |
 | `speclock_get_changes` | Get recent tracked changes |
-| `speclock_get_events` | Get event log (filterable by type/time) |
+| `speclock_get_events` | Get event log (filterable) |
 
-### Continuity Protection
+### Enforcement & Protection
 | Tool | Purpose |
 |------|---------|
 | `speclock_check_conflict` | Check action against locks (semantic matching) |
@@ -232,96 +218,31 @@ AI:   🔓 Unlocked. Proceeding with auth file changes.
 | `speclock_detect_drift` | Scan changes for constraint violations |
 | `speclock_health` | Health score + multi-agent timeline |
 
-## Killer Features
-
-### Semantic Conflict Detection
-
-Not just keyword matching — SpecLock understands synonyms, negation, and destructive intent:
-
-```
-Lock: "No breaking changes to public API"
-
-Action: "remove the external endpoints"
-Result: [HIGH] Conflict detected (confidence: 85%)
-  - synonym match: remove/delete, external/public, endpoints/api
-  - lock prohibits this action (negation detected)
-  - destructive action against locked constraint
-```
-
-### Auto-Lock Suggestions
-
-SpecLock analyzes your decisions and notes for commitment language and suggests constraints:
-
-```
-Decision: "Always use REST for public endpoints"
-→ Suggestion: Promote to lock (contains "always" — strong commitment language)
-
-Project mentions "security" but has no security lock
-→ Suggestion: "No secrets or credentials in source code"
-```
-
-### Drift Detection
-
-Proactively scans recent changes against your locks:
-
-```
-Lock: "No database schema changes without migration"
-Change: "Modified users table schema directly"
-→ [HIGH] Drift detected — review immediately
-```
-
-### Multi-Agent Timeline
-
-Track which AI tools touched your project and what they did:
-
-```
-Health Check — Score: 85/100 (Grade: A)
-
-Multi-Agent Timeline:
-- claude-code: 12 sessions, last active 2026-02-24
-- cursor: 5 sessions, last active 2026-02-23
-- codex: 2 sessions, last active 2026-02-20
-```
-
 ## CLI Commands
 
 ```bash
-# Setup (NEW in v1.3.0)
-speclock setup --goal "Build my app"   Full one-shot setup (init + SPECLOCK.md + context)
+# Setup
+speclock setup --goal "Build my app"   # One-shot: init + rules + context
 
-# Memory Management
-speclock init                          Initialize SpecLock
-speclock goal <text>                   Set project goal
-speclock lock <text> [--tags a,b]      Add a SpecLock constraint
-speclock lock remove <id>              Remove a lock
-speclock decide <text>                 Record a decision
-speclock note <text>                   Add a note
+# Memory
+speclock goal <text>                   # Set project goal
+speclock lock <text> [--tags a,b]      # Add a constraint
+speclock lock remove <id>              # Remove a lock
+speclock decide <text>                 # Record a decision
+speclock note <text>                   # Add a note
 
-# Change Tracking
-speclock log-change <text> --files x   Log a significant change (NEW in v1.3.0)
-speclock context                       Generate and print context pack
+# Tracking
+speclock log-change <text> --files x   # Log a change
+speclock context                       # Regenerate context file
 
-# Protection
-speclock check <text>                  Check for lock conflicts (NEW in v1.3.0)
+# Enforcement
+speclock check <text>                  # Check for lock conflicts
 
 # Other
-speclock facts deploy --provider X     Set deploy facts
-speclock watch                         Start file watcher
-speclock serve [--project <path>]      Start MCP server
-speclock status                        Show brain summary
+speclock status                        # Show brain summary
+speclock serve [--project <path>]      # Start MCP server
+speclock watch                         # Start file watcher
 ```
-
-## Three Integration Modes
-
-SpecLock works everywhere because it adapts to your platform:
-
-| Mode | Platforms | How It Works |
-|------|-----------|--------------|
-| **MCP Remote** | Lovable, bolt.diy, Base44 | Connect via URL — no install needed |
-| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 19 tools via MCP |
-| **npm File-Based** | Bolt.new, Aider, Rocket.new | `npx speclock setup` — AI reads SPECLOCK.md + uses CLI |
-
-SpecLock is infrastructure, not a competitor. It makes **every** AI coding tool better.
 
 ## Architecture
 
@@ -337,7 +258,7 @@ SpecLock is infrastructure, not a competitor. It makes **every** AI coding tool 
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
 │              SpecLock Core Engine                      │
-│   Memory | Tracking | Protection | Git | Intelligence │
+│   Memory | Tracking | Enforcement | Git | Intelligence│
 └──────────────────────┬───────────────────────────────┘
                        │
                 .speclock/
@@ -366,4 +287,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-*SpecLock v1.3.0 — Because no AI session should ever forget.*
+*SpecLock v1.3.1 — Because remembering isn't enough. AI needs to respect boundaries.*

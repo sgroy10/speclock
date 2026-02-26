@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpecLock — Kill AI Amnesia Forever</title>
-    <meta name="description" content="SpecLock is the AI Continuity Engine that maintains project memory across coding sessions. 19 MCP tools. Semantic conflict detection. Works with Lovable, Claude Code, Cursor, Windsurf, Cline, Codex.">
+    <title>SpecLock — AI Remembers. SpecLock Enforces.</title>
+    <meta name="description" content="SpecLock is the AI Constraint Engine — memory + enforcement for AI coding tools. The only solution that stops AI from breaking what you locked. Works with Bolt.new, Lovable, Claude Code, Cursor.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -201,6 +201,23 @@
         }
         .sc-user { color: #93c5fd; }
         .sc-ai { color: #4ade80; }
+
+        /* COMPARISON TABLE */
+        .compare-table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px;
+        }
+        .compare-table th {
+            text-align: left; padding: 12px 14px; background: var(--surface-2);
+            border-bottom: 2px solid var(--border); font-weight: 700; font-size: 0.8rem;
+        }
+        .compare-table td {
+            padding: 10px 14px; border-bottom: 1px solid var(--border);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table .speclock-col { background: #fef2f2; font-weight: 600; }
+        .compare-table th.speclock-col { background: #fecaca; color: var(--accent); }
+        .compare-yes { color: var(--green); font-weight: 600; }
+        .compare-no { color: var(--text-dim); }
 
         /* BOLT SHOWCASE */
         .bolt-showcase {
@@ -453,7 +470,7 @@
         <div class="nav-links">
             <a href="#bolt">Bolt.new</a>
             <a href="#demo">Demo</a>
-            <a href="#problem">Problem</a>
+            <a href="#compare">Compare</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#setup">Setup</a>
             <a href="#instructions">Instructions</a>
@@ -466,14 +483,14 @@
     <section class="hero">
         <div class="badge">
             <span class="dot"></span>
-            LIVE ON SMITHERY &mdash; 19 MCP TOOLS
+            WORKS ON BOLT.NEW, LOVABLE, CLAUDE CODE, CURSOR
         </div>
         <h1>
-            <span class="strike">AI Amnesia</span><br>
-            <span class="red">Killed.</span>
+            AI Remembers.<br>
+            <span class="red">SpecLock Enforces.</span>
         </h1>
         <p class="hero-sub">
-            SpecLock is the <strong>AI Continuity Engine</strong> that remembers your project across sessions and <strong>actively prevents</strong> your AI from breaking what works.
+            Memory alone isn't enough &mdash; AI tools forget constraints, ignore decisions, and break what works. SpecLock is the <strong>AI Constraint Engine</strong> that gives your AI <strong>memory + active enforcement</strong>.
         </p>
         <div class="hero-cta">
             <a href="#setup" class="btn-primary">Get Started</a>
@@ -489,8 +506,8 @@
     <!-- BOLT.NEW SHOWCASE -->
     <section class="bolt-showcase" id="bolt">
         <div class="bolt-badge"><div class="pulse"></div> NEW IN v1.3.0</div>
-        <h2>Bolt.new now has memory.</h2>
-        <p class="bolt-sub">Millions of Bolt.new users can now have persistent AI memory across sessions. No MCP needed. No config. Just say <strong>"install speclock"</strong>.</p>
+        <h2>Bolt.new now has memory + guardrails.</h2>
+        <p class="bolt-sub">Millions of Bolt.new users have zero memory and zero protection between sessions. SpecLock gives Bolt persistent memory <strong>and</strong> active constraint enforcement. No MCP needed. Just say <strong>"install speclock"</strong>.</p>
 
         <div class="bolt-flow">
             <div class="bolt-step">
@@ -529,7 +546,7 @@
     <section class="section-wrap" id="demo">
         <div class="section-label">Live Demo</div>
         <h2>See it in action</h2>
-        <p class="subtitle">This is what SpecLock does across two sessions. The AI remembers everything.</p>
+        <p class="subtitle">Memory + enforcement in action. The AI remembers your constraints and <strong>actively blocks violations</strong>.</p>
 
         <div class="demo-terminal">
             <div class="terminal-header">
@@ -570,43 +587,131 @@
     <!-- PROBLEM -->
     <section class="section-wrap" id="problem" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
         <div class="section-label">The Problem</div>
-        <h2>Every AI tool forgets. Every. Single. Session.</h2>
+        <h2>Memory without enforcement is dangerous.</h2>
+        <p class="subtitle">Some AI tools now have memory. But remembering is not the same as respecting.</p>
         <div class="amnesia-grid">
             <div class="amnesia-card">
-                <div class="emoji">&#x1F9E0;</div>
-                <h3>Context Window Resets</h3>
-                <p>Start a new chat and the AI has zero memory of what you built yesterday.</p>
-            </div>
-            <div class="amnesia-card">
                 <div class="emoji">&#x1F4A5;</div>
-                <h3>Features Get Broken</h3>
-                <p>The AI "fixes" something and accidentally destroys a feature you spent hours on.</p>
-            </div>
-            <div class="amnesia-card">
-                <div class="emoji">&#x1F501;</div>
-                <h3>Endless Re-Explaining</h3>
-                <p>"As I mentioned before..." — you waste 30% of prompts just re-telling the AI what it should already know.</p>
-            </div>
-            <div class="amnesia-card">
-                <div class="emoji">&#x1F6AB;</div>
-                <h3>Constraints Violated</h3>
-                <p>You said "don't touch auth" three sessions ago. The AI doesn't remember and rewrites your login flow.</p>
+                <h3>AI Breaks What You Locked</h3>
+                <p>You said "never touch auth files." The AI remembers &mdash; and rewrites them anyway while "fixing a bug."</p>
             </div>
             <div class="amnesia-card">
                 <div class="emoji">&#x1F504;</div>
-                <h3>Decisions Forgotten</h3>
-                <p>You chose PostgreSQL in session 2. Session 5 suggests MongoDB. Session 8 switches to Firebase.</p>
+                <h3>Decisions Get Overridden</h3>
+                <p>You chose PostgreSQL. Three sessions later, the AI switches to MongoDB because it "seemed better."</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1F6AB;</div>
+                <h3>No Constraint Enforcement</h3>
+                <p>Claude's native memory, Mem0, CLAUDE.md &mdash; none of them <strong>stop</strong> the AI when it's about to violate a rule.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1F9E0;</div>
+                <h3>Bolt.new Has Nothing</h3>
+                <p>Millions of vibe coders on Bolt.new have zero memory and zero protection between sessions. Every chat starts from scratch.</p>
             </div>
             <div class="amnesia-card">
                 <div class="emoji">&#x1F916;</div>
                 <h3>Multi-Agent Chaos</h3>
-                <p>Agent A builds feature X. Agent B has no idea and builds a conflicting feature Y.</p>
+                <p>Agent A locks the API. Agent B doesn't know and rewrites it. No tool tracks constraints across agents &mdash; except SpecLock.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1F501;</div>
+                <h3>Passive Memory = False Safety</h3>
+                <p>Your AI "remembers" your rules in a text file. But when the context is long, it ignores them. You need active enforcement, not passive notes.</p>
             </div>
         </div>
     </section>
 
+    <!-- WHY NOT NATIVE MEMORY -->
+    <section class="section-wrap" id="compare">
+        <div class="section-label">Why SpecLock</div>
+        <h2>How SpecLock compares to alternatives</h2>
+        <p class="subtitle">Memory tools exist. But none of them enforce constraints or work on Bolt.new.</p>
+
+        <div style="overflow-x: auto;">
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Claude Native Memory</th>
+                    <th>Mem0</th>
+                    <th>CLAUDE.md / .cursorrules</th>
+                    <th class="speclock-col">SpecLock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Stops AI from breaking locks</strong></td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="speclock-col compare-yes">Yes &mdash; active enforcement</td>
+                </tr>
+                <tr>
+                    <td><strong>Semantic conflict detection</strong></td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="speclock-col compare-yes">Yes &mdash; synonyms + negation</td>
+                </tr>
+                <tr>
+                    <td><strong>Works on Bolt.new</strong></td>
+                    <td class="compare-no">No (Claude only)</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="speclock-col compare-yes">Yes &mdash; npm file-based</td>
+                </tr>
+                <tr>
+                    <td><strong>Works on Lovable</strong></td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="speclock-col compare-yes">Yes &mdash; MCP remote</td>
+                </tr>
+                <tr>
+                    <td>Remembers context</td>
+                    <td class="compare-yes">Yes</td>
+                    <td class="compare-yes">Yes</td>
+                    <td class="compare-no">Manual</td>
+                    <td class="speclock-col compare-yes">Yes</td>
+                </tr>
+                <tr>
+                    <td>Structured decisions/locks</td>
+                    <td class="compare-no">Flat text</td>
+                    <td class="compare-no">Tags only</td>
+                    <td class="compare-no">Flat text</td>
+                    <td class="speclock-col compare-yes">Goals, locks, decisions</td>
+                </tr>
+                <tr>
+                    <td>Git-aware (checkpoints)</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="compare-no">No</td>
+                    <td class="speclock-col compare-yes">Yes</td>
+                </tr>
+                <tr>
+                    <td>Cross-platform</td>
+                    <td class="compare-no">Claude only</td>
+                    <td class="compare-no">MCP only</td>
+                    <td class="compare-no">Tool-specific</td>
+                    <td class="speclock-col compare-yes">MCP + npm (universal)</td>
+                </tr>
+                <tr>
+                    <td>Price</td>
+                    <td>Free (Claude only)</td>
+                    <td>Free tier / $249/mo</td>
+                    <td>Free (manual)</td>
+                    <td class="speclock-col"><strong>Free &amp; open source</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <p style="margin-top: 20px; text-align: center; color: var(--text-dim); font-size: 0.88rem;"><strong style="color: var(--accent);">Other tools remember. SpecLock enforces.</strong></p>
+    </section>
+
     <!-- HOW IT WORKS -->
-    <section class="section-wrap" id="how-it-works">
+    <section class="section-wrap" id="how-it-works" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
         <div class="section-label">How It Works</div>
         <h2>SpecLock in real life</h2>
         <p class="subtitle">Connect once. The AI handles everything automatically. Here's what happens:</p>
@@ -1104,8 +1209,8 @@ Install speclock and set up project memory for my app
     <!-- FOOTER CTA -->
     <section class="footer-cta">
         <div class="section-label">Get Started</div>
-        <h2>Your AI's memory starts now.</h2>
-        <p>Stop re-explaining. Start building. SpecLock remembers everything.</p>
+        <h2>Give your AI memory that enforces.</h2>
+        <p>Remembering isn't enough. SpecLock makes your AI respect boundaries. Free &amp; open source.</p>
         <div class="cta-buttons">
             <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">
                 Get SpecLock on Smithery
@@ -1120,7 +1225,7 @@ Install speclock and set up project memory for my app
     </section>
 
     <footer>
-        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock &mdash; AI Continuity Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock &mdash; AI Constraint Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
     </footer>
 
     <script>
