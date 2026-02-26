@@ -5,28 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpecLock — Kill AI Amnesia Forever</title>
     <meta name="description" content="SpecLock is the AI Continuity Engine that maintains project memory across coding sessions. 19 MCP tools. Semantic conflict detection. Works with Lovable, Claude Code, Cursor, Windsurf, Cline, Codex.">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0f;
-            --surface: #12121a;
-            --surface-2: #1a1a26;
-            --border: #2a2a3a;
-            --text: #e8e8f0;
-            --text-dim: #8888a0;
-            --accent: #ff4d4d;
-            --accent-glow: #ff4d4d40;
-            --green: #00e676;
-            --green-glow: #00e67640;
-            --blue: #448aff;
-            --yellow: #ffd740;
-            --purple: #b388ff;
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #e53e3e;
+            --accent-light: #fee2e2;
+            --accent-glow: rgba(229, 62, 62, 0.12);
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --yellow: #d97706;
+            --yellow-light: #fef3c7;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
@@ -35,306 +41,332 @@
 
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Grid background */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(var(--border) 1px, transparent 1px),
-                linear-gradient(90deg, var(--border) 1px, transparent 1px);
-            background-size: 60px 60px;
-            opacity: 0.08;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Glow orbs */
-        .glow-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(120px);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .glow-orb.red { width: 500px; height: 500px; background: var(--accent); opacity: 0.06; top: -100px; right: -100px; }
-        .glow-orb.green { width: 400px; height: 400px; background: var(--green); opacity: 0.04; bottom: 20%; left: -100px; }
-
         section { position: relative; z-index: 1; }
 
         /* NAV */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            padding: 16px 40px;
+            padding: 14px 40px;
             display: flex; align-items: center; justify-content: space-between;
-            background: rgba(10, 10, 15, 0.85);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
         }
         .nav-logo {
             display: flex; align-items: center; gap: 10px;
-            font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
         }
         .nav-logo .lock-icon {
-            width: 32px; height: 32px; background: var(--accent);
+            width: 30px; height: 30px; background: var(--accent);
             border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: white;
+            font-size: 14px; color: white;
         }
-        .nav-links { display: flex; gap: 32px; align-items: center; }
-        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
         .nav-links a:hover { color: var(--text); }
-        .btn-smithery {
-            background: var(--accent); color: white; padding: 8px 20px;
+        .btn-nav-cta {
+            background: var(--accent); color: white; padding: 8px 18px;
             border-radius: 8px; text-decoration: none; font-weight: 600;
             font-size: 0.85rem; transition: all 0.2s; border: none; cursor: pointer;
         }
-        .btn-smithery:hover { background: #ff6666; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+        .btn-nav-cta:hover { background: #c53030; }
 
         /* HERO */
         .hero {
-            min-height: 100vh; display: flex; flex-direction: column;
+            min-height: 90vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; text-align: center;
-            padding: 120px 24px 80px;
+            padding: 120px 24px 60px;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
         }
         .badge {
             display: inline-flex; align-items: center; gap: 8px;
-            background: var(--surface-2); border: 1px solid var(--border);
-            padding: 6px 16px; border-radius: 100px; font-size: 0.8rem;
-            color: var(--green); margin-bottom: 32px;
-            font-family: 'JetBrains Mono', monospace;
+            background: var(--green-light); border: 1px solid #bbf7d0;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--green); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
         }
         .badge .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
         h1 {
-            font-size: clamp(3rem, 8vw, 6rem); font-weight: 900;
-            line-height: 1.05; letter-spacing: -2px; max-width: 900px;
-            margin-bottom: 24px;
+            font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 900;
+            line-height: 1.08; letter-spacing: -2px; max-width: 800px;
+            margin-bottom: 20px;
         }
-        h1 .strike { text-decoration: line-through; color: var(--text-dim); opacity: 0.4; }
+        h1 .strike { text-decoration: line-through; color: var(--text-dim); opacity: 0.35; }
         h1 .red { color: var(--accent); }
 
         .hero-sub {
-            font-size: 1.2rem; color: var(--text-dim); max-width: 620px;
-            line-height: 1.7; margin-bottom: 48px; font-weight: 300;
+            font-size: 1.15rem; color: var(--text-dim); max-width: 600px;
+            line-height: 1.7; margin-bottom: 40px; font-weight: 400;
         }
-        .hero-sub strong { color: var(--text); font-weight: 500; }
+        .hero-sub strong { color: var(--text); font-weight: 600; }
 
-        .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+        .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
         .btn-primary {
-            background: var(--accent); color: white; padding: 14px 32px;
-            border-radius: 12px; text-decoration: none; font-weight: 700;
-            font-size: 1rem; transition: all 0.2s; border: none; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--accent); color: white; padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 700;
+            font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer;
         }
-        .btn-primary:hover { background: #ff6666; transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .btn-primary:hover { background: #c53030; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
         .btn-secondary {
-            background: var(--surface-2); color: var(--text); padding: 14px 32px;
-            border-radius: 12px; text-decoration: none; font-weight: 600;
-            font-size: 1rem; border: 1px solid var(--border); transition: all 0.2s;
-            display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+            background: white; color: var(--text); padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 600;
+            font-size: 0.95rem; border: 1px solid var(--border); transition: all 0.2s;
+            cursor: pointer;
         }
-        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
 
-        /* TOOLS COUNTER */
+        /* STATS */
         .tools-strip {
-            margin-top: 64px; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+            margin-top: 50px; display: flex; gap: 48px; flex-wrap: wrap; justify-content: center;
         }
         .tool-stat { text-align: center; }
-        .tool-stat .num { font-size: 2.5rem; font-weight: 800; color: var(--accent); }
-        .tool-stat .label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .tool-stat .num { font-size: 2.2rem; font-weight: 800; color: var(--accent); }
+        .tool-stat .label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* SECTION COMMON */
+        .section-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: 600;
+        }
+        .section-wrap {
+            padding: 80px 24px; max-width: 1000px; margin: 0 auto;
+        }
+        .section-wrap h2 {
+            font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;
+        }
+        .section-wrap .subtitle {
+            color: var(--text-dim); font-size: 1.05rem; margin-bottom: 40px; max-width: 650px;
+        }
 
         /* LIVE DEMO */
-        .demo {
-            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
-        }
-        .demo h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
-        .demo .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 700px; }
-
         .demo-terminal {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 16px; overflow: hidden;
+            background: var(--code-bg); border-radius: 14px; overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
         .terminal-header {
-            display: flex; gap: 8px; padding: 14px 18px;
-            background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
+            display: flex; gap: 8px; padding: 12px 16px;
+            background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
         .terminal-dot.r { background: #FF5F57; }
         .terminal-dot.y { background: #FFBD2E; }
         .terminal-dot.g { background: #28CA41; }
         .terminal-body {
-            padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-            line-height: 1.9; overflow-x: auto;
+            padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            line-height: 1.9; overflow-x: auto; color: var(--code-text);
         }
-        .t-comment { color: var(--text-dim); }
-        .t-cmd { color: var(--green); }
-        .t-lock { color: var(--yellow); }
-        .t-blocked { color: var(--accent); font-weight: 600; }
-        .t-ok { color: var(--green); font-weight: 600; }
-        .t-dim { color: var(--text-dim); }
+        .t-comment { color: #64748b; }
+        .t-cmd { color: #4ade80; }
+        .t-lock { color: #fbbf24; }
+        .t-blocked { color: #f87171; font-weight: 600; }
+        .t-ok { color: #4ade80; font-weight: 600; }
+        .t-dim { color: #64748b; }
 
-        /* PROBLEM SECTION */
-        .problem {
-            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
-        }
-        .section-label {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
-            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
-            margin-bottom: 16px;
-        }
-        .problem h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 48px; max-width: 700px; }
-
+        /* PROBLEM GRID */
         .amnesia-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2px; background: var(--border); border-radius: 16px; overflow: hidden;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
         }
-        .amnesia-card { background: var(--surface); padding: 32px; }
-        .amnesia-card .emoji { font-size: 2rem; margin-bottom: 12px; }
-        .amnesia-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .amnesia-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
-
-        /* TOOLS SECTION */
-        .tools-section {
-            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        .amnesia-card {
+            background: white; padding: 28px; border-radius: 12px;
+            border: 1px solid var(--border); transition: all 0.2s;
         }
-        .tools-section h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
-        .tools-section .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 600px; }
+        .amnesia-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px var(--accent-glow); }
+        .amnesia-card .emoji { font-size: 1.8rem; margin-bottom: 10px; }
+        .amnesia-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+        .amnesia-card p { color: var(--text-dim); font-size: 0.88rem; line-height: 1.6; }
 
+        /* HOW IT WORKS */
+        .scenario-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .scenario-card {
+            background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+            transition: all 0.2s;
+        }
+        .scenario-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .scenario-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;
+        }
+        .scenario-card h4 { margin-bottom: 12px; font-size: 1rem; }
+        .scenario-code {
+            background: var(--code-bg); border-radius: 8px; padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;
+            line-height: 1.8; color: var(--code-text);
+        }
+        .sc-user { color: #93c5fd; }
+        .sc-ai { color: #4ade80; }
+
+        /* TOOLS GRID */
         .tools-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 10px;
         }
         .tool-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 12px; padding: 20px; transition: all 0.2s;
+            background: white; border: 1px solid var(--border);
+            border-radius: 10px; padding: 18px; transition: all 0.2s;
         }
-        .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .tool-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
         .tool-card .tool-cat {
-            font-size: 0.65rem; color: var(--accent); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-bottom: 4px; font-weight: 600;
+            font-size: 0.62rem; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 3px; font-weight: 700;
         }
         .tool-card .tool-name {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
-            color: var(--green); margin-bottom: 6px; font-weight: 600;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+            color: var(--blue); margin-bottom: 4px; font-weight: 600;
         }
-        .tool-card .tool-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+        .tool-card .tool-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
 
-        /* INTEGRATION SECTION */
-        .integrations {
-            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
-        }
-        .integrations h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
-        .integrations .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 48px; max-width: 700px; }
-
+        /* SETUP / INTEGRATIONS */
         .platform-tabs {
-            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px;
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
         }
         .platform-tab {
-            padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border);
-            background: var(--surface); color: var(--text-dim); cursor: pointer;
-            font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
-            font-family: 'Outfit', sans-serif;
+            padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border);
+            background: white; color: var(--text-dim); cursor: pointer;
+            font-size: 0.88rem; font-weight: 600; transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
         }
         .platform-tab.active, .platform-tab:hover {
-            border-color: var(--accent); color: var(--text); background: var(--surface-2);
+            border-color: var(--accent); color: var(--text); background: var(--accent-light);
         }
         .platform-tab .status {
-            display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px;
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-left: 5px;
         }
         .platform-tab .status.live { background: var(--green); }
         .platform-tab .status.soon { background: var(--yellow); }
-        .platform-tab .status.manual { background: var(--blue); }
 
         .platform-content { display: none; }
         .platform-content.active { display: block; }
 
         .install-box {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 16px; overflow: hidden;
+            background: white; border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden;
         }
         .install-header {
-            padding: 20px 24px; border-bottom: 1px solid var(--border);
+            padding: 18px 24px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface);
         }
-        .install-header h3 { font-size: 1.1rem; font-weight: 700; }
+        .install-header h3 { font-size: 1.05rem; font-weight: 700; }
         .install-header .diff-tag {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
             padding: 4px 10px; border-radius: 6px; font-weight: 600;
         }
-        .diff-easy { background: #00e67620; color: var(--green); }
-        .diff-medium { background: #ffd74020; color: var(--yellow); }
+        .diff-easy { background: var(--green-light); color: var(--green); }
+        .diff-medium { background: var(--yellow-light); color: var(--yellow); }
 
         .install-steps { padding: 24px; }
-        .step { display: flex; gap: 16px; margin-bottom: 24px; }
+        .step { display: flex; gap: 14px; margin-bottom: 22px; }
         .step:last-child { margin-bottom: 0; }
         .step-num {
-            width: 28px; height: 28px; min-width: 28px;
+            width: 26px; height: 26px; min-width: 26px;
             background: var(--accent); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700; color: white;
+            font-size: 0.75rem; font-weight: 700; color: white; margin-top: 2px;
         }
-        .step-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+        .step-content h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
         .step-content p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+        .step-content a { color: var(--accent); }
 
         .code-block {
-            background: #0d0d14; border: 1px solid var(--border);
-            border-radius: 10px; padding: 16px 20px; margin-top: 10px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
-            color: var(--green); overflow-x: auto; line-height: 1.8;
+            background: var(--code-bg); border-radius: 8px; padding: 14px 18px; margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+            color: var(--code-text); overflow-x: auto; line-height: 1.8;
             position: relative;
         }
-        .code-block .comment { color: var(--text-dim); }
-        .code-block .string { color: var(--yellow); }
-        .code-block .key { color: var(--blue); }
+        .code-block .string { color: #fbbf24; }
+        .code-block .key { color: #93c5fd; }
 
         .copy-btn {
-            position: absolute; top: 10px; right: 10px;
-            background: var(--surface-2); border: 1px solid var(--border);
-            color: var(--text-dim); padding: 4px 10px; border-radius: 6px;
-            font-size: 0.7rem; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+            position: absolute; top: 8px; right: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            color: #94a3b8; padding: 4px 10px; border-radius: 5px;
+            font-size: 0.68rem; cursor: pointer; font-family: 'JetBrains Mono', monospace;
             transition: all 0.2s;
         }
-        .copy-btn:hover { color: var(--text); border-color: var(--text-dim); }
+        .copy-btn:hover { color: #e2e8f0; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); }
 
-        /* COMPATIBILITY TABLE */
-        .compat-section {
-            padding: 100px 24px; max-width: 1100px; margin: 0 auto;
+        /* KNOWLEDGE INSTRUCTIONS */
+        .knowledge-section {
+            background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
         }
-        .compat-section h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 48px; }
+        .knowledge-box {
+            background: white; border: 2px solid var(--accent); border-radius: 14px;
+            overflow: hidden;
+        }
+        .knowledge-header {
+            padding: 18px 24px; background: var(--accent-light);
+            border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .knowledge-header h3 { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+        .knowledge-body { padding: 24px; }
+        .knowledge-body .where-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.88rem;
+        }
+        .knowledge-body .where-table th {
+            text-align: left; padding: 10px 14px; background: var(--surface);
+            border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim);
+        }
+        .knowledge-body .where-table td {
+            padding: 10px 14px; border-bottom: 1px solid var(--border);
+        }
+        .knowledge-body .where-table tr:last-child td { border-bottom: none; }
+        .knowledge-rules {
+            background: var(--code-bg); border-radius: 10px; padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;
+            color: var(--code-text); line-height: 1.9; position: relative;
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+        .rules-copy-btn {
+            position: absolute; top: 12px; right: 12px;
+            background: var(--accent); border: none;
+            color: white; padding: 8px 18px; border-radius: 8px;
+            font-size: 0.78rem; cursor: pointer; font-family: 'Inter', sans-serif;
+            font-weight: 600; transition: all 0.2s;
+        }
+        .rules-copy-btn:hover { background: #c53030; }
 
+        /* COMPAT TABLE */
         .compat-table {
             width: 100%; border-collapse: collapse;
-            background: var(--surface); border-radius: 16px; overflow: hidden;
+            background: white; border-radius: 14px; overflow: hidden;
             border: 1px solid var(--border);
         }
         .compat-table th {
-            padding: 16px 20px; text-align: left; font-size: 0.8rem;
+            padding: 14px 18px; text-align: left; font-size: 0.75rem;
             text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim);
-            background: var(--surface-2); border-bottom: 1px solid var(--border);
+            background: var(--surface); border-bottom: 1px solid var(--border);
         }
         .compat-table td {
-            padding: 14px 20px; border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+            padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 0.88rem;
         }
         .compat-table tr:last-child td { border-bottom: none; }
         .compat-table .platform-name { font-weight: 600; }
-        .compat-table .check { color: var(--green); font-size: 1.2rem; }
+        .compat-table .check { color: var(--green); font-size: 1.1rem; }
         .compat-table .cross { color: var(--text-dim); opacity: 0.3; }
-        .compat-table .coming { color: var(--yellow); font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .compat-table .coming { color: var(--yellow); font-size: 0.72rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
         .compat-table .audience { font-size: 0.8rem; color: var(--text-dim); }
 
         /* FOOTER CTA */
         .footer-cta {
-            padding: 100px 24px; text-align: center;
+            padding: 80px 24px; text-align: center;
+            background: linear-gradient(180deg, var(--surface) 0%, #fff 100%);
         }
-        .footer-cta h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
-        .footer-cta p { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 40px; }
-        .footer-cta .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .footer-cta h2 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+        .footer-cta p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 36px; }
+        .footer-cta .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         footer {
-            padding: 40px 24px; text-align: center; border-top: 1px solid var(--border);
-            color: var(--text-dim); font-size: 0.8rem;
+            padding: 32px 24px; text-align: center; border-top: 1px solid var(--border);
+            color: var(--text-dim); font-size: 0.78rem;
         }
         footer a { color: var(--text-dim); text-decoration: none; }
         footer a:hover { color: var(--text); }
@@ -343,35 +375,31 @@
         @media (max-width: 768px) {
             nav { padding: 12px 16px; }
             .nav-links { display: none; }
-            h1 { font-size: 2.5rem; letter-spacing: -1px; }
+            h1 { font-size: 2.2rem; letter-spacing: -1px; }
             .hero-sub { font-size: 1rem; }
             .tools-strip { gap: 24px; }
-            .problem h2, .demo h2, .tools-section h2, .integrations h2, .compat-section h2, .footer-cta h2 {
-                font-size: 2rem;
-            }
-            .compat-table { font-size: 0.8rem; display: block; overflow-x: auto; }
-            .terminal-body { font-size: 0.7rem; padding: 16px; }
+            .section-wrap h2 { font-size: 1.8rem; }
+            .compat-table { font-size: 0.78rem; display: block; overflow-x: auto; }
+            .terminal-body { font-size: 0.68rem; padding: 16px; }
+            .knowledge-rules { font-size: 0.68rem; }
         }
     </style>
 </head>
 <body>
-    <div class="glow-orb red"></div>
-    <div class="glow-orb green"></div>
 
-    <!-- NAV -->
     <nav>
         <div class="nav-logo">
-            <div class="lock-icon">&#x1f512;</div>
+            <div class="lock-icon">&#x1F512;</div>
             SpecLock
         </div>
         <div class="nav-links">
-            <a href="#demo">Live Demo</a>
+            <a href="#demo">Demo</a>
             <a href="#problem">Problem</a>
-            <a href="#tools">19 Tools</a>
-            <a href="#connect">Setup</a>
             <a href="#how-it-works">How It Works</a>
+            <a href="#setup">Setup</a>
+            <a href="#instructions">Instructions</a>
             <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
-            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-smithery">Get on Smithery</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-nav-cta">Get on Smithery</a>
         </div>
     </nav>
 
@@ -387,37 +415,23 @@
         </h1>
         <p class="hero-sub">
             SpecLock is the <strong>AI Continuity Engine</strong> that remembers your project across sessions and <strong>actively prevents</strong> your AI from breaking what works.
-            MCP server for memory + project instructions for enforcement = your AI never forgets and never violates your constraints.
         </p>
         <div class="hero-cta">
-            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">
-                Install from Smithery
-            </a>
-            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">
-                View on GitHub
-            </a>
+            <a href="#setup" class="btn-primary">Get Started</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">View on GitHub</a>
         </div>
         <div class="tools-strip">
-            <div class="tool-stat">
-                <div class="num">19</div>
-                <div class="label">MCP Tools</div>
-            </div>
-            <div class="tool-stat">
-                <div class="num">6+</div>
-                <div class="label">Platforms</div>
-            </div>
-            <div class="tool-stat">
-                <div class="num">0</div>
-                <div class="label">Context Lost</div>
-            </div>
+            <div class="tool-stat"><div class="num">19</div><div class="label">MCP Tools</div></div>
+            <div class="tool-stat"><div class="num">8</div><div class="label">Platforms</div></div>
+            <div class="tool-stat"><div class="num">0</div><div class="label">Config Needed</div></div>
         </div>
     </section>
 
     <!-- LIVE DEMO -->
-    <section class="demo" id="demo">
-        <div class="section-label">Live Test</div>
-        <h2>4 locks set. 4 violations attempted. 4 blocked.</h2>
-        <p class="subtitle">A real test on a client jewelry wholesale project. SpecLock caught every constraint violation before any code was changed.</p>
+    <section class="section-wrap" id="demo">
+        <div class="section-label">Live Demo</div>
+        <h2>See it in action</h2>
+        <p class="subtitle">This is what SpecLock does across two sessions. The AI remembers everything.</p>
 
         <div class="demo-terminal">
             <div class="terminal-header">
@@ -426,179 +440,127 @@
                 <div class="terminal-dot g"></div>
             </div>
             <div class="terminal-body">
-                <div class="t-comment"># Session 1: Developer sets project constraints</div>
-                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Colors: Gold #C5A572, Black #1A1A1A only. NO bright colors, NO neon."</span></div>
-                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Tagline: Crafted in Guangzhou. Trusted Worldwide. Do NOT change."</span></div>
-                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"Contact must include WeChat QR + WhatsApp + Alibaba."</span></div>
-                <div><span class="t-cmd">$ speclock add_lock</span> <span class="t-lock">"All prices in USD. This is B2B wholesale, NOT retail."</span></div>
-                <br>
-                <div class="t-comment"># Session 2: Context compacted. New AI session. Client requests changes.</div>
-                <div class="t-comment"># SpecLock session_briefing loads all locks automatically.</div>
-                <br>
-                <div class="t-dim">Checking: "Add blue gradient and neon green accent buttons"</div>
-                <div class="t-blocked">BLOCKED [HIGH 100%] Violates: NO bright colors, NO neon, NO blue/green</div>
-                <br>
-                <div class="t-dim">Checking: "Change the tagline to something more modern"</div>
-                <div class="t-blocked">BLOCKED [HIGH 100%] Synonym match: change/modify/alter/rewrite</div>
-                <br>
-                <div class="t-dim">Checking: "Remove WeChat from the contact section"</div>
-                <div class="t-blocked">BLOCKED [HIGH 100%] Destructive action against locked constraint</div>
-                <br>
-                <div class="t-dim">Checking: "Convert all prices from USD to CNY"</div>
-                <div class="t-blocked">BLOCKED [HIGH 100%] Violates: All prices in USD</div>
-                <br>
-                <div class="t-ok">Result: 4/4 violations caught. Zero damage to codebase.</div>
+<span class="t-comment"># Session 1 — Setting up the project</span>
+<span class="t-dim">$</span> <span class="t-cmd">speclock_session_briefing</span>
+<span class="t-ok">&gt; Project memory active. No previous context found.</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">speclock_set_goal</span> <span class="t-dim">"Build a SaaS dashboard with Stripe billing"</span>
+<span class="t-ok">&gt; Goal set.</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">speclock_add_lock</span> <span class="t-dim">"Never modify auth files without permission"</span>
+<span class="t-lock">&gt; &#x1F512; Locked: "Never modify auth files without permission"</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">speclock_add_decision</span> <span class="t-dim">"Use Supabase for auth, Stripe for payments"</span>
+<span class="t-ok">&gt; Decision recorded.</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">speclock_session_summary</span> <span class="t-dim">"Set up project structure and core constraints"</span>
+<span class="t-ok">&gt; Session saved. 1 lock, 1 decision tracked.</span>
+
+<span class="t-comment"># Session 2 — AI remembers everything</span>
+<span class="t-dim">$</span> <span class="t-cmd">speclock_session_briefing</span>
+<span class="t-ok">&gt; &#x1F512; Memory loaded — 1 lock, 1 decision, 1 session tracked.</span>
+<span class="t-ok">&gt; Goal: Build a SaaS dashboard with Stripe billing</span>
+<span class="t-ok">&gt; Lock: Never modify auth files without permission</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">speclock_check_conflict</span> <span class="t-dim">"Adding social login to auth page"</span>
+<span class="t-blocked">&gt; &#x26A0;&#xFE0F; CONFLICT (HIGH confidence): Violates lock "Never modify auth files"</span>
+<span class="t-blocked">&gt; Action blocked. Ask user for permission before proceeding.</span>
             </div>
         </div>
     </section>
 
     <!-- PROBLEM -->
-    <section class="problem" id="problem">
+    <section class="section-wrap" id="problem" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
         <div class="section-label">The Problem</div>
-        <h2>Every AI coding session starts from zero. Yours won't.</h2>
+        <h2>Every AI tool forgets. Every. Single. Session.</h2>
         <div class="amnesia-grid">
             <div class="amnesia-card">
-                <div class="emoji">&#x1f9e0;</div>
-                <h3>Session Amnesia</h3>
-                <p>Your AI forgets everything when you start a new chat. Architecture decisions, constraints, what you tried before &mdash; all gone.</p>
+                <div class="emoji">&#x1F9E0;</div>
+                <h3>Context Window Resets</h3>
+                <p>Start a new chat and the AI has zero memory of what you built yesterday.</p>
             </div>
             <div class="amnesia-card">
-                <div class="emoji">&#x1f500;</div>
-                <h3>Semantic Drift</h3>
-                <p>AI slowly diverges from your original requirements. By session 5, it's building something completely different than what you specified.</p>
+                <div class="emoji">&#x1F4A5;</div>
+                <h3>Features Get Broken</h3>
+                <p>The AI "fixes" something and accidentally destroys a feature you spent hours on.</p>
             </div>
             <div class="amnesia-card">
-                <div class="emoji">&#x1f4a5;</div>
-                <h3>Constraint Violations</h3>
-                <p>"Don't use Redux" &mdash; you said it 10 times. The AI adds Redux anyway because it has no memory of your non-negotiable rules.</p>
+                <div class="emoji">&#x1F501;</div>
+                <h3>Endless Re-Explaining</h3>
+                <p>"As I mentioned before..." — you waste 30% of prompts just re-telling the AI what it should already know.</p>
             </div>
             <div class="amnesia-card">
-                <div class="emoji">&#x1f504;</div>
-                <h3>Repeat Yourself Loop</h3>
-                <p>You paste the same context, the same rules, the same architecture docs at the start of every single session. Hours wasted.</p>
+                <div class="emoji">&#x1F6AB;</div>
+                <h3>Constraints Violated</h3>
+                <p>You said "don't touch auth" three sessions ago. The AI doesn't remember and rewrites your login flow.</p>
             </div>
             <div class="amnesia-card">
-                <div class="emoji">&#x1f47b;</div>
+                <div class="emoji">&#x1F504;</div>
+                <h3>Decisions Forgotten</h3>
+                <p>You chose PostgreSQL in session 2. Session 5 suggests MongoDB. Session 8 switches to Firebase.</p>
+            </div>
+            <div class="amnesia-card">
+                <div class="emoji">&#x1F916;</div>
                 <h3>Multi-Agent Chaos</h3>
-                <p>Using Claude + Cursor + Copilot? None of them know what the others decided. You're the only thread of continuity.</p>
-            </div>
-            <div class="amnesia-card">
-                <div class="emoji">&#x1f3af;</div>
-                <h3>Vibe Coder Pain</h3>
-                <p>Non-technical founders suffer most. They can't re-explain complex requirements. SpecLock remembers so they don't have to.</p>
+                <p>Agent A builds feature X. Agent B has no idea and builds a conflicting feature Y.</p>
             </div>
         </div>
     </section>
 
-    <!-- TOOLS -->
-    <section class="tools-section" id="tools">
-        <div class="section-label">Capabilities</div>
-        <h2>19 tools. Zero amnesia.</h2>
-        <p class="subtitle">Every tool is designed to lock context, enforce constraints, and maintain continuity across sessions.</p>
-        <div class="tools-grid">
-            <div class="tool-card">
-                <div class="tool-cat">Memory</div>
-                <div class="tool-name">speclock_init</div>
-                <div class="tool-desc">Initialize SpecLock in your project directory</div>
+    <!-- HOW IT WORKS -->
+    <section class="section-wrap" id="how-it-works">
+        <div class="section-label">How It Works</div>
+        <h2>SpecLock in real life</h2>
+        <p class="subtitle">Connect once. The AI handles everything automatically. Here's what happens:</p>
+
+        <div class="scenario-grid">
+            <div class="scenario-card">
+                <div class="scenario-label" style="color: var(--accent);">Lock</div>
+                <h4>You lock something important</h4>
+                <div class="scenario-code">
+<span class="sc-user">You:</span>  "Don't ever touch the auth files"
+<span class="sc-ai">AI:</span>   &#x1F512; Locked: "Never modify auth files"
+                </div>
             </div>
-            <div class="tool-card">
-                <div class="tool-cat">Memory</div>
-                <div class="tool-name">speclock_get_context</div>
-                <div class="tool-desc">THE KEY TOOL. Returns full structured context pack</div>
+            <div class="scenario-card">
+                <div class="scenario-label" style="color: var(--yellow);">Protect</div>
+                <h4>AI checks before every change</h4>
+                <div class="scenario-code">
+<span class="sc-user">You:</span>  "Add social login"
+<span class="sc-ai">AI:</span>   &#x26A0;&#xFE0F; This conflicts with your lock:
+      "Never modify auth files"
+      Proceed or find another way?
+                </div>
             </div>
-            <div class="tool-card">
-                <div class="tool-cat">Memory</div>
-                <div class="tool-name">speclock_set_goal</div>
-                <div class="tool-desc">Set or update the high-level project goal</div>
+            <div class="scenario-card">
+                <div class="scenario-label" style="color: var(--green);">Remember</div>
+                <h4>New session, full memory</h4>
+                <div class="scenario-code">
+<span class="sc-user">You:</span>  "Let's work on the dashboard"
+<span class="sc-ai">AI:</span>   &#x1F512; Memory loaded &mdash; 5 locks,
+      3 decisions, 2 sessions tracked.
+      Ready to continue.
+                </div>
             </div>
-            <div class="tool-card">
-                <div class="tool-cat">Protection</div>
-                <div class="tool-name">speclock_add_lock</div>
-                <div class="tool-desc">Add a non-negotiable constraint (SpecLock)</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Protection</div>
-                <div class="tool-name">speclock_remove_lock</div>
-                <div class="tool-desc">Deactivate a constraint by ID (soft-delete)</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Memory</div>
-                <div class="tool-name">speclock_add_decision</div>
-                <div class="tool-desc">Record an architectural or design decision</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Memory</div>
-                <div class="tool-name">speclock_add_note</div>
-                <div class="tool-desc">Add a pinned note that persists across sessions</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Tracking</div>
-                <div class="tool-name">speclock_log_change</div>
-                <div class="tool-desc">Log a significant change with affected files</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Tracking</div>
-                <div class="tool-name">speclock_get_changes</div>
-                <div class="tool-desc">Get recent file changes tracked by SpecLock</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Tracking</div>
-                <div class="tool-name">speclock_get_events</div>
-                <div class="tool-desc">Get the event log, filterable by type</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Tracking</div>
-                <div class="tool-name">speclock_set_deploy_facts</div>
-                <div class="tool-desc">Record deployment config (provider, branch, URL)</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Protection</div>
-                <div class="tool-name">speclock_check_conflict</div>
-                <div class="tool-desc">Check if an action conflicts with any active lock</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Session</div>
-                <div class="tool-name">speclock_session_briefing</div>
-                <div class="tool-desc">Start a session with full context briefing</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Session</div>
-                <div class="tool-name">speclock_session_summary</div>
-                <div class="tool-desc">End session and record what was accomplished</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Git</div>
-                <div class="tool-name">speclock_checkpoint</div>
-                <div class="tool-desc">Create a named git tag for safe rollback</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Git</div>
-                <div class="tool-name">speclock_repo_status</div>
-                <div class="tool-desc">Get current git status, branch, and diff summary</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Intel</div>
-                <div class="tool-name">speclock_suggest_locks</div>
-                <div class="tool-desc">AI suggests new constraints from project patterns</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Intel</div>
-                <div class="tool-name">speclock_detect_drift</div>
-                <div class="tool-desc">Detect semantic drift from original spec</div>
-            </div>
-            <div class="tool-card">
-                <div class="tool-cat">Intel</div>
-                <div class="tool-name">speclock_health</div>
-                <div class="tool-desc">Project health score with actionable insights</div>
+            <div class="scenario-card">
+                <div class="scenario-label" style="color: var(--purple);">Unlock</div>
+                <h4>You change your mind</h4>
+                <div class="scenario-code">
+<span class="sc-user">You:</span>  "Unlock the auth files"
+<span class="sc-ai">AI:</span>   You locked: "Never modify auth
+      files". Want me to unlock?
+<span class="sc-user">You:</span>  "Yes"
+<span class="sc-ai">AI:</span>   &#x1F513; Unlocked. Proceeding.
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- INTEGRATIONS -->
-    <section class="integrations" id="connect">
-        <div class="section-label">Connect</div>
-        <h2>Works where you work.</h2>
-        <p class="subtitle">Connect SpecLock to any MCP-compatible platform in under 2 minutes. Here's how for each one.</p>
+    <!-- SETUP / INTEGRATIONS -->
+    <section class="section-wrap" id="setup" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
+        <div class="section-label">Setup</div>
+        <h2>Connect in 2 minutes</h2>
+        <p class="subtitle">Choose your platform. Follow the steps. Done.</p>
 
         <div class="platform-tabs">
             <button class="platform-tab active" onclick="showPlatform('lovable')">Lovable <span class="status live"></span></button>
@@ -616,21 +578,14 @@
             <div class="install-box">
                 <div class="install-header">
                     <h3>Lovable &mdash; Custom MCP Server</h3>
-                    <span class="diff-tag diff-easy">Easy &mdash; 2 min</span>
+                    <span class="diff-tag diff-easy">Easy &mdash; 3 min</span>
                 </div>
                 <div class="install-steps">
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Open Connectors Settings</h4>
-                            <p>In your Lovable workspace, go to <strong>Settings &rarr; Connectors &rarr; Personal connectors</strong></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">2</div>
-                        <div class="step-content">
-                            <h4>Add New MCP Server</h4>
-                            <p>Click <strong>"New MCP server"</strong>. Enter the following:</p>
+                            <h4>Connect SpecLock MCP</h4>
+                            <p>Go to <strong>Settings &rarr; Connectors &rarr; Personal connectors &rarr; New MCP server</strong></p>
                             <div class="code-block">
 <span class="key">Server name:</span>  <span class="string">SpecLock</span>
 <span class="key">Server URL:</span>   <span class="string">https://speclock-mcp-production.up.railway.app/mcp</span>
@@ -640,42 +595,22 @@
                         </div>
                     </div>
                     <div class="step">
-                        <div class="step-num">3</div>
+                        <div class="step-num">2</div>
                         <div class="step-content">
-                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
-                            <p>Go to <strong>Project Settings &rarr; Knowledge</strong> and paste these rules. This makes the AI use SpecLock automatically on every message:</p>
-                            <div class="code-block" style="font-size:0.72em; line-height:1.5;">
-## SpecLock Rules (MANDATORY &mdash; follow on every message)
-
-1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST.
-   Show: "🔒 Memory loaded &mdash; X locks, Y decisions."
-
-2. BEFORE MODIFYING CODE: Call speclock_check_conflict.
-   If HIGH conflict, STOP and warn me.
-
-3. WHEN I SAY "lock this" / "never touch" / "don't change":
-   Call speclock_add_lock. Confirm: "🔒 Locked: [constraint]"
-
-4. AFTER COMPLETING FEATURES: Call speclock_log_change +
-   speclock_add_decision for architectural choices.
-
-5. LOCKED ITEMS: Warn before changing. Only unlock if I confirm.
-
-6. END OF CONVERSATION: Call speclock_session_summary.
-                                <button class="copy-btn" onclick="copyText('## SpecLock Rules (MANDATORY — follow on every message)\n\n1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST. Read all locks, decisions, and goals before doing anything else. Show a brief summary: &quot;🔒 Memory loaded — X locks, Y decisions.&quot;\n\n2. BEFORE WRITING OR MODIFYING ANY CODE: Call speclock_check_conflict with a description of what you\'re about to change. If a conflict is found with HIGH confidence, STOP and tell me which lock would be violated. Do NOT proceed unless I explicitly say to override it.\n\n3. WHEN I SAY &quot;lock this&quot;, &quot;never touch this&quot;, &quot;don\'t ever change this&quot;, &quot;this is critical&quot;, or similar: Immediately call speclock_add_lock with my exact constraint. Confirm with: &quot;🔒 Locked: [constraint]&quot;\n\n4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call speclock_log_change with a summary of what was built/changed and which files were affected. Also call speclock_add_decision if an architectural choice was made.\n\n5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED: Warn me first: &quot;⚠️ You locked this: [constraint]. Want me to unlock it and proceed?&quot; Only proceed if I confirm.\n\n6. END OF CONVERSATION: Call speclock_session_summary with what was accomplished.')">Copy Rules</button>
-                            </div>
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em; font-weight:700;">(REQUIRED)</span></h4>
+                            <p>Go to <strong>Project Settings &rarr; Knowledge</strong> and paste the SpecLock rules. This makes the AI use SpecLock automatically on every message. <a href="#instructions">Copy the rules below &darr;</a></p>
                         </div>
                     </div>
                     <div class="step">
-                        <div class="step-num">4</div>
+                        <div class="step-num">3</div>
                         <div class="step-content">
-                            <h4>Start Using It</h4>
-                            <p>That's it! Now every time you chat, the AI will automatically load your project memory, check constraints before changing code, and log what it builds. Say <em>"Initialize SpecLock and set a goal for this project"</em> in your first chat.</p>
+                            <h4>Start Building</h4>
+                            <p>That's it! Every chat now auto-loads your memory, checks constraints, and logs decisions. Say <em>"Initialize SpecLock"</em> in your first chat to get started.</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <p style="margin-top:16px; color: var(--text-dim); font-size:0.85rem;">Requires Lovable <strong>paid plan</strong> (Pro $25/mo) for custom MCP servers. Prebuilt connectors available on all plans.</p>
+            <p style="margin-top:14px; color: var(--text-dim); font-size:0.82rem;">Requires Lovable <strong>paid plan</strong> (Pro $25/mo) for custom MCP servers.</p>
         </div>
 
         <!-- CLAUDE CODE -->
@@ -690,7 +625,6 @@
                         <div class="step-num">1</div>
                         <div class="step-content">
                             <h4>Install via Smithery</h4>
-                            <p>Run this in your terminal:</p>
                             <div class="code-block">
 npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                                 <button class="copy-btn" onclick="copyText('npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code')">Copy</button>
@@ -717,8 +651,8 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">3</div>
                         <div class="step-content">
-                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
-                            <p>Add the SpecLock rules to <strong>CLAUDE.md</strong> in your project root. This makes Claude use SpecLock automatically. <a href="https://github.com/sgroy10/speclock/blob/main/SPECLOCK-INSTRUCTIONS.md" target="_blank" style="color:var(--accent);">Get the rules &rarr;</a></p>
+                            <h4>Done &mdash; Zero Config Needed</h4>
+                            <p>Claude Code follows MCP server instructions automatically. No extra setup. SpecLock works the moment you connect it.</p>
                         </div>
                     </div>
                 </div>
@@ -736,15 +670,7 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Open MCP Settings</h4>
-                            <p>Go to <strong>Cursor Settings &rarr; Tools &amp; MCP</strong> &rarr; click <strong>"Add new MCP server"</strong></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">2</div>
-                        <div class="step-content">
-                            <h4>Add SpecLock config</h4>
-                            <p>Add to your <strong>.cursor/mcp.json</strong>:</p>
+                            <h4>Add to .cursor/mcp.json</h4>
                             <div class="code-block">
 {
   <span class="key">"mcpServers"</span>: {
@@ -759,10 +685,10 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                         </div>
                     </div>
                     <div class="step">
-                        <div class="step-num">3</div>
+                        <div class="step-num">2</div>
                         <div class="step-content">
-                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em;">(CRITICAL)</span></h4>
-                            <p>Add the SpecLock rules to <strong>.cursorrules</strong> in your project root. This makes Cursor use SpecLock automatically. <a href="https://github.com/sgroy10/speclock/blob/main/SPECLOCK-INSTRUCTIONS.md" target="_blank" style="color:var(--accent);">Get the rules &rarr;</a></p>
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em; font-weight:700;">(RECOMMENDED)</span></h4>
+                            <p>Add the SpecLock rules to <strong>.cursorrules</strong> in your project root for best results. <a href="#instructions">Copy the rules below &darr;</a></p>
                         </div>
                     </div>
                 </div>
@@ -780,15 +706,8 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Open MCP Configuration</h4>
-                            <p>Go to <strong>Windsurf Settings &rarr; Cascade &rarr; MCP Servers</strong></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">2</div>
-                        <div class="step-content">
-                            <h4>Add SpecLock Server</h4>
-                            <p>Add to your <strong>~/.codeium/windsurf/mcp_config.json</strong>:</p>
+                            <h4>Add to MCP config</h4>
+                            <p>Add to <strong>~/.codeium/windsurf/mcp_config.json</strong>:</p>
                             <div class="code-block">
 {
   <span class="key">"mcpServers"</span>: {
@@ -800,6 +719,13 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
 }
                                 <button class="copy-btn" onclick="copyText('{&quot;mcpServers&quot;:{&quot;speclock&quot;:{&quot;command&quot;:&quot;npx&quot;,&quot;args&quot;:[&quot;-y&quot;,&quot;speclock&quot;,&quot;serve&quot;,&quot;--project&quot;,&quot;.&quot;]}}}')">Copy</button>
                             </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Add Project Instructions <span style="color:var(--accent); font-size:0.75em; font-weight:700;">(RECOMMENDED)</span></h4>
+                            <p>Add the SpecLock rules to <strong>.windsurfrules</strong> in your project root. <a href="#instructions">Copy the rules below &darr;</a></p>
                         </div>
                     </div>
                 </div>
@@ -817,15 +743,8 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Open Cline MCP Settings</h4>
-                            <p>Click the <strong>MCP Servers</strong> icon in the Cline sidebar &rarr; click <strong>"Configure MCP Servers"</strong></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">2</div>
-                        <div class="step-content">
-                            <h4>Add SpecLock</h4>
-                            <p>Add to the MCP settings JSON:</p>
+                            <h4>Add to Cline MCP Settings</h4>
+                            <p>Click <strong>MCP Servers</strong> icon in the Cline sidebar &rarr; <strong>Configure MCP Servers</strong></p>
                             <div class="code-block">
 {
   <span class="key">"mcpServers"</span>: {
@@ -873,15 +792,8 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Open MCP Settings</h4>
-                            <p>In your bolt.diy instance, go to <strong>Settings &rarr; MCP</strong></p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">2</div>
-                        <div class="step-content">
                             <h4>Add Remote MCP Server</h4>
-                            <p>Add SpecLock as a Streamable HTTP server:</p>
+                            <p>In bolt.diy, go to <strong>Settings &rarr; MCP</strong> and add:</p>
                             <div class="code-block">
 {
   <span class="key">"speclock"</span>: {
@@ -909,7 +821,7 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                         <div class="step-num">&mdash;</div>
                         <div class="step-content">
                             <h4>MCP Support Incoming</h4>
-                            <p>Bolt.new has announced MCP server support on their roadmap. Once live, you'll be able to connect SpecLock directly. In the meantime, use <strong>bolt.diy</strong> (the open-source version) which already supports MCP, or use <strong>Lovable</strong> which has full custom MCP support today.</p>
+                            <p>Bolt.new has MCP on their roadmap. Once live, SpecLock will work. In the meantime, use <strong>bolt.diy</strong> (open-source) or <strong>Lovable</strong> which support MCP today.</p>
                         </div>
                     </div>
                 </div>
@@ -917,61 +829,104 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
         </div>
     </section>
 
-    <!-- HOW IT WORKS IN PRACTICE -->
-    <section class="compat-section" id="how-it-works">
-        <div class="section-label">Real-World Protection</div>
-        <h2>See SpecLock in action</h2>
-        <p style="color: var(--text-dim); max-width: 700px; margin: 0 auto 40px;">Here's what happens when SpecLock + Project Instructions are active. The AI automatically protects your work.</p>
+    <!-- PROJECT INSTRUCTIONS (KNOWLEDGE PASTE) -->
+    <section class="section-wrap knowledge-section" id="instructions" style="max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
+        <div class="section-label">Project Instructions</div>
+        <h2>The rules that make SpecLock automatic</h2>
+        <p class="subtitle">Copy these rules and paste them into your platform's project instructions. This tells the AI to use SpecLock on every message &mdash; no commands needed.</p>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 900px; margin: 0 auto;">
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
-                <div style="color: var(--accent); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 1</div>
-                <h4 style="margin-bottom: 12px;">You lock something important</h4>
-                <div class="code-block" style="font-size: 0.8em; text-align: left;">
-<span class="string">You:</span>  "Don't ever touch the auth files"
-<span class="key">AI:</span>   🔒 Locked: "Never modify auth files"
-                </div>
+        <div class="knowledge-box">
+            <div class="knowledge-header">
+                <h3>&#x1F512; SpecLock Project Instructions &mdash; Copy &amp; Paste</h3>
             </div>
+            <div class="knowledge-body">
+                <h4 style="font-size: 0.95rem; margin-bottom: 12px;">Where to paste (one-time setup):</h4>
+                <table class="where-table">
+                    <thead>
+                        <tr><th>Platform</th><th>Where to Paste</th><th>Auto from MCP?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Lovable</strong></td><td>Project Settings &rarr; Knowledge</td><td style="color:var(--accent);">No &mdash; paste required</td></tr>
+                        <tr><td><strong>Claude Code</strong></td><td>CLAUDE.md in project root</td><td style="color:var(--green);">Yes &mdash; works without paste</td></tr>
+                        <tr><td><strong>Cursor</strong></td><td>.cursorrules in project root</td><td style="color:var(--yellow);">Partial &mdash; paste recommended</td></tr>
+                        <tr><td><strong>Windsurf</strong></td><td>.windsurfrules in project root</td><td style="color:var(--yellow);">Partial &mdash; paste recommended</td></tr>
+                        <tr><td><strong>Cline</strong></td><td>Custom Instructions in settings</td><td style="color:var(--yellow);">Partial &mdash; paste recommended</td></tr>
+                        <tr><td><strong>bolt.diy</strong></td><td>System prompt settings</td><td style="color:var(--accent);">No &mdash; paste required</td></tr>
+                    </tbody>
+                </table>
 
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
-                <div style="color: var(--yellow); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 2</div>
-                <h4 style="margin-bottom: 12px;">AI checks before every change</h4>
-                <div class="code-block" style="font-size: 0.8em; text-align: left;">
-<span class="string">You:</span>  "Add social login"
-<span class="key">AI:</span>   ⚠️ This conflicts with your lock:
-      "Never modify auth files"
-      Should I proceed or find another way?
-                </div>
-            </div>
+                <h4 style="font-size: 0.95rem; margin-bottom: 12px;">The rules to copy:</h4>
+                <div class="knowledge-rules" id="speclock-rules">
+<button class="rules-copy-btn" onclick="copyRules()">Copy Rules</button>
+## SpecLock Rules (MANDATORY &mdash; follow on every message)
 
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
-                <div style="color: var(--green); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 3</div>
-                <h4 style="margin-bottom: 12px;">New session, full memory</h4>
-                <div class="code-block" style="font-size: 0.8em; text-align: left;">
-<span class="string">You:</span>  "Let's work on the dashboard"
-<span class="key">AI:</span>   🔒 Memory loaded &mdash; 5 locks,
-      3 decisions, 2 sessions tracked.
-      Last time you added the payment page.
-      Ready to continue.
-                </div>
-            </div>
+1. START OF EVERY CONVERSATION: Call speclock_session_briefing
+   FIRST. Read all locks, decisions, and goals before doing
+   anything else. Show a brief summary:
+   "&#x1F512; Memory loaded &mdash; X locks, Y decisions."
 
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
-                <div style="color: var(--purple); font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">SCENARIO 4</div>
-                <h4 style="margin-bottom: 12px;">You change your mind</h4>
-                <div class="code-block" style="font-size: 0.8em; text-align: left;">
-<span class="string">You:</span>  "Unlock the auth files"
-<span class="key">AI:</span>   You locked: "Never modify auth files"
-      Want me to unlock and proceed?
-<span class="string">You:</span>  "Yes"
-<span class="key">AI:</span>   🔓 Unlocked. Proceeding.
-                </div>
+2. BEFORE WRITING OR MODIFYING ANY CODE: Call
+   speclock_check_conflict with a description of what you're
+   about to change (e.g., "Adding payment page" or "Modifying
+   the auth login flow"). If a conflict is found with HIGH
+   confidence, STOP and tell me which lock would be violated.
+   Do NOT proceed unless I explicitly say to override it.
+
+3. WHEN I SAY "lock this", "never touch this", "don't ever
+   change this", "this is critical", or similar: Immediately
+   call speclock_add_lock with my exact constraint.
+   Confirm with: "&#x1F512; Locked: [constraint]"
+
+4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call
+   speclock_log_change with a summary of what was built/changed
+   and which files were affected. Also call speclock_add_decision
+   if an architectural choice was made.
+
+5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED:
+   Warn me first: "&#x26A0;&#xFE0F; You locked this: [constraint]. Want me
+   to unlock it and proceed?" Only proceed if I confirm.
+
+6. END OF CONVERSATION: Call speclock_session_summary with
+   what was accomplished.</div>
+
+                <p style="margin-top: 16px; color: var(--text-dim); font-size: 0.85rem; line-height: 1.7;">
+                    <strong>That's it.</strong> Paste once, and every chat after that will automatically use SpecLock. The AI will load your memory at the start, check constraints before changes, and log what it builds. You never have to type a SpecLock command.
+                </p>
             </div>
         </div>
     </section>
 
+    <!-- 19 TOOLS -->
+    <section class="section-wrap" id="tools">
+        <div class="section-label">19 MCP Tools</div>
+        <h2>Everything SpecLock can do</h2>
+        <p class="subtitle">Memory management, change tracking, constraint enforcement, git integration, and AI-powered intelligence.</p>
+
+        <div class="tools-grid">
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_init</div><div class="tool-desc">Initialize SpecLock in project</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_get_context</div><div class="tool-desc">Full structured context pack</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_set_goal</div><div class="tool-desc">Set or update project goal</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_add_lock</div><div class="tool-desc">Add non-negotiable constraint</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_remove_lock</div><div class="tool-desc">Deactivate a lock by ID</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_add_decision</div><div class="tool-desc">Record architectural decision</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_add_note</div><div class="tool-desc">Add a pinned note</div></div>
+            <div class="tool-card"><div class="tool-cat">Memory</div><div class="tool-name">speclock_set_deploy_facts</div><div class="tool-desc">Record deploy configuration</div></div>
+            <div class="tool-card"><div class="tool-cat">Tracking</div><div class="tool-name">speclock_log_change</div><div class="tool-desc">Log a significant change</div></div>
+            <div class="tool-card"><div class="tool-cat">Tracking</div><div class="tool-name">speclock_get_changes</div><div class="tool-desc">Get recent tracked changes</div></div>
+            <div class="tool-card"><div class="tool-cat">Tracking</div><div class="tool-name">speclock_get_events</div><div class="tool-desc">Get event log (filterable)</div></div>
+            <div class="tool-card"><div class="tool-cat">Protection</div><div class="tool-name">speclock_check_conflict</div><div class="tool-desc">Check action against locks</div></div>
+            <div class="tool-card"><div class="tool-cat">Protection</div><div class="tool-name">speclock_session_briefing</div><div class="tool-desc">Start session + full briefing</div></div>
+            <div class="tool-card"><div class="tool-cat">Protection</div><div class="tool-name">speclock_session_summary</div><div class="tool-desc">End session + record summary</div></div>
+            <div class="tool-card"><div class="tool-cat">Git</div><div class="tool-name">speclock_checkpoint</div><div class="tool-desc">Create named git tag</div></div>
+            <div class="tool-card"><div class="tool-cat">Git</div><div class="tool-name">speclock_repo_status</div><div class="tool-desc">Branch, commit, diff info</div></div>
+            <div class="tool-card"><div class="tool-cat">Intelligence</div><div class="tool-name">speclock_suggest_locks</div><div class="tool-desc">AI-powered lock suggestions</div></div>
+            <div class="tool-card"><div class="tool-cat">Intelligence</div><div class="tool-name">speclock_detect_drift</div><div class="tool-desc">Scan for constraint violations</div></div>
+            <div class="tool-card"><div class="tool-cat">Intelligence</div><div class="tool-name">speclock_health</div><div class="tool-desc">Health score + agent timeline</div></div>
+        </div>
+    </section>
+
     <!-- COMPATIBILITY TABLE -->
-    <section class="compat-section" id="platforms">
+    <section class="section-wrap" id="platforms" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
         <div class="section-label">Platform Matrix</div>
         <h2>Where SpecLock works today</h2>
         <table class="compat-table">
@@ -980,7 +935,7 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <th>Platform</th>
                     <th>MCP Support</th>
                     <th>SpecLock Status</th>
-                    <th>Primary Audience</th>
+                    <th>Instructions Needed?</th>
                 </tr>
             </thead>
             <tbody>
@@ -988,55 +943,49 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                     <td class="platform-name">Lovable</td>
                     <td><span class="check">&#x2713;</span> Custom MCP (Paid)</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Non-technical founders, vibe coders</td>
+                    <td>Yes &mdash; paste into Knowledge</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Claude Code</td>
                     <td><span class="check">&#x2713;</span> Native MCP</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Developers, power users</td>
+                    <td>No &mdash; auto from MCP</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Cursor</td>
                     <td><span class="check">&#x2713;</span> Native MCP</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Professional developers</td>
+                    <td>Recommended &mdash; .cursorrules</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Windsurf</td>
                     <td><span class="check">&#x2713;</span> Native MCP</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Developers, teams</td>
+                    <td>Recommended &mdash; .windsurfrules</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Cline</td>
                     <td><span class="check">&#x2713;</span> Native MCP</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">VS Code power users</td>
+                    <td>Recommended</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Codex (OpenAI)</td>
                     <td><span class="check">&#x2713;</span> Via Smithery</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Developers</td>
+                    <td>TBD</td>
                 </tr>
                 <tr>
                     <td class="platform-name">bolt.diy</td>
                     <td><span class="check">&#x2713;</span> MCP Support</td>
                     <td><span class="check">&#x2713;</span> Ready</td>
-                    <td class="audience">Self-hosters, tinkerers</td>
+                    <td>Yes &mdash; paste into system prompt</td>
                 </tr>
                 <tr>
                     <td class="platform-name">Bolt.new</td>
                     <td><span class="coming">ROADMAP</span></td>
                     <td><span class="coming">PLANNED</span></td>
-                    <td class="audience">Non-technical builders</td>
-                </tr>
-                <tr>
-                    <td class="platform-name">v0 (Vercel)</td>
-                    <td><span class="cross">&#x2717;</span> Not yet</td>
-                    <td><span class="coming">MONITORING</span></td>
-                    <td class="audience">Frontend developers</td>
+                    <td>&mdash;</td>
                 </tr>
             </tbody>
         </table>
@@ -1078,6 +1027,32 @@ npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
                 const orig = btn.textContent;
                 btn.textContent = 'Copied!';
                 setTimeout(() => btn.textContent = orig, 1500);
+            });
+        }
+
+        function copyRules() {
+            const rules = `## SpecLock Rules (MANDATORY — follow on every message)
+
+1. START OF EVERY CONVERSATION: Call speclock_session_briefing FIRST. Read all locks, decisions, and goals before doing anything else. Show a brief summary: "🔒 Memory loaded — X locks, Y decisions."
+
+2. BEFORE WRITING OR MODIFYING ANY CODE: Call speclock_check_conflict with a description of what you're about to change (e.g., "Adding payment page, creating new route and components" or "Modifying the auth login flow"). If a conflict is found with HIGH confidence, STOP and tell me which lock would be violated. Do NOT proceed unless I explicitly say to override it.
+
+3. WHEN I SAY "lock this", "never touch this", "don't ever change this", "this is critical", or similar: Immediately call speclock_add_lock with my exact constraint. Confirm with: "🔒 Locked: [constraint]"
+
+4. AFTER COMPLETING ANY FEATURE OR SIGNIFICANT CHANGE: Call speclock_log_change with a summary of what was built/changed and which files were affected. Also call speclock_add_decision if an architectural choice was made.
+
+5. WHEN I ASK TO REMOVE OR CHANGE SOMETHING THAT WAS LOCKED: Warn me first: "⚠️ You locked this: [constraint]. Want me to unlock it and proceed?" Only proceed if I confirm.
+
+6. END OF CONVERSATION: Call speclock_session_summary with what was accomplished.`;
+
+            navigator.clipboard.writeText(rules).then(() => {
+                const btn = document.querySelector('.rules-copy-btn');
+                btn.textContent = 'Copied!';
+                btn.style.background = '#16a34a';
+                setTimeout(() => {
+                    btn.textContent = 'Copy Rules';
+                    btn.style.background = '';
+                }, 2000);
             });
         }
 
