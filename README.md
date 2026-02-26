@@ -4,6 +4,8 @@
 
 > Developed by **Sandeep Roy** ([github.com/sgroy10](https://github.com/sgroy10))
 
+**Website**: [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/) | **npm**: [npmjs.com/package/speclock](https://www.npmjs.com/package/speclock) | **Smithery**: [smithery.ai/servers/sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
+
 [![npm version](https://img.shields.io/npm/v/speclock.svg)](https://www.npmjs.com/package/speclock)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
