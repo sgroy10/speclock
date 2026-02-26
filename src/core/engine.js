@@ -696,3 +696,53 @@ export async function watchRepo(root) {
   console.log("SpecLock watching for changes...");
   return watcher;
 }
+
+// --- SPECLOCK.md generator (for npm dependency / file-based mode) ---
+
+export function createSpecLockMd(root) {
+  const mdContent = `# SpecLock — Project Memory Active
+
+This project uses **SpecLock** for AI continuity across sessions.
+Read \`.speclock/context/latest.md\` for full project context before making changes.
+
+## Rules (follow on every message)
+
+1. **START OF EVERY MESSAGE**: Read \`.speclock/context/latest.md\` for project memory — goals, constraints (locks), decisions, and recent changes. If the file doesn't exist, run \`npx speclock context\` to generate it.
+
+2. **BEFORE MODIFYING CODE**: Run \`npx speclock check "description of what you plan to change"\`. If a conflict is found (HIGH confidence), STOP and warn the user which constraint would be violated. Do NOT proceed unless the user explicitly says to override.
+
+3. **WHEN USER SAYS "lock this", "never touch", "don't change", "always", "critical"**: Run \`npx speclock lock "the exact constraint"\`. Confirm: "Locked: [constraint]"
+
+4. **AFTER COMPLETING A FEATURE OR SIGNIFICANT CHANGE**: Run \`npx speclock log-change "what was built/changed" --files file1.tsx,file2.ts\`. Then run \`npx speclock context\` to refresh the context file.
+
+5. **WHEN AN ARCHITECTURAL DECISION IS MADE**: Run \`npx speclock decide "the decision"\`
+
+6. **WHEN USER WANTS TO CHANGE SOMETHING LOCKED**: Warn first: "This is locked: [constraint]. Want me to unlock and proceed?" If confirmed, run \`npx speclock lock remove <lockId>\`
+
+## Quick Reference
+
+\`\`\`bash
+npx speclock status                              # See brain summary
+npx speclock context                             # Regenerate context file
+npx speclock lock "constraint text"              # Add a constraint
+npx speclock lock remove <lockId>                # Remove a constraint
+npx speclock decide "decision text"              # Record a decision
+npx speclock log-change "what changed"           # Log a change
+npx speclock check "what you plan to do"         # Check for conflicts
+npx speclock goal "project goal"                 # Set/update goal
+npx speclock note "important note"               # Add a note
+\`\`\`
+
+## How It Works
+
+SpecLock maintains a \`.speclock/\` directory with structured project memory:
+- \`brain.json\` — goals, locks, decisions, session history
+- \`events.log\` — immutable audit trail
+- \`context/latest.md\` — human-readable context (read this!)
+
+Every command automatically refreshes the context file so it's always up to date.
+`;
+  const filePath = path.join(root, "SPECLOCK.md");
+  fs.writeFileSync(filePath, mdContent);
+  return filePath;
+}

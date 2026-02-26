@@ -7,7 +7,10 @@ import {
   addDecision,
   addNote,
   updateDeployFacts,
+  logChange,
+  checkConflict,
   watchRepo,
+  createSpecLockMd,
 } from "../core/engine.js";
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
@@ -52,50 +55,56 @@ function rootDir() {
   return process.cwd();
 }
 
+// --- Auto-regenerate context after write operations ---
+
+function refreshContext(root) {
+  try {
+    generateContext(root);
+  } catch (_) {
+    // Silently skip if context generation fails
+  }
+}
+
 // --- Help text ---
 
 function printHelp() {
   console.log(`
-SpecLock v1.1.0 — AI Continuity Engine
+SpecLock v1.3.0 — AI Continuity Engine
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
 
 Commands:
-  init                          Initialize SpecLock in current directory
-  goal <text>                   Set or update the project goal
-  lock <text> [--tags a,b]      Add a non-negotiable constraint (SpecLock)
-  lock remove <id>              Remove a lock by ID
-  decide <text> [--tags a,b]    Record a decision
-  note <text> [--pinned]        Add a pinned note
-  facts deploy [--provider X]   Set deployment facts
-  context                       Generate and print context pack
-  watch                         Start file watcher (auto-track changes)
-  serve [--project <path>]      Start MCP stdio server
-  status                        Show project brain summary
+  setup [--goal <text>]           Full setup: init + SPECLOCK.md + context
+  init                            Initialize SpecLock in current directory
+  goal <text>                     Set or update the project goal
+  lock <text> [--tags a,b]        Add a non-negotiable constraint
+  lock remove <id>                Remove a lock by ID
+  decide <text> [--tags a,b]      Record a decision
+  note <text> [--pinned]          Add a pinned note
+  log-change <text> [--files x,y] Log a significant change
+  check <text>                    Check if action conflicts with locks
+  context                         Generate and print context pack
+  facts deploy [--provider X]     Set deployment facts
+  watch                           Start file watcher (auto-track changes)
+  serve [--project <path>]        Start MCP stdio server
+  status                          Show project brain summary
 
 Options:
-  --tags <a,b,c>                Comma-separated tags
-  --source <user|agent>         Who created this (default: user)
-  --provider <name>             Deploy provider
-  --branch <name>               Deploy branch
-  --autoDeploy <true|false>     Auto-deploy setting
-  --url <url>                   Deployment URL
-  --notes <text>                Additional notes
-  --project <path>              Project root (for serve)
+  --tags <a,b,c>                  Comma-separated tags
+  --source <user|agent>           Who created this (default: user)
+  --files <a.ts,b.ts>             Comma-separated file paths
+  --goal <text>                   Goal text (for setup command)
+  --project <path>                Project root (for serve)
 
 Examples:
-  speclock init
-  speclock goal "Ship v1 of the continuity engine"
-  speclock lock "No external database in v1" --tags scope
-  speclock decide "Use MCP as primary integration" --tags architecture
-  speclock context
-  speclock serve --project /path/to/repo
-
-MCP Tools (19): init, get_context, set_goal, add_lock, remove_lock,
-  add_decision, add_note, set_deploy_facts, log_change, get_changes,
-  get_events, check_conflict, session_briefing, session_summary,
-  checkpoint, repo_status, suggest_locks, detect_drift, health
+  npx speclock setup --goal "Build PawPalace pet shop"
+  npx speclock lock "Never modify auth files"
+  npx speclock check "Adding social login to auth page"
+  npx speclock log-change "Built payment system" --files src/pay.tsx
+  npx speclock decide "Use Supabase for auth"
+  npx speclock context
+  npx speclock status
 `);
 }
 
@@ -104,7 +113,7 @@ MCP Tools (19): init, get_context, set_goal, add_lock, remove_lock,
 function showStatus(root) {
   const brain = readBrain(root);
   if (!brain) {
-    console.log("SpecLock not initialized. Run: speclock init");
+    console.log("SpecLock not initialized. Run: npx speclock setup");
     return;
   }
 
@@ -113,11 +122,11 @@ function showStatus(root) {
   console.log(`\nSpecLock Status — ${brain.project.name}`);
   console.log("=".repeat(50));
   console.log(`Goal: ${brain.goal.text || "(not set)"}`);
-  console.log(`SpecLocks: ${activeLocks.length} active`);
+  console.log(`Locks: ${activeLocks.length} active`);
   console.log(`Decisions: ${brain.decisions.length}`);
   console.log(`Notes: ${brain.notes.length}`);
   console.log(`Events: ${brain.events.count}`);
-  console.log(`Deploy: ${brain.facts.deploy.provider}`);
+  console.log(`Deploy: ${brain.facts.deploy.provider || "(not set)"}`);
 
   if (brain.sessions.current) {
     console.log(`Session: active (${brain.sessions.current.toolUsed})`);
@@ -133,7 +142,6 @@ function showStatus(root) {
   }
 
   console.log(`Recent changes: ${brain.state.recentChanges.length}`);
-  console.log(`Reverts: ${brain.state.reverts.length}`);
   console.log("");
 }
 
@@ -148,12 +156,60 @@ async function main() {
     process.exit(0);
   }
 
-  if (cmd === "init") {
+  // --- SETUP (new: one-shot full setup) ---
+  if (cmd === "setup") {
+    const flags = parseFlags(args);
+    const goalText = flags.goal || flags._.join(" ").trim();
+
+    // 1. Initialize
     ensureInit(root);
-    console.log("SpecLock initialized.");
+    console.log("Initialized .speclock/ directory.");
+
+    // 2. Set goal if provided
+    if (goalText) {
+      setGoal(root, goalText);
+      console.log(`Goal set: "${goalText}"`);
+    }
+
+    // 3. Create SPECLOCK.md in project root
+    const mdPath = createSpecLockMd(root);
+    console.log(`Created SPECLOCK.md (AI instructions file).`);
+
+    // 4. Generate context
+    generateContext(root);
+    console.log("Generated .speclock/context/latest.md");
+
+    // 5. Print summary
+    console.log(`
+SpecLock is ready!
+
+Files created:
+  .speclock/brain.json          — Project memory
+  .speclock/context/latest.md   — Context for AI (read this)
+  SPECLOCK.md                   — AI rules (read this)
+
+Next steps:
+  The AI should read SPECLOCK.md for rules and
+  .speclock/context/latest.md for project context.
+
+  To add constraints:  npx speclock lock "Never touch auth files"
+  To check conflicts:  npx speclock check "Modifying auth page"
+  To log changes:      npx speclock log-change "Built landing page"
+  To see status:       npx speclock status
+`);
     return;
   }
 
+  // --- INIT ---
+  if (cmd === "init") {
+    ensureInit(root);
+    createSpecLockMd(root);
+    generateContext(root);
+    console.log("SpecLock initialized. Created SPECLOCK.md and context file.");
+    return;
+  }
+
+  // --- GOAL ---
   if (cmd === "goal") {
     const text = args.join(" ").trim();
     if (!text) {
@@ -162,10 +218,12 @@ async function main() {
       process.exit(1);
     }
     setGoal(root, text);
+    refreshContext(root);
     console.log(`Goal set: "${text}"`);
     return;
   }
 
+  // --- LOCK ---
   if (cmd === "lock") {
     // Check for "lock remove <id>"
     if (args[0] === "remove") {
@@ -177,6 +235,7 @@ async function main() {
       }
       const result = removeLock(root, lockId);
       if (result.removed) {
+        refreshContext(root);
         console.log(`Lock removed: "${result.lockText}"`);
       } else {
         console.error(result.error);
@@ -193,10 +252,12 @@ async function main() {
       process.exit(1);
     }
     const { lockId } = addLock(root, text, parseTags(flags.tags), flags.source || "user");
-    console.log(`SpecLock added (${lockId}): "${text}"`);
+    refreshContext(root);
+    console.log(`Locked (${lockId}): "${text}"`);
     return;
   }
 
+  // --- DECIDE ---
   if (cmd === "decide") {
     const flags = parseFlags(args);
     const text = flags._.join(" ").trim();
@@ -206,10 +267,12 @@ async function main() {
       process.exit(1);
     }
     const { decId } = addDecision(root, text, parseTags(flags.tags), flags.source || "user");
+    refreshContext(root);
     console.log(`Decision recorded (${decId}): "${text}"`);
     return;
   }
 
+  // --- NOTE ---
   if (cmd === "note") {
     const flags = parseFlags(args);
     const text = flags._.join(" ").trim();
@@ -220,10 +283,60 @@ async function main() {
     }
     const pinned = flags.pinned !== false;
     const { noteId } = addNote(root, text, pinned);
+    refreshContext(root);
     console.log(`Note added (${noteId}): "${text}"`);
     return;
   }
 
+  // --- LOG-CHANGE (new) ---
+  if (cmd === "log-change") {
+    const flags = parseFlags(args);
+    const text = flags._.join(" ").trim();
+    if (!text) {
+      console.error("Error: Change summary is required.");
+      console.error('Usage: speclock log-change "what changed" --files a.ts,b.ts');
+      process.exit(1);
+    }
+    const files = flags.files ? flags.files.split(",").map((f) => f.trim()).filter(Boolean) : [];
+    logChange(root, text, files);
+    refreshContext(root);
+    console.log(`Change logged: "${text}"`);
+    if (files.length > 0) {
+      console.log(`Files: ${files.join(", ")}`);
+    }
+    return;
+  }
+
+  // --- CHECK (new: conflict check) ---
+  if (cmd === "check") {
+    const text = args.join(" ").trim();
+    if (!text) {
+      console.error("Error: Action description is required.");
+      console.error('Usage: speclock check "what you plan to do"');
+      process.exit(1);
+    }
+    const result = checkConflict(root, text);
+    if (result.hasConflict) {
+      console.log(`\nCONFLICT DETECTED`);
+      console.log("=".repeat(50));
+      for (const lock of result.conflictingLocks) {
+        console.log(`  [${lock.confidence}] "${lock.text}"`);
+        console.log(`  Confidence: ${lock.score}%`);
+        if (lock.reasons && lock.reasons.length > 0) {
+          for (const reason of lock.reasons) {
+            console.log(`  - ${reason}`);
+          }
+        }
+        console.log("");
+      }
+      console.log(result.analysis);
+    } else {
+      console.log(`No conflicts found. Safe to proceed with: "${text}"`);
+    }
+    return;
+  }
+
+  // --- FACTS ---
   if (cmd === "facts") {
     const sub = args.shift();
     if (sub !== "deploy") {
@@ -245,21 +358,25 @@ async function main() {
         String(flags.autoDeploy).toLowerCase() === "true";
     }
     updateDeployFacts(root, payload);
+    refreshContext(root);
     console.log("Deploy facts updated.");
     return;
   }
 
+  // --- CONTEXT ---
   if (cmd === "context") {
     const md = generateContext(root);
     console.log(md);
     return;
   }
 
+  // --- WATCH ---
   if (cmd === "watch") {
     await watchRepo(root);
     return;
   }
 
+  // --- SERVE ---
   if (cmd === "serve") {
     // Start MCP server — pass through --project if provided
     const flags = parseFlags(args);
@@ -269,6 +386,7 @@ async function main() {
     return;
   }
 
+  // --- STATUS ---
   if (cmd === "status") {
     showStatus(root);
     return;

@@ -1,6 +1,6 @@
 {
   "name": "speclock",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "AI continuity engine — MCP server + CLI that kills AI amnesia. Maintains project memory, enforces constraints, and detects drift across AI coding sessions.",
   "type": "module",
   "main": "src/mcp/server.js",
@@ -54,6 +54,7 @@
     "bin/",
     "src/",
     "README.md",
+    "SPECLOCK-INSTRUCTIONS.md",
     "LICENSE"
   ],
   "devDependencies": {
