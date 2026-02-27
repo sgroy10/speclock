@@ -702,54 +702,68 @@ export async function watchRepo(root) {
 export function createSpecLockMd(root) {
   const mdContent = `# SpecLock — AI Constraint Engine Active
 
-## MANDATORY: Read this BEFORE doing anything.
+## STOP — Read this before doing ANYTHING.
 
-This project uses **SpecLock** for AI constraint enforcement.
+**If a file contains "SPECLOCK-GUARD" at the top → DO NOT EDIT IT. Period.**
 
-**STOP. Before writing or modifying ANY code, you MUST:**
-1. Read \`.speclock/context/latest.md\` for project memory
-2. Run \`npx speclock check "what you plan to change"\`
-3. If conflict found → STOP and warn the user
+## Your Job (Do This Automatically — The User Will NOT Ask)
 
-**If a file starts with "SPECLOCK-GUARD — DO NOT MODIFY" → DO NOT EDIT IT.**
+### On EVERY message:
+Read \`.speclock/context/latest.md\` first. Always. No exceptions.
 
-## Rules (MANDATORY — every message, no exceptions)
+### Before changing ANY code:
+Run \`npx speclock check "what you plan to do"\` BEFORE writing code.
+If conflict → STOP. Tell the user. Do NOT proceed.
 
-1. **FIRST ACTION OF EVERY MESSAGE**: Read \`.speclock/context/latest.md\`. This contains all project constraints (locks), decisions, and goals. Show: "Memory loaded — X locks, Y decisions." If the file doesn't exist, run \`npx speclock context\`.
+### Detect constraints from natural language:
+Users will NOT say "lock this." They speak naturally. YOU must detect it.
 
-2. **BEFORE MODIFYING ANY CODE — EVERY TIME**: Run \`npx speclock check "description of what you plan to change"\`. If a conflict is found (HIGH confidence), STOP IMMEDIATELY. Tell the user which constraint would be violated. Do NOT proceed unless the user explicitly overrides. THIS IS THE MOST IMPORTANT RULE.
+Examples of what users say → what you do:
 
-3. **WHEN USER SAYS "lock this", "never touch", "don't change", "always", "critical"**: Run \`npx speclock lock "the exact constraint"\`. Then run \`npx speclock guard <file> --lock "constraint"\` on the specific files to inject a lock warning directly into the file. Confirm: "Locked: [constraint]"
+| User says | You do |
+|-----------|--------|
+| "don't touch the auth" | \`npx speclock lock "Never modify auth files"\` + \`npx speclock guard src/components/Auth.tsx --lock "Never modify auth files"\` |
+| "database is firebase, don't change it" | \`npx speclock lock "Database must always be Firebase"\` |
+| "leave the payment system alone" | \`npx speclock lock "Never modify payment system"\` + guard the payment files |
+| "always use Supabase" | \`npx speclock lock "Always use Supabase"\` |
+| "the API is done, don't mess with it" | \`npx speclock lock "Never modify API endpoints"\` + guard the API files |
 
-4. **AFTER COMPLETING A FEATURE OR CHANGE**: Run \`npx speclock log-change "what was built" --files file1.tsx,file2.ts\`.
+When you lock something, ALSO guard the specific files:
+\`npx speclock guard <filepath> --lock "the constraint"\`
+This injects a warning directly into the file so it cannot be missed.
 
-5. **WHEN AN ARCHITECTURAL DECISION IS MADE**: Run \`npx speclock decide "the decision"\`
+### When user wants to change something locked:
+User might say "actually, let me change auth" or "ok modify the database."
+1. Warn: "This is currently locked: [constraint]. Want me to unlock?"
+2. If they confirm → \`npx speclock lock remove <lockId>\` + \`npx speclock unguard <file>\`
+3. Make the changes
+4. Ask if they want to re-lock: "Want me to lock this again?"
 
-6. **WHEN USER WANTS TO CHANGE SOMETHING LOCKED**: Warn first. If confirmed, run \`npx speclock lock remove <lockId>\` and \`npx speclock unguard <file>\` to remove the file guard.
+### After building something:
+\`npx speclock log-change "what you built" --files file1.tsx,file2.ts\`
 
-## Quick Reference
+### When a tech decision is made:
+\`npx speclock decide "the decision"\`
+
+## Commands
 
 \`\`\`bash
-npx speclock check "what you plan to do"         # CHECK BEFORE CHANGES
-npx speclock lock "constraint text"              # Add a constraint
-npx speclock guard src/Auth.tsx --lock "text"    # Inject lock into file
-npx speclock unguard src/Auth.tsx                # Remove file lock
-npx speclock lock remove <lockId>                # Remove a constraint
-npx speclock log-change "what changed"           # Log a change
-npx speclock decide "decision text"              # Record a decision
-npx speclock context                             # Regenerate context file
-npx speclock status                              # See brain summary
+npx speclock check "what you plan to do"         # ALWAYS RUN BEFORE CHANGES
+npx speclock lock "constraint"                   # Lock a constraint
+npx speclock guard <file> --lock "constraint"    # Protect a specific file
+npx speclock unguard <file>                      # Remove file protection
+npx speclock lock remove <lockId>                # Unlock a constraint
+npx speclock log-change "what changed"           # Log changes
+npx speclock decide "decision"                   # Record a decision
+npx speclock context                             # Refresh context file
+npx speclock status                              # See project summary
 \`\`\`
 
-## How It Works
+## Key Rule
 
-SpecLock maintains a \`.speclock/\` directory with structured project memory:
-- \`brain.json\` — goals, locks, decisions, session history
-- \`events.log\` — immutable audit trail
-- \`context/latest.md\` — human-readable context (read this!)
-
-**Guarded files** have a lock warning header injected directly into the source code.
-When you see "SPECLOCK-GUARD" at the top of a file, that file is LOCKED.
+**The user will NEVER tell you to run these commands. You run them automatically.**
+**The user will NEVER say "lock this." You detect the intent and lock it yourself.**
+**The user will NEVER say "check constraints." You check before EVERY code change.**
 `;
   const filePath = path.join(root, "SPECLOCK.md");
   fs.writeFileSync(filePath, mdContent);
