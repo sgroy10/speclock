@@ -13,6 +13,7 @@ import {
   createSpecLockMd,
   guardFile,
   unguardFile,
+  injectPackageJsonMarker,
 } from "../core/engine.js";
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
@@ -71,7 +72,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v1.4.0 — AI Constraint Engine
+SpecLock v1.5.0 — AI Constraint Engine
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -181,18 +182,25 @@ async function main() {
     const mdPath = createSpecLockMd(root);
     console.log(`Created SPECLOCK.md (AI instructions file).`);
 
-    // 4. Generate context
+    // 4. Inject marker into package.json (so AI tools auto-discover SpecLock)
+    const pkgResult = injectPackageJsonMarker(root);
+    if (pkgResult.success) {
+      console.log("Injected SpecLock marker into package.json.");
+    }
+
+    // 5. Generate context
     generateContext(root);
     console.log("Generated .speclock/context/latest.md");
 
-    // 5. Print summary
+    // 6. Print summary
     console.log(`
 SpecLock is ready!
 
-Files created:
+Files created/updated:
   .speclock/brain.json          — Project memory
   .speclock/context/latest.md   — Context for AI (read this)
   SPECLOCK.md                   — AI rules (read this)
+  package.json                  — SpecLock marker added (AI auto-discovery)
 
 Next steps:
   The AI should read SPECLOCK.md for rules and
@@ -210,8 +218,9 @@ Next steps:
   if (cmd === "init") {
     ensureInit(root);
     createSpecLockMd(root);
+    injectPackageJsonMarker(root);
     generateContext(root);
-    console.log("SpecLock initialized. Created SPECLOCK.md and context file.");
+    console.log("SpecLock initialized. Created SPECLOCK.md, updated package.json, and generated context file.");
     return;
   }
 

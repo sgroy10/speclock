@@ -704,7 +704,23 @@ export function createSpecLockMd(root) {
 
 ## STOP — Read this before doing ANYTHING.
 
+This project has SpecLock installed. It tracks project memory, goals, constraints (locks), and decisions.
+
+**Step 1:** Read \`.speclock/context/latest.md\` — this contains the full project memory.
+**Step 2:** Follow ALL rules below on every message.
+
 **If a file contains "SPECLOCK-GUARD" at the top → DO NOT EDIT IT. Period.**
+
+## Returning to This Project? (New Chat Session)
+
+If you are starting a new chat on this project:
+1. SpecLock is ALREADY installed — do NOT reinstall it
+2. The \`.speclock/\` directory contains all project memory
+3. Run \`npx speclock status\` to see the current state
+4. Read \`.speclock/context/latest.md\` for full context (goals, locks, decisions, history)
+5. Respect ALL existing locks and constraints before making any changes
+
+**DO NOT say "SpecLock is not installed" — if you can read this file, it IS installed.**
 
 ## Your Job (Do This Automatically — The User Will NOT Ask)
 
@@ -748,6 +764,7 @@ User might say "actually, let me change auth" or "ok modify the database."
 ## Commands
 
 \`\`\`bash
+npx speclock status                              # CHECK IF ALREADY SET UP
 npx speclock check "what you plan to do"         # ALWAYS RUN BEFORE CHANGES
 npx speclock lock "constraint"                   # Lock a constraint
 npx speclock guard <file> --lock "constraint"    # Protect a specific file
@@ -756,7 +773,6 @@ npx speclock lock remove <lockId>                # Unlock a constraint
 npx speclock log-change "what changed"           # Log changes
 npx speclock decide "decision"                   # Record a decision
 npx speclock context                             # Refresh context file
-npx speclock status                              # See project summary
 \`\`\`
 
 ## Key Rule
@@ -764,6 +780,7 @@ npx speclock status                              # See project summary
 **The user will NEVER tell you to run these commands. You run them automatically.**
 **The user will NEVER say "lock this." You detect the intent and lock it yourself.**
 **The user will NEVER say "check constraints." You check before EVERY code change.**
+**If this file exists, SpecLock is installed. Do NOT reinstall. Just read the context and follow the rules.**
 `;
   const filePath = path.join(root, "SPECLOCK.md");
   fs.writeFileSync(filePath, mdContent);
@@ -822,6 +839,34 @@ export function guardFile(root, relativeFilePath, lockText) {
   fs.writeFileSync(fullPath, guarded);
 
   return { success: true };
+}
+
+// --- Package.json marker injection (makes Bolt.new auto-discover SpecLock) ---
+
+export function injectPackageJsonMarker(root) {
+  const pkgPath = path.join(root, "package.json");
+  if (!fs.existsSync(pkgPath)) {
+    return { success: false, error: "No package.json found in project root." };
+  }
+
+  try {
+    const raw = fs.readFileSync(pkgPath, "utf-8");
+    const pkg = JSON.parse(raw);
+
+    // Add speclock marker
+    pkg.speclock = {
+      active: true,
+      rules: "IMPORTANT: Read SPECLOCK.md before making ANY changes to this project. Read .speclock/context/latest.md for project memory, goals, locks, and decisions. Run 'npx speclock check' before modifying locked files.",
+    };
+
+    // Write back with same formatting
+    const indent = raw.match(/^(\s+)/m)?.[1] || "  ";
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, indent) + "\n");
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: `Failed to modify package.json: ${err.message}` };
+  }
 }
 
 export function unguardFile(root, relativeFilePath) {

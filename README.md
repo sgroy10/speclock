@@ -76,7 +76,7 @@ Or run it yourself:
 npx speclock setup --goal "Build my app"
 ```
 
-**That's it.** The AI reads `SPECLOCK.md`, follows the rules, and uses CLI commands. Tested on Bolt.new — the AI ran 17 commands automatically on first install, setting up goals, locks, and decisions without any configuration.
+**That's it.** SpecLock creates `SPECLOCK.md`, injects a marker into `package.json`, and generates `.speclock/context/latest.md`. The AI reads these automatically and follows the rules. When the AI returns in a new session, it sees the SpecLock marker in `package.json` and knows to check the rules before making changes.
 
 ### Lovable (MCP Remote — No Install)
 
@@ -287,4 +287,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-*SpecLock v1.3.1 — Because remembering isn't enough. AI needs to respect boundaries.*
+*SpecLock v1.5.0 — Because remembering isn't enough. AI needs to respect boundaries.*
