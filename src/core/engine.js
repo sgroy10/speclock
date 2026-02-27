@@ -700,37 +700,45 @@ export async function watchRepo(root) {
 // --- SPECLOCK.md generator (for npm dependency / file-based mode) ---
 
 export function createSpecLockMd(root) {
-  const mdContent = `# SpecLock — Project Memory Active
+  const mdContent = `# SpecLock — AI Constraint Engine Active
 
-This project uses **SpecLock** for AI continuity across sessions.
-Read \`.speclock/context/latest.md\` for full project context before making changes.
+## MANDATORY: Read this BEFORE doing anything.
 
-## Rules (follow on every message)
+This project uses **SpecLock** for AI constraint enforcement.
 
-1. **START OF EVERY MESSAGE**: Read \`.speclock/context/latest.md\` for project memory — goals, constraints (locks), decisions, and recent changes. If the file doesn't exist, run \`npx speclock context\` to generate it.
+**STOP. Before writing or modifying ANY code, you MUST:**
+1. Read \`.speclock/context/latest.md\` for project memory
+2. Run \`npx speclock check "what you plan to change"\`
+3. If conflict found → STOP and warn the user
 
-2. **BEFORE MODIFYING CODE**: Run \`npx speclock check "description of what you plan to change"\`. If a conflict is found (HIGH confidence), STOP and warn the user which constraint would be violated. Do NOT proceed unless the user explicitly says to override.
+**If a file starts with "SPECLOCK-GUARD — DO NOT MODIFY" → DO NOT EDIT IT.**
 
-3. **WHEN USER SAYS "lock this", "never touch", "don't change", "always", "critical"**: Run \`npx speclock lock "the exact constraint"\`. Confirm: "Locked: [constraint]"
+## Rules (MANDATORY — every message, no exceptions)
 
-4. **AFTER COMPLETING A FEATURE OR SIGNIFICANT CHANGE**: Run \`npx speclock log-change "what was built/changed" --files file1.tsx,file2.ts\`. Then run \`npx speclock context\` to refresh the context file.
+1. **FIRST ACTION OF EVERY MESSAGE**: Read \`.speclock/context/latest.md\`. This contains all project constraints (locks), decisions, and goals. Show: "Memory loaded — X locks, Y decisions." If the file doesn't exist, run \`npx speclock context\`.
+
+2. **BEFORE MODIFYING ANY CODE — EVERY TIME**: Run \`npx speclock check "description of what you plan to change"\`. If a conflict is found (HIGH confidence), STOP IMMEDIATELY. Tell the user which constraint would be violated. Do NOT proceed unless the user explicitly overrides. THIS IS THE MOST IMPORTANT RULE.
+
+3. **WHEN USER SAYS "lock this", "never touch", "don't change", "always", "critical"**: Run \`npx speclock lock "the exact constraint"\`. Then run \`npx speclock guard <file> --lock "constraint"\` on the specific files to inject a lock warning directly into the file. Confirm: "Locked: [constraint]"
+
+4. **AFTER COMPLETING A FEATURE OR CHANGE**: Run \`npx speclock log-change "what was built" --files file1.tsx,file2.ts\`.
 
 5. **WHEN AN ARCHITECTURAL DECISION IS MADE**: Run \`npx speclock decide "the decision"\`
 
-6. **WHEN USER WANTS TO CHANGE SOMETHING LOCKED**: Warn first: "This is locked: [constraint]. Want me to unlock and proceed?" If confirmed, run \`npx speclock lock remove <lockId>\`
+6. **WHEN USER WANTS TO CHANGE SOMETHING LOCKED**: Warn first. If confirmed, run \`npx speclock lock remove <lockId>\` and \`npx speclock unguard <file>\` to remove the file guard.
 
 ## Quick Reference
 
 \`\`\`bash
-npx speclock status                              # See brain summary
-npx speclock context                             # Regenerate context file
+npx speclock check "what you plan to do"         # CHECK BEFORE CHANGES
 npx speclock lock "constraint text"              # Add a constraint
+npx speclock guard src/Auth.tsx --lock "text"    # Inject lock into file
+npx speclock unguard src/Auth.tsx                # Remove file lock
 npx speclock lock remove <lockId>                # Remove a constraint
-npx speclock decide "decision text"              # Record a decision
 npx speclock log-change "what changed"           # Log a change
-npx speclock check "what you plan to do"         # Check for conflicts
-npx speclock goal "project goal"                 # Set/update goal
-npx speclock note "important note"               # Add a note
+npx speclock decide "decision text"              # Record a decision
+npx speclock context                             # Regenerate context file
+npx speclock status                              # See brain summary
 \`\`\`
 
 ## How It Works
@@ -740,9 +748,94 @@ SpecLock maintains a \`.speclock/\` directory with structured project memory:
 - \`events.log\` — immutable audit trail
 - \`context/latest.md\` — human-readable context (read this!)
 
-Every command automatically refreshes the context file so it's always up to date.
+**Guarded files** have a lock warning header injected directly into the source code.
+When you see "SPECLOCK-GUARD" at the top of a file, that file is LOCKED.
 `;
   const filePath = path.join(root, "SPECLOCK.md");
   fs.writeFileSync(filePath, mdContent);
   return filePath;
+}
+
+// --- File-level lock guard ---
+
+const GUARD_MARKERS = {
+  js: { start: "// ", block: false },
+  ts: { start: "// ", block: false },
+  jsx: { start: "// ", block: false },
+  tsx: { start: "// ", block: false },
+  py: { start: "# ", block: false },
+  rb: { start: "# ", block: false },
+  sh: { start: "# ", block: false },
+  css: { start: "/* ", end: " */", block: true },
+  html: { start: "<!-- ", end: " -->", block: true },
+  vue: { start: "<!-- ", end: " -->", block: true },
+  svelte: { start: "<!-- ", end: " -->", block: true },
+  sql: { start: "-- ", block: false },
+};
+
+const GUARD_TAG = "SPECLOCK-GUARD";
+
+function getCommentStyle(filePath) {
+  const ext = path.extname(filePath).slice(1).toLowerCase();
+  return GUARD_MARKERS[ext] || { start: "// ", block: false };
+}
+
+export function guardFile(root, relativeFilePath, lockText) {
+  const fullPath = path.join(root, relativeFilePath);
+  if (!fs.existsSync(fullPath)) {
+    return { success: false, error: `File not found: ${relativeFilePath}` };
+  }
+
+  const content = fs.readFileSync(fullPath, "utf-8");
+  const style = getCommentStyle(fullPath);
+
+  // Check if already guarded
+  if (content.includes(GUARD_TAG)) {
+    return { success: false, error: `File already guarded: ${relativeFilePath}` };
+  }
+
+  const warningLines = [
+    `${style.start}${"=".repeat(60)}${style.end || ""}`,
+    `${style.start}${GUARD_TAG} — DO NOT MODIFY THIS FILE${style.end || ""}`,
+    `${style.start}LOCKED BY SPECLOCK: ${lockText}${style.end || ""}`,
+    `${style.start}Run "npx speclock check" before ANY changes to this file.${style.end || ""}`,
+    `${style.start}If you modify this file, you are VIOLATING a project constraint.${style.end || ""}`,
+    `${style.start}${"=".repeat(60)}${style.end || ""}`,
+    "",
+  ];
+
+  const guarded = warningLines.join("\n") + content;
+  fs.writeFileSync(fullPath, guarded);
+
+  return { success: true };
+}
+
+export function unguardFile(root, relativeFilePath) {
+  const fullPath = path.join(root, relativeFilePath);
+  if (!fs.existsSync(fullPath)) {
+    return { success: false, error: `File not found: ${relativeFilePath}` };
+  }
+
+  const content = fs.readFileSync(fullPath, "utf-8");
+  if (!content.includes(GUARD_TAG)) {
+    return { success: false, error: `File is not guarded: ${relativeFilePath}` };
+  }
+
+  // Remove everything from first marker line to the blank line after last marker
+  const lines = content.split("\n");
+  let guardEnd = 0;
+  let inGuard = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes(GUARD_TAG)) inGuard = true;
+    if (inGuard && lines[i].includes("=".repeat(60)) && i > 0) {
+      guardEnd = i + 1; // Skip the blank line after
+      if (lines[guardEnd] === "") guardEnd++;
+      break;
+    }
+  }
+
+  const unguarded = lines.slice(guardEnd).join("\n");
+  fs.writeFileSync(fullPath, unguarded);
+
+  return { success: true };
 }

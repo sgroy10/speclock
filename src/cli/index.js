@@ -11,6 +11,8 @@ import {
   checkConflict,
   watchRepo,
   createSpecLockMd,
+  guardFile,
+  unguardFile,
 } from "../core/engine.js";
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
@@ -69,7 +71,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v1.3.0 — AI Continuity Engine
+SpecLock v1.4.0 — AI Constraint Engine
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -80,6 +82,8 @@ Commands:
   goal <text>                     Set or update the project goal
   lock <text> [--tags a,b]        Add a non-negotiable constraint
   lock remove <id>                Remove a lock by ID
+  guard <file> [--lock "text"]    Inject lock warning into a file (NEW)
+  unguard <file>                  Remove lock warning from a file (NEW)
   decide <text> [--tags a,b]      Record a decision
   note <text> [--pinned]          Add a pinned note
   log-change <text> [--files x,y] Log a significant change
@@ -95,11 +99,13 @@ Options:
   --source <user|agent>           Who created this (default: user)
   --files <a.ts,b.ts>             Comma-separated file paths
   --goal <text>                   Goal text (for setup command)
+  --lock <text>                   Lock text (for guard command)
   --project <path>                Project root (for serve)
 
 Examples:
   npx speclock setup --goal "Build PawPalace pet shop"
   npx speclock lock "Never modify auth files"
+  npx speclock guard src/Auth.tsx --lock "Never modify auth files"
   npx speclock check "Adding social login to auth page"
   npx speclock log-change "Built payment system" --files src/pay.tsx
   npx speclock decide "Use Supabase for auth"
@@ -332,6 +338,45 @@ Next steps:
       console.log(result.analysis);
     } else {
       console.log(`No conflicts found. Safe to proceed with: "${text}"`);
+    }
+    return;
+  }
+
+  // --- GUARD (new: file-level lock) ---
+  if (cmd === "guard") {
+    const flags = parseFlags(args);
+    const filePath = flags._[0];
+    if (!filePath) {
+      console.error("Error: File path is required.");
+      console.error('Usage: speclock guard <file> --lock "constraint text"');
+      process.exit(1);
+    }
+    const lockText = flags.lock || "This file is locked by SpecLock. Do not modify.";
+    const result = guardFile(root, filePath, lockText);
+    if (result.success) {
+      console.log(`Guarded: ${filePath}`);
+      console.log(`Lock warning injected: "${lockText}"`);
+    } else {
+      console.error(result.error);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // --- UNGUARD ---
+  if (cmd === "unguard") {
+    const filePath = args[0];
+    if (!filePath) {
+      console.error("Error: File path is required.");
+      console.error("Usage: speclock unguard <file>");
+      process.exit(1);
+    }
+    const result = unguardFile(root, filePath);
+    if (result.success) {
+      console.log(`Unguarded: ${filePath}`);
+    } else {
+      console.error(result.error);
+      process.exit(1);
     }
     return;
   }
