@@ -1,6 +1,6 @@
 {
   "name": "speclock",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "AI constraint engine — MCP server + CLI with active enforcement. Memory + guardrails for AI coding tools. Works with Bolt.new, Claude Code, Cursor, Lovable.",
   "type": "module",
   "main": "src/mcp/server.js",
