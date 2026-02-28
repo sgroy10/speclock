@@ -16,6 +16,8 @@ import {
   endSession,
   suggestLocks,
   detectDrift,
+  syncLocksToPackageJson,
+  autoGuardRelatedFiles,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -171,9 +173,19 @@ server.tool(
   },
   async ({ text, tags, source }) => {
     const { lockId } = addLock(PROJECT_ROOT, text, tags, source);
+
+    // Auto-guard related files
+    const guardResult = autoGuardRelatedFiles(PROJECT_ROOT, text);
+    const guardMsg = guardResult.guarded.length > 0
+      ? `\nAuto-guarded ${guardResult.guarded.length} file(s): ${guardResult.guarded.join(", ")}`
+      : "";
+
+    // Sync active locks to package.json
+    syncLocksToPackageJson(PROJECT_ROOT);
+
     return {
       content: [
-        { type: "text", text: `Lock added (${lockId}): "${text}"` },
+        { type: "text", text: `Lock added (${lockId}): "${text}"${guardMsg}` },
       ],
     };
   }
@@ -194,6 +206,8 @@ server.tool(
         isError: true,
       };
     }
+    // Sync updated locks to package.json
+    syncLocksToPackageJson(PROJECT_ROOT);
     return {
       content: [
         {

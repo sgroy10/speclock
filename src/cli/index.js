@@ -14,6 +14,8 @@ import {
   guardFile,
   unguardFile,
   injectPackageJsonMarker,
+  syncLocksToPackageJson,
+  autoGuardRelatedFiles,
 } from "../core/engine.js";
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
@@ -72,7 +74,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v1.5.0 — AI Constraint Engine
+SpecLock v1.6.0 — AI Constraint Engine
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -200,16 +202,16 @@ Files created/updated:
   .speclock/brain.json          — Project memory
   .speclock/context/latest.md   — Context for AI (read this)
   SPECLOCK.md                   — AI rules (read this)
-  package.json                  — SpecLock marker added (AI auto-discovery)
+  package.json                  — Active locks embedded (AI auto-discovery)
 
 Next steps:
-  The AI should read SPECLOCK.md for rules and
-  .speclock/context/latest.md for project context.
-
   To add constraints:  npx speclock lock "Never touch auth files"
   To check conflicts:  npx speclock check "Modifying auth page"
   To log changes:      npx speclock log-change "Built landing page"
   To see status:       npx speclock status
+
+Tip: When starting a new chat, tell the AI:
+  "Check speclock status and read the project constraints before doing anything"
 `);
     return;
   }
@@ -250,6 +252,8 @@ Next steps:
       }
       const result = removeLock(root, lockId);
       if (result.removed) {
+        // Sync updated locks to package.json
+        syncLocksToPackageJson(root);
         refreshContext(root);
         console.log(`Lock removed: "${result.lockText}"`);
       } else {
@@ -267,6 +271,22 @@ Next steps:
       process.exit(1);
     }
     const { lockId } = addLock(root, text, parseTags(flags.tags), flags.source || "user");
+
+    // Auto-guard related files (Solution 1)
+    const guardResult = autoGuardRelatedFiles(root, text);
+    if (guardResult.guarded.length > 0) {
+      console.log(`Auto-guarded ${guardResult.guarded.length} related file(s):`);
+      for (const f of guardResult.guarded) {
+        console.log(`  🔒 ${f}`);
+      }
+    }
+
+    // Sync locks to package.json (Solution 2)
+    const syncResult = syncLocksToPackageJson(root);
+    if (syncResult.success) {
+      console.log(`Synced ${syncResult.lockCount} lock(s) to package.json.`);
+    }
+
     refreshContext(root);
     console.log(`Locked (${lockId}): "${text}"`);
     return;

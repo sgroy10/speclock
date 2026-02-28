@@ -218,6 +218,35 @@ Result: [HIGH] Conflict detected (confidence: 85%)
 | `speclock_detect_drift` | Scan changes for constraint violations |
 | `speclock_health` | Health score + multi-agent timeline |
 
+## Auto-Guard: Locks That Actually Work
+
+When you add a lock, SpecLock **automatically finds and guards related files**:
+
+```
+speclock lock "Never modify auth files"
+→ Auto-guarded 2 related file(s):
+  🔒 src/components/Auth.tsx
+  🔒 src/contexts/AuthContext.tsx
+
+speclock lock "Database must always be Supabase"
+→ Auto-guarded 1 related file(s):
+  🔒 src/lib/supabase.ts
+```
+
+The guard injects a warning **directly inside the file**. When the AI opens the file to edit it, it sees:
+```
+// ============================================================
+// SPECLOCK-GUARD — DO NOT MODIFY THIS FILE
+// LOCKED: Never modify auth files
+// THIS FILE IS LOCKED. DO NOT EDIT, CHANGE, OR REWRITE ANY PART OF IT.
+// The user must say "unlock" before this file can be changed.
+// A question is NOT permission. Asking about features is NOT permission.
+// ONLY "unlock" or "remove the lock" is permission to edit this file.
+// ============================================================
+```
+
+Active locks are also embedded in `package.json` — so the AI sees your constraints every time it reads the project config.
+
 ## CLI Commands
 
 ```bash
@@ -226,17 +255,19 @@ speclock setup --goal "Build my app"   # One-shot: init + rules + context
 
 # Memory
 speclock goal <text>                   # Set project goal
-speclock lock <text> [--tags a,b]      # Add a constraint
+speclock lock <text> [--tags a,b]      # Add constraint + auto-guard files
 speclock lock remove <id>              # Remove a lock
 speclock decide <text>                 # Record a decision
 speclock note <text>                   # Add a note
 
+# Enforcement
+speclock check <text>                  # Check for lock conflicts
+speclock guard <file> --lock "text"    # Manually guard a specific file
+speclock unguard <file>                # Remove guard from file
+
 # Tracking
 speclock log-change <text> --files x   # Log a change
 speclock context                       # Regenerate context file
-
-# Enforcement
-speclock check <text>                  # Check for lock conflicts
 
 # Other
 speclock status                        # Show brain summary
@@ -287,4 +318,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-*SpecLock v1.5.0 — Because remembering isn't enough. AI needs to respect boundaries.*
+*SpecLock v1.6.0 — Because remembering isn't enough. AI needs to respect boundaries.*

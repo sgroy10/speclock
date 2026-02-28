@@ -849,9 +849,9 @@ export function guardFile(root, relativeFilePath, lockText) {
   return { success: true };
 }
 
-// --- Package.json marker injection (makes Bolt.new auto-discover SpecLock) ---
+// --- Package.json lock sync (Solution 2: embed active locks directly in package.json) ---
 
-export function injectPackageJsonMarker(root) {
+export function syncLocksToPackageJson(root) {
   const pkgPath = path.join(root, "package.json");
   if (!fs.existsSync(pkgPath)) {
     return { success: false, error: "No package.json found in project root." };
@@ -860,21 +860,157 @@ export function injectPackageJsonMarker(root) {
   try {
     const raw = fs.readFileSync(pkgPath, "utf-8");
     const pkg = JSON.parse(raw);
+    const brain = readBrain(root);
+    if (!brain) {
+      return { success: false, error: "SpecLock not initialized." };
+    }
 
-    // Add speclock marker
+    const activeLocks = brain.specLock.items
+      .filter((l) => l.active !== false)
+      .map((l) => l.text);
+
     pkg.speclock = {
       active: true,
-      rules: "IMPORTANT: Read SPECLOCK.md before making ANY changes to this project. Read .speclock/context/latest.md for project memory, goals, locks, and decisions. Run 'npx speclock check' before modifying locked files.",
+      message: "STOP — This project has SpecLock constraints. Read SPECLOCK.md and .speclock/context/latest.md BEFORE making ANY changes. Run 'npx speclock check' before ALL code changes. If a lock below is violated, STOP and ask user to unlock.",
+      locks: activeLocks,
+      context: ".speclock/context/latest.md",
+      rules: "SPECLOCK.md",
     };
 
-    // Write back with same formatting
     const indent = raw.match(/^(\s+)/m)?.[1] || "  ";
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, indent) + "\n");
 
-    return { success: true };
+    return { success: true, lockCount: activeLocks.length };
   } catch (err) {
-    return { success: false, error: `Failed to modify package.json: ${err.message}` };
+    return { success: false, error: `Failed to sync locks to package.json: ${err.message}` };
   }
+}
+
+// Backward-compatible alias
+export function injectPackageJsonMarker(root) {
+  return syncLocksToPackageJson(root);
+}
+
+// --- Auto-guard related files (Solution 1: scan project and guard files matching lock keywords) ---
+
+const FILE_KEYWORD_PATTERNS = [
+  { keywords: ["auth", "authentication", "login", "signup", "signin", "sign-in", "sign-up"], patterns: ["**/Auth*", "**/auth*", "**/Login*", "**/login*", "**/SignUp*", "**/signup*", "**/SignIn*", "**/signin*", "**/*Auth*", "**/*auth*"] },
+  { keywords: ["database", "db", "supabase", "firebase", "mongo", "postgres", "sql", "prisma"], patterns: ["**/supabase*", "**/firebase*", "**/database*", "**/db.*", "**/db/**", "**/prisma/**", "**/*Client*", "**/*client*"] },
+  { keywords: ["payment", "pay", "stripe", "billing", "checkout", "subscription"], patterns: ["**/payment*", "**/Payment*", "**/pay*", "**/Pay*", "**/stripe*", "**/Stripe*", "**/billing*", "**/Billing*", "**/checkout*", "**/Checkout*"] },
+  { keywords: ["api", "endpoint", "route", "routes"], patterns: ["**/api/**", "**/routes/**", "**/endpoints/**"] },
+  { keywords: ["config", "configuration", "settings", "env"], patterns: ["**/config*", "**/Config*", "**/settings*", "**/Settings*"] },
+];
+
+function findRelatedFiles(root, lockText) {
+  const lockLower = lockText.toLowerCase();
+  const matchedFiles = [];
+
+  // Find which keyword patterns match this lock text
+  const matchingPatterns = [];
+  for (const group of FILE_KEYWORD_PATTERNS) {
+    const hasMatch = group.keywords.some((kw) => lockLower.includes(kw));
+    if (hasMatch) {
+      matchingPatterns.push(...group.patterns);
+    }
+  }
+
+  if (matchingPatterns.length === 0) return matchedFiles;
+
+  // Scan the src/ directory (and common directories) for matching files
+  const searchDirs = ["src", "app", "components", "pages", "lib", "utils", "contexts", "hooks", "services"];
+
+  for (const dir of searchDirs) {
+    const dirPath = path.join(root, dir);
+    if (!fs.existsSync(dirPath)) continue;
+    scanDirForMatches(root, dirPath, matchingPatterns, matchedFiles);
+  }
+
+  // Also check root-level files
+  try {
+    const rootFiles = fs.readdirSync(root);
+    for (const file of rootFiles) {
+      const fullPath = path.join(root, file);
+      if (!fs.statSync(fullPath).isFile()) continue;
+      const ext = path.extname(file).slice(1).toLowerCase();
+      if (!GUARD_MARKERS[ext]) continue;
+
+      for (const pattern of matchingPatterns) {
+        const simpleMatch = patternMatchesFile(pattern, file);
+        if (simpleMatch) {
+          const rel = path.relative(root, fullPath).replace(/\\/g, "/");
+          if (!matchedFiles.includes(rel)) matchedFiles.push(rel);
+        }
+      }
+    }
+  } catch (_) {}
+
+  return matchedFiles;
+}
+
+function scanDirForMatches(root, dirPath, patterns, results) {
+  try {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === "node_modules" || entry.name === ".speclock" || entry.name === ".git") continue;
+        scanDirForMatches(root, fullPath, patterns, results);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name).slice(1).toLowerCase();
+        if (!GUARD_MARKERS[ext]) continue;
+        const relPath = path.relative(root, fullPath).replace(/\\/g, "/");
+        for (const pattern of patterns) {
+          if (patternMatchesFile(pattern, relPath) || patternMatchesFile(pattern, entry.name)) {
+            if (!results.includes(relPath)) results.push(relPath);
+            break;
+          }
+        }
+      }
+    }
+  } catch (_) {}
+}
+
+function patternMatchesFile(pattern, filePath) {
+  // Simple glob matching: convert glob to regex
+  // Handle ** (any path), * (any chars in segment)
+  const clean = pattern.replace(/\\/g, "/");
+  const fileLower = filePath.toLowerCase();
+  const patternLower = clean.toLowerCase();
+
+  // Strip leading **/ for simple name matching
+  const namePattern = patternLower.replace(/^\*\*\//, "");
+
+  // Check if pattern is just a name pattern (no path separators)
+  if (!namePattern.includes("/")) {
+    const fileName = fileLower.split("/").pop();
+    // Convert glob * to regex .*
+    const regex = new RegExp("^" + namePattern.replace(/\*/g, ".*") + "$");
+    if (regex.test(fileName)) return true;
+    // Also check if the pattern appears anywhere in the filename
+    const corePattern = namePattern.replace(/\*/g, "");
+    if (corePattern.length > 2 && fileName.includes(corePattern)) return true;
+  }
+
+  // Full path match
+  const regex = new RegExp("^" + patternLower.replace(/\*\*\//g, "(.*/)?").replace(/\*/g, "[^/]*") + "$");
+  return regex.test(fileLower);
+}
+
+export function autoGuardRelatedFiles(root, lockText) {
+  const relatedFiles = findRelatedFiles(root, lockText);
+  const guarded = [];
+  const skipped = [];
+
+  for (const relFile of relatedFiles) {
+    const result = guardFile(root, relFile, lockText);
+    if (result.success) {
+      guarded.push(relFile);
+    } else {
+      skipped.push({ file: relFile, reason: result.error });
+    }
+  }
+
+  return { guarded, skipped, scannedPatterns: relatedFiles.length };
 }
 
 export function unguardFile(root, relativeFilePath) {
