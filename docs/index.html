@@ -252,10 +252,10 @@
             margin-bottom: 12px; color: #1a1d23;
         }
         .bolt-showcase .bolt-sub {
-            color: #6b7280; font-size: 1.05rem; margin-bottom: 36px; max-width: 650px;
+            color: #6b7280; font-size: 1.05rem; margin-bottom: 36px; max-width: 700px;
         }
         .bolt-flow {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
         }
         @media (max-width: 700px) { .bolt-flow { grid-template-columns: 1fr; } }
         .bolt-step {
@@ -554,40 +554,85 @@
 
     <!-- BOLT.NEW SHOWCASE -->
     <section class="bolt-showcase" id="bolt">
-        <div class="bolt-badge"><div class="pulse"></div> NEW IN v1.3.0</div>
-        <h2>Bolt.new now has memory + guardrails.</h2>
-        <p class="bolt-sub">Millions of Bolt.new users have zero memory and zero protection between sessions. SpecLock gives Bolt persistent memory <strong>and</strong> active constraint enforcement. No MCP needed. Just say <strong>"install speclock"</strong>.</p>
+        <div class="bolt-badge"><div class="pulse"></div> TESTED ON BOLT.NEW</div>
+        <h2>Proof: SpecLock stops Bolt from breaking your code.</h2>
+        <p class="bolt-sub">Real tests on a live Bolt.new project. Auth files locked, database locked to Supabase. Here's what happens when Bolt tries to violate constraints.</p>
 
         <div class="bolt-flow">
+            <!-- Test 1: Auth blocked -->
             <div class="bolt-step">
-                <div class="bolt-step-num" style="color: var(--blue);">Session 1 &mdash; Setup</div>
-                <h4>Say "install speclock" &mdash; done.</h4>
-                <p>Bolt automatically runs <code>npx speclock setup</code>, reads the generated rules, and starts capturing your project memory.</p>
+                <div class="bolt-step-num" style="color: var(--accent);">Test 1 &mdash; Locked Change Blocked</div>
+                <h4>"Add social media login to auth page"</h4>
                 <div class="mini-terminal">
-<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Install speclock and set up memory for Lumina"</span>
-<span style="color:#64748b;">Bolt:</span> <span style="color:#4ade80;">&#10003; Set goal: "Build B2B Lumina API"</span>
-      <span style="color:#4ade80;">&#10003; Added 6 locks (auth, security, rate limiting...)</span>
-      <span style="color:#4ade80;">&#10003; Recorded 7 decisions (Gemini, Stripe...)</span>
-      <span style="color:#4ade80;">&#10003; Context file generated</span>
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Add social media login to auth page"</span>
+
+<span style="color:#f87171;">Bolt: I cannot add social media login to the auth page.</span>
+<span style="color:#f87171;">The auth files are locked with the constraint</span>
+<span style="color:#f87171;">"Never modify auth files."</span>
+
+<span style="color:#fbbf24;">SpecLock detected a HIGH conflict:</span>
+<span style="color:#94a3b8;">  - Direct keyword match on "auth"</span>
+<span style="color:#94a3b8;">  - Auth.tsx and AuthContext.tsx are guarded</span>
+<span style="color:#94a3b8;">  - Say "unlock" to remove the lock</span>
                 </div>
             </div>
 
+            <!-- Test 2: Normal feature works -->
             <div class="bolt-step">
-                <div class="bolt-step-num" style="color: var(--green);">Session 2 &mdash; Full Memory</div>
-                <h4>New chat. Everything remembered.</h4>
-                <p>Bolt reads <code>.speclock/context/latest.md</code> and picks up exactly where you left off. All locks, decisions, and history intact.</p>
+                <div class="bolt-step-num" style="color: var(--green);">Test 2 &mdash; Unlocked Feature Works</div>
+                <h4>"Add dark theme to the app"</h4>
                 <div class="mini-terminal">
-<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Create a plan for the API endpoints"</span>
-<span style="color:#64748b;">Bolt:</span> <span style="color:#4ade80;">&#10003; Read project context (6 locks, 7 decisions)</span>
-      <span style="color:#4ade80;">&#10003; Created 10-phase plan respecting ALL constraints</span>
-      <span style="color:#4ade80;">&#10003; All plans use Supabase (locked), Bearer auth (locked)</span>
-      <span style="color:#4ade80;">&#10003; Logged planning phase back to SpecLock</span>
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Ok add dark theme to the app"</span>
+
+<span style="color:#4ade80;">Bolt: Checked SpecLock &mdash; no conflicts found.</span>
+<span style="color:#4ade80;">&#10003; Created theme context with dark mode</span>
+<span style="color:#4ade80;">&#10003; Added toggle button to Dashboard</span>
+<span style="color:#4ade80;">&#10003; Updated color classes</span>
+<span style="color:#4ade80;">&#10003; Build verified</span>
+
+<span style="color:#94a3b8;">SpecLock blocks locked things.</span>
+<span style="color:#94a3b8;">Everything else works normally.</span>
+                </div>
+            </div>
+
+            <!-- Test 3: Database blocked -->
+            <div class="bolt-step">
+                <div class="bolt-step-num" style="color: var(--accent);">Test 3 &mdash; Database Constraint Enforced</div>
+                <h4>"Change the database to Firebase"</h4>
+                <div class="mini-terminal">
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Change the database to Firebase"</span>
+
+<span style="color:#f87171;">Bolt: I cannot change the database to Firebase.</span>
+<span style="color:#f87171;">This project has SpecLock constraints.</span>
+
+<span style="color:#fbbf24;">Lock: "Database must always be Supabase</span>
+<span style="color:#fbbf24;">&mdash; never change to another database"</span>
+
+<span style="color:#94a3b8;">To use Firebase, you need to explicitly</span>
+<span style="color:#94a3b8;">say "unlock" to remove the database lock.</span>
+                </div>
+            </div>
+
+            <!-- Test 4: File guard works -->
+            <div class="bolt-step">
+                <div class="bolt-step-num" style="color: var(--purple);">Test 4 &mdash; File-Level Guard</div>
+                <h4>Bolt reads the guard inside the file</h4>
+                <div class="mini-terminal">
+<span style="color:#64748b;">User:</span> <span style="color:#93c5fd;">"Add social media login to auth"</span>
+
+<span style="color:#94a3b8;">Bolt reads Auth.tsx and sees (lines 2-7):</span>
+<span style="color:#fbbf24;">// SPECLOCK-GUARD &mdash; DO NOT MODIFY THIS FILE</span>
+<span style="color:#fbbf24;">// LOCKED: Never modify auth files</span>
+
+<span style="color:#f87171;">Bolt: I cannot add social media login to the</span>
+<span style="color:#f87171;">Auth component. This file is locked by SpecLock.</span>
+<span style="color:#f87171;">"A request for features is not permission to edit."</span>
                 </div>
             </div>
         </div>
 
         <div class="bolt-cta">
-            <strong>Works on Bolt.new free and paid plans.</strong> Also works with Aider, Rocket.new, and any platform with npm.
+            <strong>Locked things? Blocked. Unlocked things? Work normally.</strong> One prompt to install: "Install speclock and set up project memory"
         </div>
     </section>
 
