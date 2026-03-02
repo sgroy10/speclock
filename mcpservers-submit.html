@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpecLock - MCPServers.org Submission Helper</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: #8b8fa3;
+    font-size: 15px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+  .open-btn-wrapper {
+    margin-bottom: 36px;
+  }
+  .open-btn {
+    display: inline-block;
+    background: #4f6ef7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .open-btn:hover { background: #3b5ce4; }
+  .fields-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: #c0c4d6;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2a2d3a;
+  }
+  .field-card {
+    background: #1a1d2b;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .field-card:hover { border-color: #4f6ef7; }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7094;
+    margin-bottom: 8px;
+  }
+  .field-value-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .field-value {
+    flex: 1;
+    font-size: 15px;
+    color: #e8eaf0;
+    line-height: 1.5;
+    word-break: break-all;
+    padding: 10px 14px;
+    background: #12141e;
+    border-radius: 6px;
+    border: 1px solid #22253a;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  .field-value.placeholder {
+    color: #f5a623;
+    font-style: italic;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  .copy-btn {
+    flex-shrink: 0;
+    background: #2a2d3a;
+    color: #c0c4d6;
+    border: 1px solid #3a3d4a;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: center;
+  }
+  .copy-btn:hover {
+    background: #4f6ef7;
+    color: #fff;
+    border-color: #4f6ef7;
+  }
+  .copy-btn.copied {
+    background: #22c55e;
+    color: #fff;
+    border-color: #22c55e;
+  }
+  .copy-all-wrapper {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #2a2d3a;
+  }
+  .copy-all-btn {
+    background: #1a1d2b;
+    color: #c0c4d6;
+    border: 1px dashed #4f6ef7;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .copy-all-btn:hover {
+    background: #4f6ef7;
+    color: #fff;
+    border-style: solid;
+  }
+  .note {
+    margin-top: 28px;
+    padding: 16px 20px;
+    background: #1c1a0f;
+    border: 1px solid #3d3520;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #d4a94a;
+    line-height: 1.6;
+  }
+  .note strong { color: #f5a623; }
+  .step-badge {
+    display: inline-block;
+    background: #4f6ef7;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .step-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>SpecLock -- Submit to MCPServers.org</h1>
+  <p class="subtitle">
+    Copy each field value below and paste it into the submission form.
+    Click the button to open the submission page first.
+  </p>
+
+  <!-- Step 1 -->
+  <div class="step-text"><span class="step-badge">1</span>Open the submission page</div>
+  <div class="open-btn-wrapper">
+    <a class="open-btn" href="https://mcpservers.org/submit" target="_blank" rel="noopener">
+      Open mcpservers.org/submit
+    </a>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-text"><span class="step-badge">2</span>Copy and paste each field</div>
+  <div class="fields-header">Form Fields</div>
+
+  <!-- Server Name -->
+  <div class="field-card">
+    <div class="field-label">Server Name</div>
+    <div class="field-value-row">
+      <div class="field-value" id="val-name">SpecLock</div>
+      <button class="copy-btn" onclick="copyField('val-name', this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- Short Description -->
+  <div class="field-card">
+    <div class="field-label">Short Description</div>
+    <div class="field-value-row">
+      <div class="field-value" id="val-desc">AI constraint engine &#8212; persistent memory + active enforcement. Stops AI from breaking locked code. Semantic conflict detection, file-level guards, session continuity. 22 MCP tools.</div>
+      <button class="copy-btn" onclick="copyField('val-desc', this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- Link -->
+  <div class="field-card">
+    <div class="field-label">Link (GitHub or docs)</div>
+    <div class="field-value-row">
+      <div class="field-value" id="val-link">https://github.com/sgroy10/speclock</div>
+      <button class="copy-btn" onclick="copyField('val-link', this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- Category -->
+  <div class="field-card">
+    <div class="field-label">Category (select from dropdown)</div>
+    <div class="field-value-row">
+      <div class="field-value" id="val-cat">development</div>
+      <button class="copy-btn" onclick="copyField('val-cat', this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- Contact Email -->
+  <div class="field-card">
+    <div class="field-label">Contact Email</div>
+    <div class="field-value-row">
+      <div class="field-value placeholder" id="val-email">YOU NEED TO ENTER YOUR EMAIL ADDRESS HERE ON THE FORM</div>
+      <button class="copy-btn" style="opacity:0.4; cursor:default;" disabled>N/A</button>
+    </div>
+  </div>
+
+  <!-- Copy All -->
+  <div class="copy-all-wrapper">
+    <button class="copy-all-btn" onclick="copyAll(this)">Copy All Fields as Text (for reference)</button>
+  </div>
+
+  <div class="note">
+    <strong>Reminder:</strong> The Category field is a dropdown on the form -- select <strong>development</strong> from the list.
+    You must provide your own email address for the Contact Email field.
+    The site also offers a "Premium Submit" option for $39 -- the free submission should work fine.
+  </div>
+
+</div>
+
+<script>
+function copyField(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function copyAll(btn) {
+  const all = [
+    'Server Name: SpecLock',
+    'Short Description: AI constraint engine \u2014 persistent memory + active enforcement. Stops AI from breaking locked code. Semantic conflict detection, file-level guards, session continuity. 22 MCP tools.',
+    'Link: https://github.com/sgroy10/speclock',
+    'Category: development',
+    'Contact Email: (enter your email)'
+  ].join('\n');
+  navigator.clipboard.writeText(all).then(function() {
+    btn.textContent = 'Copied all fields!';
+    setTimeout(function() {
+      btn.textContent = 'Copy All Fields as Text (for reference)';
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

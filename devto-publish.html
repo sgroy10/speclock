@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dev.to Article — Ready to Publish</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { color: #fff; margin-bottom: 8px; font-size: 24px; }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 16px; color: #fff; margin-bottom: 12px; }
+  .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; background: #1a2a3a; color: #60a5fa; }
+  .reply-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.5; color: #ccc; white-space: pre-wrap; margin-bottom: 12px; max-height: 200px; overflow-y: auto; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .btn-copy { background: #2563eb; color: #fff; }
+  .btn-copy:hover { background: #3b82f6; }
+  .btn-copy.copied { background: #16a34a; }
+  .btn-open { background: #333; color: #fff; text-decoration: none; display: inline-block; text-align: center; }
+  .btn-open:hover { background: #444; }
+  .instructions { background: #1a1a2a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.8; color: #a0a0c0; }
+  .instructions strong { color: #fff; }
+  .step-num { display: inline-block; background: #2563eb; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 8px; }
+  .divider { border: none; border-top: 1px solid #222; margin: 20px 0; }
+  .tag { display: inline-block; background: #1a2a1a; color: #4ade80; padding: 3px 10px; border-radius: 12px; font-size: 11px; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<h1>Dev.to Article — Ready to Publish</h1>
+<p class="subtitle">3 steps: Open Dev.to, paste the article, publish. That's it.</p>
+
+<div class="instructions">
+  <strong>How to publish:</strong><br><br>
+  <span class="step-num">1</span> Click <strong>"Open Dev.to Editor"</strong> below (log in with GitHub if needed)<br><br>
+  <span class="step-num">2</span> In the Dev.to editor, click the <strong>"..."</strong> menu at the bottom-left and select <strong>"Edit in Markdown"</strong> (V2 editor) — or if you see a plain text box, you're already in markdown mode<br><br>
+  <span class="step-num">3</span> Click <strong>"Copy Full Article"</strong> below → paste into the editor (Ctrl+V) → it replaces everything<br><br>
+  <span class="step-num">4</span> The title, tags, and description are embedded in the frontmatter — Dev.to reads them automatically<br><br>
+  <span class="step-num">5</span> Click <strong>"Publish"</strong> on Dev.to. Done!
+</div>
+
+<!-- ARTICLE METADATA -->
+<div class="card">
+  <h2>Article Details</h2>
+  <p style="margin-bottom: 8px;"><strong style="color:#fff;">Title:</strong> I Told My AI "Never Touch Auth" — It Did Anyway. Here's How I Fixed It.</p>
+  <p style="margin-bottom: 8px;"><strong style="color:#fff;">Tags:</strong> <span class="tag">#ai</span><span class="tag">#programming</span><span class="tag">#beginners</span><span class="tag">#discuss</span></p>
+  <p><strong style="color:#fff;">Description:</strong> AI coding tools remember your constraints. Then ignore them. I built an open-source enforcement layer that actually stops the AI before it breaks your locked code.</p>
+</div>
+
+<!-- FULL ARTICLE COPY -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2>Full Article (Markdown)</h2>
+    <span class="badge">Dev.to</span>
+  </div>
+  <div class="reply-box" id="fullArticle">---
+title: I Told My AI "Never Touch Auth" — It Did Anyway. Here's How I Fixed It.
+published: false
+description: AI coding tools remember your constraints. Then ignore them. I built an open-source enforcement layer that actually stops the AI before it breaks your locked code.
+tags: ai, programming, beginners, discuss
+cover_image:
+---
+
+Last month, I was building a SaaS app on Bolt.new. Session 1 went great — auth system working, Supabase connected, everything clean.
+
+Session 2, I asked Bolt to "add a dark theme."
+
+Bolt added the dark theme. It also **rewrote my auth system**, switched my database queries, and broke 3 pages I didn't ask it to touch.
+
+Sound familiar?
+
+## The Problem Nobody's Solving
+
+AI coding tools now have memory. Claude Code has auto-memory. Cursor has Memory Bank. Lovable has Knowledge. `.cursorrules` and `AGENTS.md` exist.
+
+**But memory without enforcement is dangerous.**
+
+Here's what actually happens:
+
+- Your AI remembers you use Supabase — then switches to Firebase because it "seemed better"
+- Your AI remembers your auth setup — then rewrites it while "fixing" a bug
+- Your AI remembers your constraints — then **ignores them when they're inconvenient**
+
+The stats back this up:
+
+- **66%** of developers say AI gives solutions that are "almost right, but not quite" (Stack Overflow 2025)
+- **45%** of AI-generated code contains security vulnerabilities (Georgetown CSET)
+- Cursor's own forum has threads like ["The Vicious Circle of Agent Context Loss"](https://forum.cursor.com/t/the-vicious-circle-of-agent-context-loss/104068) and ["Cursor often forgets .mdc instructions"](https://forum.cursor.com/t/cursor-often-forgets-mdc-instructions/151718)
+
+**Remembering is not the same as respecting.**
+
+## What I Built
+
+I spent 6 months building [SpecLock](https://github.com/sgroy10/speclock) — an open-source constraint engine that adds **active enforcement** on top of persistent memory.
+
+The idea is simple: you tell the AI what it **can't** do, and SpecLock **stops it** before the damage happens.
+
+```
+You:    "Don't ever touch the auth files"
+AI:     Lock added: "Never modify auth files"
+
+... 5 sessions later ...
+
+You:    "Add social login to the login page"
+AI:     CONFLICT (HIGH — 100%): Violates lock "Never modify auth files"
+        Should I proceed or find another approach?
+```
+
+No other tool does this. Not Claude's native memory. Not Cursor rules. Not AGENTS.md files.
+
+## How It Works: 3 Enforcement Layers
+
+The reason `.cursorrules` and `AGENTS.md` fail is they're **suggestions**. The AI reads them, then does whatever it wants. As one Cursor forum user put it: "LLMs can't guarantee 100% compliance. They work probabilistically."
+
+SpecLock uses 3 layers that make enforcement as strong as possible:
+
+### Layer 1: Package.json Lock Sync
+When you add a lock, SpecLock embeds it directly in `package.json`. Since every AI tool reads `package.json` at session start, your constraints are visible from the very first message.
+
+```json
+{
+  "speclock": {
+    "active": true,
+    "locks": [
+      "Never modify auth files",
+      "Database must always be Supabase"
+    ]
+  }
+}
+```
+
+### Layer 2: Semantic Conflict Detection
+Before any change, SpecLock checks the proposed action against all locks. Not just keyword matching — **synonym expansion** (15 groups), **negation detection**, and **destructive action flagging**:
+
+```
+Lock:   "No breaking changes to public API"
+Action: "Remove the external endpoints"
+
+Result: CONFLICT (85% confidence)
+  - synonym match: remove/delete, external/public, endpoints/api
+  - lock prohibits this action (negation detected)
+  - destructive action against locked constraint
+```
+
+### Layer 3: File-Level Guards
+When you lock something like "never modify auth files", SpecLock **finds the actual auth files** in your project and injects a warning header:
+
+```javascript
+// ============================================================
+// SPECLOCK-GUARD — DO NOT MODIFY THIS FILE
+// LOCKED: Never modify auth files
+// THIS FILE IS LOCKED. DO NOT EDIT, CHANGE, OR REWRITE.
+// A question is NOT permission. ONLY "unlock" is permission.
+// ============================================================
+
+export function Auth() { return <div>Login</div> }
+```
+
+When the AI opens the file to edit it, it sees the warning **before** it can make changes. This is the strongest layer — the AI literally has to read the guard to access the code.
+
+## Real Test: 4 Tests on Bolt.new
+
+I ran 4 tests on Bolt.new with real locks:
+
+| Test | What I Asked | What Happened | Result |
+|------|-------------|---------------|--------|
+| 1 | "Add social media login" | Bolt detected conflict with auth lock | **Blocked** |
+| 2 | "Add dark theme" | Bolt added it normally | **Allowed** (not locked) |
+| 3 | "Switch database to Firebase" | Bolt detected conflict with Supabase lock | **Blocked** |
+| 4 | Bolt opened Auth.tsx to edit | Bolt read SPECLOCK-GUARD and refused | **Blocked at file level** |
+
+**Locked things get blocked. Unlocked things work normally.** That's the whole point.
+
+## Quick Start (2 minutes)
+
+### Bolt.new / Aider / Any npm Platform
+
+Just tell the AI:
+
+```
+"Install speclock and set up project memory"
+```
+
+Or run it yourself:
+
+```bash
+npx speclock setup --goal "Build my app"
+```
+
+That's it. SpecLock creates `SPECLOCK.md`, injects locks into `package.json`, and generates a context file. The AI reads these automatically.
+
+### Cursor / Claude Code / Windsurf / Cline (MCP)
+
+Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "speclock": {
+      "command": "npx",
+      "args": ["-y", "speclock", "serve", "--project", "."]
+    }
+  }
+}
+```
+
+This gives you 22 MCP tools — session memory, locks, conflict checking, git checkpoints, change tracking, constraint templates, violation reports, pre-commit hooks, and more.
+
+### Lovable (MCP Remote — No Install)
+
+1. Go to Settings > Connectors > New MCP server
+2. Enter URL: `https://speclock-mcp-production.up.railway.app/mcp`
+3. Done.
+
+## What's Different From Other Memory Tools?
+
+| Feature | Claude Memory | Cursor Rules | AGENTS.md | **SpecLock** |
+|---------|--------------|-------------|-----------|-------------|
+| Remembers context | Yes | Yes | Yes | **Yes** |
+| **Blocks violations** | No | No | No | **Yes** |
+| **Semantic conflict detection** | No | No | No | **Yes** |
+| File-level protection | No | No | No | **Yes** |
+| Git checkpoints | No | No | No | **Yes** |
+| **Constraint templates** | No | No | No | **Yes (6 built-in)** |
+| **Violation reports** | No | No | No | **Yes** |
+| **Git pre-commit enforcement** | No | No | No | **Yes** |
+| Works on Bolt.new | No | No | No | **Yes** |
+
+## New in v1.7.0: Templates, Reports, Pre-commit Hooks
+
+**Constraint Templates** — `npx speclock setup --template nextjs` adds 5-6 locks instantly. Available: nextjs, react, express, supabase, stripe, security-hardened.
+
+**Violation Reports** — `npx speclock report` shows how many times SpecLock protected your project.
+
+**Git Pre-commit Hook** — `npx speclock hook install` blocks commits to locked files at the git level.
+
+## The Uncomfortable Truth
+
+Every AI coding tool will get better memory eventually. Context windows will grow. Models will improve.
+
+But the fundamental problem remains: **AI tools are optimized to be helpful, not to respect boundaries.**
+
+When you say "never touch auth" and then ask "add social login", the AI sees a conflict between your constraint and your current request — and it resolves the conflict by doing what you're currently asking. That's how LLMs work. They're people-pleasers.
+
+The only way to fix this is an **external enforcement layer** that doesn't care about being helpful. It just checks the rules and blocks violations.
+
+That's SpecLock.
+
+## Try It
+
+- **GitHub**: [github.com/sgroy10/speclock](https://github.com/sgroy10/speclock)
+- **npm**: [npmjs.com/package/speclock](https://www.npmjs.com/package/speclock)
+- **Website**: [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/)
+
+Free. Open source. MIT license.
+
+---
+
+**What constraint would you lock first?** Drop it in the comments — I'm curious what people are most worried about their AI breaking.</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyText('fullArticle', this)">Copy Full Article</button>
+    <a class="btn btn-open" href="https://dev.to/new" target="_blank">Open Dev.to Editor</a>
+  </div>
+</div>
+
+<hr class="divider">
+
+<p style="color: #666; font-size: 12px; text-align: center; margin-top: 20px;">
+  After publishing, change <code>published: false</code> to <code>published: true</code> in the frontmatter, or just click the Publish button on Dev.to.
+</p>
+
+<script>
+function copyText(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy Full Article';
+      btn.classList.remove('copied');
+    }, 3000);
+  });
+}
+</script>
+
+</body>
+</html>

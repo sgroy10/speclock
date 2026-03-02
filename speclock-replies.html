@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpecLock — Ready-to-Post Replies</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { color: #fff; margin-bottom: 8px; font-size: 24px; }
+  .subtitle { color: #888; margin-bottom: 30px; font-size: 14px; }
+  .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .card h2 { font-size: 16px; color: #fff; }
+  .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+  .badge-cursor { background: #1a3a2a; color: #4ade80; }
+  .badge-devto { background: #1a2a3a; color: #60a5fa; }
+  .badge-openai { background: #2a1a3a; color: #c084fc; }
+  .badge-hn { background: #3a2a1a; color: #fb923c; }
+  .thread-link { display: block; color: #60a5fa; text-decoration: none; font-size: 13px; margin-bottom: 16px; word-break: break-all; }
+  .thread-link:hover { text-decoration: underline; }
+  .reply-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.6; color: #ccc; white-space: pre-wrap; margin-bottom: 12px; max-height: 300px; overflow-y: auto; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .btn-copy { background: #2563eb; color: #fff; }
+  .btn-copy:hover { background: #3b82f6; }
+  .btn-copy.copied { background: #16a34a; }
+  .btn-open { background: #333; color: #fff; text-decoration: none; display: inline-block; text-align: center; }
+  .btn-open:hover { background: #444; }
+  .status { margin-top: 20px; padding: 12px; background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; color: #4ade80; font-size: 13px; display: none; }
+  .divider { border: none; border-top: 1px solid #222; margin: 10px 0; }
+  .instructions { background: #1a1a2a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.8; color: #a0a0c0; }
+  .instructions strong { color: #fff; }
+  .counter { color: #888; font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>SpecLock — Ready-to-Post Replies</h1>
+<p class="subtitle">Click "Open Thread" → scroll to bottom → click "Copy Reply" → paste → post. Done.</p>
+
+<div class="instructions">
+  <strong>How to use:</strong><br>
+  1. Click <strong>"Open Thread"</strong> to open the forum post in a new tab<br>
+  2. Scroll to the bottom and click the Reply button on the forum<br>
+  3. Come back here and click <strong>"Copy Reply"</strong><br>
+  4. Paste (Ctrl+V) into the forum reply box and submit<br>
+  5. Repeat for each thread. That's it!
+</div>
+
+<!-- REPLY 1 -->
+<div class="card">
+  <div class="card-header">
+    <h2>1. The Vicious Circle of Agent Context Loss</h2>
+    <span class="badge badge-cursor">Cursor Forum</span>
+  </div>
+  <a class="thread-link" href="https://forum.cursor.com/t/the-vicious-circle-of-agent-context-loss/104068" target="_blank">https://forum.cursor.com/t/the-vicious-circle-of-agent-context-loss/104068</a>
+  <div class="reply-box" id="reply1">This is exactly the problem I spent 6 months solving. The issue isn't just memory — it's enforcement. Even when AI "remembers" your constraints (via .cursorrules, AGENTS.md, etc.), it still violates them when it's inconvenient.
+
+I built SpecLock — it adds persistent memory + active constraint enforcement. You set a lock like "never modify auth files" and if the AI tries to touch those files 5 sessions later, it gets blocked before the damage happens.
+
+For Cursor, it runs as an MCP server:
+```
+npx -y speclock serve --project .
+```
+
+Add it to `.cursor/mcp.json` and it gives you 22 tools — session memory, locks, conflict checking, git checkpoints, constraint templates, violation reports.
+
+Free and open source: https://github.com/sgroy10/speclock
+
+Happy to answer questions — I've been dealing with exactly this context loss problem across Cursor, Bolt.new, Claude Code, and Lovable.</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply1', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://forum.cursor.com/t/the-vicious-circle-of-agent-context-loss/104068" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 2 -->
+<div class="card">
+  <div class="card-header">
+    <h2>2. Losing context across files — how are you handling this?</h2>
+    <span class="badge badge-cursor">Cursor Forum</span>
+  </div>
+  <a class="thread-link" href="https://forum.cursor.com/t/losing-context-across-files-in-cursor-how-are-you-handling-this/146589" target="_blank">https://forum.cursor.com/t/losing-context-across-files-in-cursor-how-are-you-handling-this/146589</a>
+  <div class="reply-box" id="reply2">I tried the memory bank approach too — the problem is it's passive. The AI reads it, then ignores it when it's inconvenient.
+
+What I needed was something that actively STOPS the AI from breaking locked constraints, not just reminds it. So I built SpecLock.
+
+How it's different from AGENTS.md / memory bank:
+- You "lock" constraints: "Never modify auth files", "Database must be Supabase"
+- Before any change, conflict detection checks the action against all locks
+- If there's a conflict, the AI gets warned BEFORE making changes
+- It also auto-guards related files with warning headers
+
+For Cursor, add to `.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "speclock": {
+      "command": "npx",
+      "args": ["-y", "speclock", "serve", "--project", "."]
+    }
+  }
+}
+```
+
+Free, open source: https://github.com/sgroy10/speclock</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply2', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://forum.cursor.com/t/losing-context-across-files-in-cursor-how-are-you-handling-this/146589" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 3 -->
+<div class="card">
+  <div class="card-header">
+    <h2>3. Cursor often forgets .mdc instructions</h2>
+    <span class="badge badge-cursor">Cursor Forum</span>
+  </div>
+  <a class="thread-link" href="https://forum.cursor.com/t/cursor-often-forgets-mdc-instructions/151718" target="_blank">https://forum.cursor.com/t/cursor-often-forgets-mdc-instructions/151718</a>
+  <div class="reply-box" id="reply3">Someone here mentioned wanting "pre/post-response hooks that guarantee compliance independent of LLM limitations" — that's essentially what SpecLock does.
+
+.mdc files are suggestions — the LLM can ignore them. SpecLock adds an active enforcement layer:
+
+1. You lock a constraint ("never use Linux commands", "always use TypeScript")
+2. Before any change, semantic conflict detection runs against all locks
+3. If there's a match, the AI gets a warning with confidence score
+
+It's not 100% either (nothing is with LLMs), but it adds 3 enforcement layers:
+- Constraint checks via MCP tool calls
+- Lock text embedded in package.json (AI reads it every session)
+- Guard headers injected into protected files
+
+Works as a Cursor MCP server. Free, open source: https://github.com/sgroy10/speclock</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply3', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://forum.cursor.com/t/cursor-often-forgets-mdc-instructions/151718" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- REPLY 4 - Dev.to -->
+<div class="card">
+  <div class="card-header">
+    <h2>4. The Hidden Cost of AI Coding Context Loss</h2>
+    <span class="badge badge-devto">Dev.to</span>
+  </div>
+  <a class="thread-link" href="https://dev.to/gonewx/the-hidden-cost-of-ai-coding-context-loss-and-how-developers-are-fixing-it-4b0d" target="_blank">https://dev.to/gonewx/the-hidden-cost-of-ai-coding-context-loss-and-how-developers-are-fixing-it-4b0d</a>
+  <div class="reply-box" id="reply4">Great article. The CONTEXT.md approach is solid but has one gap — it's passive memory. The AI reads it, then does whatever it wants anyway.
+
+I built SpecLock to solve this with active enforcement on top of persistent memory. You set "locks" (non-negotiable constraints like "never modify auth files" or "database must be Supabase") and SpecLock blocks the AI when it tries to violate them.
+
+It also does the stuff you mentioned:
+- Git-aware checkpoints for rollback
+- Structured context files (goals, decisions, locks, change history)
+- Session continuity across conversations
+
+But the key difference is the enforcement layer — semantic conflict detection that catches synonyms and negation ("remove the API endpoints" triggers a conflict with "don't break the public API").
+
+Works with Claude Code, Cursor, Windsurf, Cline (MCP), and Bolt.new (npm/CLI mode).
+
+Free, open source: https://github.com/sgroy10/speclock</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply4', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://dev.to/gonewx/the-hidden-cost-of-ai-coding-context-loss-and-how-developers-are-fixing-it-4b0d" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 5 - OpenAI -->
+<div class="card">
+  <div class="card-header">
+    <h2>5. When vibe coding turns into an unfixable mess</h2>
+    <span class="badge badge-openai">OpenAI Forum</span>
+  </div>
+  <a class="thread-link" href="https://community.openai.com/t/when-vibe-coding-turns-into-an-unfixable-mess/1374390" target="_blank">https://community.openai.com/t/when-vibe-coding-turns-into-an-unfixable-mess/1374390</a>
+  <div class="reply-box" id="reply5">This is the #1 reason vibe-coded projects fail — the AI has no memory of what it shouldn't touch.
+
+Every session starts fresh, so it "helpfully" rewrites your auth, changes your database, or refactors things that were working fine.
+
+I built a tool called SpecLock that prevents this. You set constraints:
+- "Never modify auth files" → AI gets blocked if it tries
+- "Database must always be Supabase" → AI can't switch to Firebase
+- "Don't touch the payment system" → Protected with file-level guards
+
+It works on Bolt.new (npm install), Cursor/Claude Code (MCP), and Lovable.
+
+Free, open source: https://github.com/sgroy10/speclock
+
+The key insight: AI needs guardrails, not just memory. Remembering your constraints isn't enough — it needs to be stopped when it tries to violate them.</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply5', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://community.openai.com/t/when-vibe-coding-turns-into-an-unfixable-mess/1374390" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 6 - HN (Hive Memory - direct competitor, posted 18hrs ago) -->
+<div class="card">
+  <div class="card-header">
+    <h2>6. Show HN: Hive Memory — Cross-project memory for AI agents</h2>
+    <span class="badge badge-hn">Hacker News (FRESH)</span>
+  </div>
+  <a class="thread-link" href="https://news.ycombinator.com/item?id=47207442" target="_blank">https://news.ycombinator.com/item?id=47207442</a>
+  <div class="reply-box" id="reply6">Interesting project. Memory is definitely the right problem to solve.
+
+One thing I've found building in this space: memory alone isn't enough. The AI can "remember" your constraints and still violate them when it's inconvenient.
+
+I built SpecLock (https://github.com/sgroy10/speclock) which adds enforcement on top of memory. You set "locks" — non-negotiable constraints like "never modify auth files" — and semantic conflict detection blocks the AI before it makes changes that violate them.
+
+The key difference: Hive Memory tells the AI what it should know. SpecLock tells the AI what it can't do — and blocks it when it tries.
+
+Also does session continuity, git checkpoints, structured decisions/goals, and change tracking. Works as MCP server (Cursor, Claude Code, Windsurf) or npm/CLI mode (Bolt.new).
+
+Would be interesting to combine both approaches — persistent cross-project memory (Hive) + constraint enforcement (SpecLock).</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply6', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://news.ycombinator.com/item?id=47207442" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 7 - HN (Vibe coding killing open source - 62 comments, 25 days old) -->
+<div class="card">
+  <div class="card-header">
+    <h2>7. How Vibe Coding Is Killing Open Source</h2>
+    <span class="badge badge-hn">Hacker News</span>
+  </div>
+  <a class="thread-link" href="https://news.ycombinator.com/item?id=46876455" target="_blank">https://news.ycombinator.com/item?id=46876455</a>
+  <div class="reply-box" id="reply7">The core issue behind all of this: AI coding tools have memory but zero enforcement.
+
+The AI remembers you use Supabase — then switches to Firebase because it "seemed better." It remembers your auth setup — then rewrites it while "fixing" a bug. It remembers your constraints — then ignores them when they're inconvenient.
+
+This is exactly why I built SpecLock — an open source constraint engine for AI coding tools. You set locks ("never modify auth files", "database must be Supabase") and it blocks the AI when it tries to violate them. Semantic conflict detection, not just keyword matching.
+
+Works as MCP server for Cursor/Claude Code/Windsurf, and as npm package for Bolt.new.
+
+The broader point: the ecosystem needs more tools that constrain AI behavior, not just enable it. Maintainers closing PRs is a symptom. The root cause is AI tools with no guardrails.
+
+https://github.com/sgroy10/speclock</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply7', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://news.ycombinator.com/item?id=46876455" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<!-- REPLY 8 - HN (Memory system for AI agents) -->
+<div class="card">
+  <div class="card-header">
+    <h2>8. Memory system for AI agents to survive context compaction</h2>
+    <span class="badge badge-hn">Hacker News</span>
+  </div>
+  <a class="thread-link" href="https://news.ycombinator.com/item?id=46826485" target="_blank">https://news.ycombinator.com/item?id=46826485</a>
+  <div class="reply-box" id="reply8">Context compaction is brutal — you lose architectural decisions, rejected approaches, and the reasoning behind your constraints.
+
+I built SpecLock to solve this differently. Instead of trying to preserve everything through compaction, it externalizes the critical stuff:
+
+- Goals, locks (non-negotiable constraints), and decisions stored in .speclock/brain.json
+- Session briefings reload full context at conversation start
+- Locks are embedded in package.json so the AI sees them even in fresh sessions
+- Protected files get SPECLOCK-GUARD headers the AI reads before editing
+
+The enforcement layer is the key part — even if the AI "forgets" a constraint after compaction, the lock still exists and conflict detection catches violations.
+
+Works as MCP server or npm CLI. Free, open source: https://github.com/sgroy10/speclock</div>
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyReply('reply8', this)">Copy Reply</button>
+    <a class="btn btn-open" href="https://news.ycombinator.com/item?id=46826485" target="_blank">Open Thread</a>
+  </div>
+</div>
+
+<div class="counter" id="counter">0 of 8 replies copied</div>
+<div class="status" id="status"></div>
+
+<script>
+let copiedCount = 0;
+const copiedSet = new Set();
+
+function copyReply(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    if (!copiedSet.has(id)) {
+      copiedSet.add(id);
+      copiedCount++;
+      document.getElementById('counter').textContent = copiedCount + ' of 6 replies copied';
+    }
+    if (copiedCount === 8) {
+      const s = document.getElementById('status');
+      s.style.display = 'block';
+      s.textContent = 'All 8 replies copied! Go post them and get some users.';
+    }
+    setTimeout(() => {
+      btn.textContent = 'Copy Reply';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
