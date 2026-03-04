@@ -50,11 +50,14 @@ No other tool does this. Not Claude's native memory. Not Mem0. Not CLAUDE.md fil
 | Remembers context | Yes | Yes | Manual | **Yes** |
 | **Stops the AI from breaking things** | No | No | No | **Yes — active enforcement** |
 | **Semantic conflict detection** | No | No | No | **Yes — semantic engine v2 (100% detection, 0% false positives)** |
+| **Tamper-proof audit trail** | No | No | No | **Yes — HMAC-SHA256 hash chain** |
+| **Compliance exports** | No | No | No | **Yes — SOC 2, HIPAA, CSV** |
 | Works on Bolt.new | No | No | No | **Yes — npm file-based mode** |
 | Works on Lovable | No | No | No | **Yes — MCP remote** |
 | Structured decisions/locks | No | Tags only | Flat text | **Goals, locks, decisions, changes** |
 | Git-aware (checkpoints, rollback) | No | No | No | **Yes** |
 | Drift detection | No | No | No | **Yes — scans changes against locks** |
+| CI/CD integration | No | No | No | **Yes — GitHub Actions** |
 | Multi-agent timeline | No | No | No | **Yes** |
 | Cross-platform | Claude only | MCP only | Tool-specific | **Universal (MCP + npm)** |
 
@@ -189,10 +192,10 @@ Result:  NO CONFLICT (confidence: 7%)
 | Mode | Platforms | How It Works |
 |------|-----------|--------------|
 | **MCP Remote** | Lovable, bolt.diy, Base44 | Connect via URL — no install needed |
-| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 22 tools via MCP |
+| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 24 tools via MCP |
 | **npm File-Based** | Bolt.new, Aider, Rocket.new | `npx speclock setup` — AI reads SPECLOCK.md + uses CLI |
 
-## 22 MCP Tools
+## 24 MCP Tools
 
 ### Memory Management
 | Tool | Purpose |
@@ -239,6 +242,12 @@ Result:  NO CONFLICT (confidence: 7%)
 | `speclock_apply_template` | Apply pre-built constraint templates (nextjs, react, express, etc.) |
 | `speclock_report` | Violation report — blocked change stats |
 | `speclock_audit` | Audit staged files against active locks |
+
+### Enterprise (v2.1)
+| Tool | Purpose |
+|------|---------|
+| `speclock_verify_audit` | Verify HMAC audit chain integrity — tamper detection |
+| `speclock_export_compliance` | Generate SOC 2 / HIPAA / CSV compliance reports |
 
 ## Auto-Guard: Locks That Actually Work
 
@@ -303,11 +312,67 @@ speclock audit                         # Audit staged files against locks
 speclock log-change <text> --files x   # Log a change
 speclock context                       # Regenerate context file
 
+# Enterprise (v2.1)
+speclock audit-verify                  # Verify HMAC audit chain integrity
+speclock export --format <soc2|hipaa|csv>  # Compliance export
+speclock license                       # Show license tier and usage
+
 # Other
 speclock status                        # Show brain summary
 speclock serve [--project <path>]      # Start MCP server
 speclock watch                         # Start file watcher
 ```
+
+## Enterprise Features (v2.1)
+
+### HMAC Audit Chain
+Every event in `events.log` gets an HMAC-SHA256 hash chained to the previous event. Modify any event and the chain breaks — instant tamper detection.
+
+```bash
+$ npx speclock audit-verify
+
+Audit Chain Verification
+==================================================
+Status: VALID
+Total events: 47
+Hashed events: 47
+Legacy events (pre-v2.1): 0
+Audit chain verified. No tampering detected.
+```
+
+### Compliance Exports
+Generate audit-ready reports for regulated industries:
+
+```bash
+npx speclock export --format soc2    # SOC 2 Type II JSON report
+npx speclock export --format hipaa   # HIPAA PHI protection report
+npx speclock export --format csv     # All events as CSV spreadsheet
+```
+
+SOC 2 reports include: constraint change history, access logs, decision audit trail, audit chain integrity verification. HIPAA reports filter for PHI-related constraints and check encryption/access control status.
+
+### License Tiers
+| Tier | Price | Locks | Features |
+|------|-------|-------|----------|
+| **Free** | $0 | 10 | Conflict detection, MCP, CLI, context |
+| **Pro** | $19/mo | Unlimited | + LLM detection, HMAC audit, compliance exports |
+| **Enterprise** | $99/mo | Unlimited | + RBAC, encrypted storage, SSO |
+
+### HTTP Server Hardening
+- Rate limiting: 100 req/min per IP (configurable via `SPECLOCK_RATE_LIMIT`)
+- CORS: configurable origins via `SPECLOCK_CORS_ORIGINS`
+- Health endpoint: `GET /health` with uptime and audit chain status
+
+### GitHub Actions
+```yaml
+# In your workflow:
+- uses: sgroy10/speclock-check@v2
+  with:
+    fail-on-conflict: true
+```
+Audits changed files against locks, posts PR comments, fails workflow on violations.
+
+---
 
 ## Architecture
 
@@ -317,18 +382,20 @@ speclock watch                         # Start file watcher
 └──────────────┬──────────────────┬────────────────────┘
                │                  │
      MCP Protocol          File-Based (npm)
-    (22 tool calls)      (reads SPECLOCK.md +
+    (24 tool calls)      (reads SPECLOCK.md +
                         .speclock/context/latest.md,
                          runs CLI commands)
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
 │              SpecLock Core Engine                      │
-│   Memory | Tracking | Enforcement | Git | Intelligence│
+│  Memory | Tracking | Enforcement | Git | Intelligence │
+│  Audit  | Compliance | License                        │
 └──────────────────────┬───────────────────────────────┘
                        │
                 .speclock/
                 ├── brain.json         (structured memory)
-                ├── events.log         (immutable audit trail)
+                ├── events.log         (HMAC-signed audit trail)
+                ├── .audit-key         (HMAC secret — gitignored)
                 ├── patches/           (git diffs per event)
                 └── context/
                     └── latest.md      (human-readable context)
@@ -352,4 +419,4 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-*SpecLock v2.0.0 — Real semantic conflict detection. 100% detection, 0% false positives. Because remembering isn't enough — AI needs to respect boundaries.*
+*SpecLock v2.1.0 — Semantic conflict detection + enterprise audit & compliance. 100% detection, 0% false positives. HMAC audit chain, SOC 2/HIPAA exports. Because remembering isn't enough — AI needs to respect boundaries.*

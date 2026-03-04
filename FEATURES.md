@@ -35,7 +35,8 @@ The AI reads this memory at the start of every session and writes to it as it wo
 | Works without MCP | No | N/A | No | **Yes — npm file-based mode** |
 | Cross-platform | Tool-specific | Tool-specific | Tool-specific | **Universal (MCP + npm)** |
 | Auto-capture | No | No | No | **Yes — from natural language** |
-| Audit trail | No | Partial | No | **Immutable event log** |
+| Audit trail | No | Partial | No | **HMAC-signed immutable event log** |
+| Compliance exports | No | No | No | **SOC 2, HIPAA, CSV** |
 | Git-aware | No | No | No | **Checkpoints, diffs, reverts** |
 
 **Other tools remember. SpecLock enforces.**
@@ -65,7 +66,7 @@ URL: https://speclock-mcp-production.up.railway.app/mcp
   }
 }
 ```
-The AI tool runs the MCP server locally. 22 tools available via MCP protocol. Claude Code follows server instructions automatically — zero config.
+The AI tool runs the MCP server locally. 24 tools available via MCP protocol. Claude Code follows server instructions automatically — zero config.
 
 ### Mode 3: npm File-Based (Bolt.new, Aider, any platform with npm)
 ```bash
@@ -126,7 +127,7 @@ Bolt: "All planning logged to Speclock for project continuity!"
 
 ---
 
-## 22 MCP Tools
+## 24 MCP Tools
 
 ### Memory Management (8 tools)
 | Tool | Purpose |
@@ -174,6 +175,12 @@ Bolt: "All planning logged to Speclock for project continuity!"
 | `speclock_report` | Violation report — how many times SpecLock blocked changes |
 | `speclock_audit` | Audit staged files against active locks (used by pre-commit hook) |
 
+### Enterprise Compliance (2 tools — v2.1)
+| Tool | Purpose |
+|------|---------|
+| `speclock_verify_audit` | Verify HMAC audit chain integrity — detect tampering |
+| `speclock_export_compliance` | Generate SOC 2 / HIPAA / CSV compliance reports |
+
 ---
 
 ## CLI Commands
@@ -208,6 +215,13 @@ npx speclock report                         # Show violation stats
 npx speclock hook install                   # Install pre-commit hook
 npx speclock hook remove                    # Remove pre-commit hook
 npx speclock audit                          # Audit staged files vs locks
+
+# Enterprise (v2.1)
+npx speclock audit-verify                   # Verify HMAC audit chain integrity
+npx speclock export --format soc2           # SOC 2 compliance export
+npx speclock export --format hipaa          # HIPAA compliance export
+npx speclock export --format csv            # CSV export for auditors
+npx speclock license                        # Show license tier and usage
 
 # Information
 npx speclock status                         # Brain summary
@@ -249,6 +263,47 @@ Result:  NO CONFLICT (7%) — intent alignment: "enable" is opposite of "disable
 
 ---
 
+## Enterprise Features (v2.1)
+
+### HMAC Audit Chain
+Every event written to `events.log` is signed with HMAC-SHA256, chained to the previous event's hash. Tampering with any event breaks the chain — detectable instantly via `npx speclock audit-verify` or the `speclock_verify_audit` MCP tool.
+
+- **Secret management**: `SPECLOCK_AUDIT_SECRET` env var or auto-generated `.speclock/.audit-key` (gitignored)
+- **Backward compatible**: Pre-v2.1 events without hashes are accepted as "legacy"
+- **Verification**: Returns valid/broken status, total events, break point, and error details
+
+### Compliance Exports
+Generate audit-ready reports for enterprise compliance teams:
+
+| Format | Command | Output |
+|--------|---------|--------|
+| **SOC 2** | `npx speclock export --format soc2` | JSON: constraints, access logs, decisions, audit chain status |
+| **HIPAA** | `npx speclock export --format hipaa` | JSON: PHI-filtered constraints, safeguard status, encryption check |
+| **CSV** | `npx speclock export --format csv` | Spreadsheet: all events with timestamps, IDs, hashes |
+
+### License Tiers
+| Tier | Price | Locks | Key Features |
+|------|-------|-------|-------------|
+| **Free** | $0 | 10 | Conflict detection, MCP, CLI, session tracking |
+| **Pro** | $19/mo | Unlimited | + LLM detection, HMAC audit, compliance exports |
+| **Enterprise** | $99/mo | Unlimited | + RBAC, encrypted storage, SSO, priority support |
+
+### HTTP Server Hardening
+- **Rate limiting**: Sliding window, 100 req/min per IP (configurable via `SPECLOCK_RATE_LIMIT`)
+- **CORS**: Configurable origins via `SPECLOCK_CORS_ORIGINS`
+- **Health endpoint**: `GET /health` returns version, uptime, audit chain status
+- **Size limit**: 1MB max request body
+
+### GitHub Actions Integration
+```yaml
+- uses: sgroy10/speclock-check@v2
+  with:
+    fail-on-conflict: true
+```
+Runs `speclock audit` against changed files, posts violation report as PR comment, fails workflow on HIGH conflicts.
+
+---
+
 ## Platform Compatibility
 
 | Platform | MCP Support | SpecLock Mode | Setup Time | Instructions Needed? |
@@ -275,7 +330,7 @@ Result:  NO CONFLICT (7%) — intent alignment: "enable" is opposite of "disable
 └──────────────┬──────────────────┬────────────────────┘
                │                  │
      MCP Protocol          File-Based (npm)
-    (22 tool calls)      (reads SPECLOCK.md +
+    (24 tool calls)      (reads SPECLOCK.md +
                         .speclock/context/latest.md,
                          runs CLI commands)
                │                  │
@@ -286,7 +341,8 @@ Result:  NO CONFLICT (7%) — intent alignment: "enable" is opposite of "disable
                        │
                 .speclock/
                 ├── brain.json         (structured memory — single source of truth)
-                ├── events.log         (immutable JSONL audit trail)
+                ├── events.log         (HMAC-signed JSONL audit trail)
+                ├── .audit-key         (HMAC secret — gitignored)
                 ├── patches/           (git diffs per event)
                 └── context/
                     └── latest.md      (human-readable context — auto-refreshed)
@@ -364,4 +420,4 @@ AI:   Unlocked. Proceeding with auth file changes.
 
 ---
 
-*SpecLock v2.0.0 — Real semantic conflict detection. 100% detection, 0% false positives.*
+*SpecLock v2.1.0 — Semantic conflict detection + enterprise audit & compliance. 100% detection, 0% false positives. HMAC audit chain, SOC 2/HIPAA exports.*
