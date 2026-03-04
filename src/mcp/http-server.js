@@ -597,12 +597,50 @@ app.get("/", (req, res) => {
     name: "speclock",
     version: VERSION,
     author: AUTHOR,
-    description: "AI Continuity Engine with enterprise audit, compliance, and enforcement",
-    tools: 28,
+    description: "AI Constraint Engine with Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 31 MCP tools. Enterprise platform.",
+    tools: 31,
     mcp_endpoint: "/mcp",
     health_endpoint: "/health",
     npm: "https://www.npmjs.com/package/speclock",
     github: "https://github.com/sgroy10/speclock",
+  });
+});
+
+// Smithery server card for listing metadata
+app.get("/.well-known/mcp/server-card.json", (req, res) => {
+  setCorsHeaders(res);
+  res.json({
+    name: "SpecLock",
+    version: VERSION,
+    description: "AI Constraint Engine — memory + enforcement for AI coding tools. Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 31 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
+    author: {
+      name: "Sandeep Roy",
+      url: "https://github.com/sgroy10",
+    },
+    repository: "https://github.com/sgroy10/speclock",
+    homepage: "https://sgroy10.github.io/speclock/",
+    license: "MIT",
+    capabilities: {
+      tools: 31,
+      categories: [
+        "Memory Management",
+        "Change Tracking",
+        "Constraint Enforcement",
+        "Git Integration",
+        "AI Intelligence",
+        "Templates & Reports",
+        "Compliance & Audit",
+        "Hard Enforcement",
+        "Policy-as-Code",
+        "Telemetry",
+      ],
+    },
+    keywords: [
+      "ai-memory", "constraint-enforcement", "mcp", "policy-as-code",
+      "sso", "oauth", "rbac", "encryption", "audit", "compliance",
+      "soc2", "hipaa", "dashboard", "telemetry", "claude-code",
+      "cursor", "bolt-new", "lovable", "enterprise",
+    ],
   });
 });
 
