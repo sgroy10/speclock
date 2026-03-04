@@ -436,7 +436,7 @@ function createSpecLockServer() {
 const app = createMcpExpressApp({ host: "0.0.0.0" });
 
 // CORS preflight handler
-app.options("*", (req, res) => {
+app.options("/{*path}", (req, res) => {
   setCorsHeaders(res);
   res.writeHead(204).end();
 });
