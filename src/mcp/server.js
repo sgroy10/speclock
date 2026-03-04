@@ -49,6 +49,29 @@ import {
   createTag,
   getDiffSummary,
 } from "../core/git.js";
+import {
+  isAuthEnabled,
+  validateApiKey,
+  checkPermission,
+} from "../core/auth.js";
+
+// --- Auth via env var (v3.0) ---
+function getAuthRole() {
+  if (!isAuthEnabled(PROJECT_ROOT)) return "admin";
+  const key = process.env.SPECLOCK_API_KEY;
+  if (!key) return "admin"; // No key env var = local use, allow all
+  const result = validateApiKey(PROJECT_ROOT, key);
+  return result.valid ? result.role : null;
+}
+
+function requirePermission(toolName) {
+  const role = getAuthRole();
+  if (!role) return { allowed: false, error: "Invalid SPECLOCK_API_KEY." };
+  if (!checkPermission(role, toolName)) {
+    return { allowed: false, error: `Permission denied. Role "${role}" cannot access "${toolName}".` };
+  }
+  return { allowed: true, role };
+}
 
 // --- Project root resolution ---
 function parseArgs(argv) {
@@ -67,7 +90,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "2.5.0";
+const VERSION = "3.0.0";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(

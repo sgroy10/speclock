@@ -346,6 +346,47 @@ The `speclock_semantic_audit` tool (and `npx speclock audit-semantic` CLI) parse
 
 ---
 
+## Security & Access Control (v3.0)
+
+SpecLock v3.0 introduces a complete **security and access control layer** — API key authentication, role-based access control, and encrypted storage for sensitive project memory.
+
+### API Key Authentication
+- **SHA-256 hashed keys** stored in `.speclock/auth.json` (gitignored)
+- Create, rotate, and revoke keys via CLI
+- Keys are never stored in plaintext — only the SHA-256 hash is persisted
+
+### RBAC with 4 Roles
+| Role | Permissions |
+|------|-------------|
+| **viewer** | Read-only access to context, events, and changes |
+| **developer** | Read + override locks with justification |
+| **architect** | Read + write + override (manage locks, decisions, goals) |
+| **admin** | Full access including auth management (create/revoke keys, change roles) |
+
+### AES-256-GCM Encrypted Storage
+- **Transparent encrypt-on-write / decrypt-on-read** for `brain.json` and `events.log`
+- Encryption key provided via `SPECLOCK_ENCRYPTION_KEY` environment variable
+- When set, all data at rest is encrypted — when unset, files remain plaintext (backward compatible)
+
+### CLI Auth Commands
+```bash
+speclock auth create-key --role admin    # Create a new API key with role
+speclock auth rotate-key                 # Rotate an existing key
+speclock auth revoke-key                 # Revoke a key immediately
+speclock auth list-keys                  # List all active keys with roles
+```
+
+### HTTP Auth
+- **Authorization header**: `Authorization: Bearer <key>` on every request
+- **401 Unauthorized**: Returned when no key or invalid key is provided
+- **403 Forbidden**: Returned when the key's role lacks permission for the requested operation
+- **RBAC enforced on every tool call** — role checked before execution
+
+### Test Coverage
+- **300 tests** across 5 test suites covering authentication, RBAC, encryption, key lifecycle, and HTTP integration
+
+---
+
 ## Platform Compatibility
 
 | Platform | MCP Support | SpecLock Mode | Setup Time | Instructions Needed? |
@@ -462,4 +503,4 @@ AI:   Unlocked. Proceeding with auth file changes.
 
 ---
 
-*SpecLock v2.5.0 — Semantic conflict detection + enterprise audit & compliance + hard enforcement. 100% detection, 0% false positives. HMAC audit chain, SOC 2/HIPAA exports, advisory/hard enforcement modes, override audit trail, semantic pre-commit.*
+*SpecLock v3.0.0 — Semantic conflict detection + enterprise audit & compliance + hard enforcement + security & access control. 100% detection, 0% false positives. HMAC audit chain, SOC 2/HIPAA exports, advisory/hard enforcement modes, override audit trail, semantic pre-commit, API key auth, RBAC, AES-256-GCM encrypted storage.*

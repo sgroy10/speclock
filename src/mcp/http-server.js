@@ -51,9 +51,21 @@ import {
   createTag,
   getDiffSummary,
 } from "../core/git.js";
+import {
+  isAuthEnabled,
+  validateApiKey,
+  checkPermission,
+  createApiKey,
+  rotateApiKey,
+  revokeApiKey,
+  listApiKeys,
+  enableAuth,
+  disableAuth,
+  TOOL_PERMISSIONS,
+} from "../core/auth.js";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "2.5.0";
+const VERSION = "3.0.0";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 
@@ -403,6 +415,16 @@ app.options("*", (req, res) => {
   res.writeHead(204).end();
 });
 
+// --- Auth middleware helper ---
+function authenticateRequest(req) {
+  if (!isAuthEnabled(PROJECT_ROOT)) {
+    return { valid: true, role: "admin", authEnabled: false };
+  }
+  const authHeader = req.headers["authorization"] || "";
+  const rawKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  return validateApiKey(PROJECT_ROOT, rawKey);
+}
+
 app.post("/mcp", async (req, res) => {
   setCorsHeaders(res);
 
@@ -426,6 +448,28 @@ app.post("/mcp", async (req, res) => {
     });
   }
 
+  // Authentication (v3.0)
+  const auth = authenticateRequest(req);
+  if (!auth.valid) {
+    return res.status(401).json({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: auth.error || "Authentication required." },
+      id: null,
+    });
+  }
+
+  // RBAC check — extract tool name from JSON-RPC body for permission check
+  if (auth.authEnabled && req.body && req.body.method === "tools/call") {
+    const toolName = req.body.params?.name;
+    if (toolName && !checkPermission(auth.role, toolName)) {
+      return res.status(403).json({
+        jsonrpc: "2.0",
+        error: { code: -32000, message: `Permission denied. Role "${auth.role}" cannot access "${toolName}". Required: ${TOOL_PERMISSIONS[toolName] || "admin"}` },
+        id: req.body.id || null,
+      });
+    }
+  }
+
   const server = createSpecLockServer();
   try {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
@@ -440,6 +484,51 @@ app.post("/mcp", async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null });
     }
+  }
+});
+
+// --- Auth management endpoint (v3.0) ---
+app.post("/auth", async (req, res) => {
+  setCorsHeaders(res);
+  const auth = authenticateRequest(req);
+
+  const { action } = req.body || {};
+
+  // Creating the first key doesn't require auth (bootstrap)
+  if (action === "create-key" && !isAuthEnabled(PROJECT_ROOT)) {
+    const { role, name } = req.body;
+    const result = createApiKey(PROJECT_ROOT, role || "admin", name || "");
+    return res.json(result);
+  }
+
+  // All other auth actions require admin role
+  if (auth.authEnabled && (!auth.valid || auth.role !== "admin")) {
+    return res.status(auth.valid ? 403 : 401).json({
+      error: auth.valid ? "Admin role required for auth management." : auth.error,
+    });
+  }
+
+  switch (action) {
+    case "create-key": {
+      const { role, name } = req.body;
+      return res.json(createApiKey(PROJECT_ROOT, role || "developer", name || ""));
+    }
+    case "rotate-key": {
+      const { keyId } = req.body;
+      return res.json(rotateApiKey(PROJECT_ROOT, keyId));
+    }
+    case "revoke-key": {
+      const { keyId, reason } = req.body;
+      return res.json(revokeApiKey(PROJECT_ROOT, keyId, reason || "manual"));
+    }
+    case "list-keys":
+      return res.json(listApiKeys(PROJECT_ROOT));
+    case "enable":
+      return res.json(enableAuth(PROJECT_ROOT));
+    case "disable":
+      return res.json(disableAuth(PROJECT_ROOT));
+    default:
+      return res.status(400).json({ error: `Unknown auth action: "${action}". Valid: create-key, rotate-key, revoke-key, list-keys, enable, disable` });
   }
 });
 
@@ -468,8 +557,9 @@ app.get("/health", (req, res) => {
     status: "healthy",
     version: VERSION,
     uptime: Math.floor((Date.now() - START_TIME) / 1000),
-    tools: 24,
+    tools: 28,
     auditChain: auditStatus,
+    authEnabled: isAuthEnabled(PROJECT_ROOT),
     rateLimit: { limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS },
   });
 });
@@ -482,7 +572,7 @@ app.get("/", (req, res) => {
     version: VERSION,
     author: AUTHOR,
     description: "AI Continuity Engine with enterprise audit, compliance, and enforcement",
-    tools: 24,
+    tools: 28,
     mcp_endpoint: "/mcp",
     health_endpoint: "/health",
     npm: "https://www.npmjs.com/package/speclock",

@@ -532,3 +532,27 @@ export function applyTemplate(root, templateName) {
 export { verifyAuditChain } from "./audit.js";
 export { exportCompliance } from "./compliance.js";
 export { checkFeature, checkLimits, getLicenseInfo } from "./license.js";
+
+// --- Authentication & RBAC (v3.0) ---
+export {
+  isAuthEnabled,
+  enableAuth,
+  disableAuth,
+  createApiKey,
+  validateApiKey,
+  checkPermission,
+  rotateApiKey,
+  revokeApiKey,
+  listApiKeys,
+  ROLES,
+  TOOL_PERMISSIONS,
+} from "./auth.js";
+
+// --- Encrypted Storage (v3.0) ---
+export {
+  isEncryptionEnabled,
+  isEncrypted,
+  encrypt,
+  decrypt,
+  clearKeyCache,
+} from "./crypto.js";

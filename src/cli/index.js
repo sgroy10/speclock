@@ -33,6 +33,16 @@ import {
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
 import { installHook, removeHook } from "../core/hooks.js";
+import {
+  isAuthEnabled,
+  enableAuth,
+  disableAuth,
+  createApiKey,
+  rotateApiKey,
+  revokeApiKey,
+  listApiKeys,
+} from "../core/auth.js";
+import { isEncryptionEnabled } from "../core/crypto.js";
 
 // --- Argument parsing ---
 
@@ -88,7 +98,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v2.5.0 — AI Constraint Engine (Hard Enforcement + Semantic Pre-Commit)
+SpecLock v3.0.0 — AI Constraint Engine (Auth + RBAC + Encryption + Hard Enforcement)
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -136,10 +146,22 @@ Options:
 
 Templates: nextjs, react, express, supabase, stripe, security-hardened
 
+Security (v3.0):
+  auth status                     Show auth status and active keys
+  auth create-key --role <role>   Create API key (viewer/developer/architect/admin)
+  auth rotate-key <keyId>         Rotate an API key
+  auth revoke-key <keyId>         Revoke an API key
+  auth list-keys                  List all API keys
+  auth enable                     Enable API key authentication
+  auth disable                    Disable authentication
+  encrypt [status]                Show encryption status
+
 Enterprise:
   SPECLOCK_AUDIT_SECRET           HMAC secret for audit chain (env var)
   SPECLOCK_LICENSE_KEY            License key for Pro/Enterprise features
   SPECLOCK_LLM_KEY                API key for LLM-powered conflict detection
+  SPECLOCK_ENCRYPTION_KEY         Master key for AES-256-GCM encryption
+  SPECLOCK_API_KEY                API key for MCP server auth
 
 Examples:
   npx speclock setup --goal "Build PawPalace pet shop" --template nextjs
@@ -186,6 +208,8 @@ function showStatus(root) {
   }
 
   console.log(`Recent changes: ${brain.state.recentChanges.length}`);
+  console.log(`Auth: ${isAuthEnabled(root) ? "enabled" : "disabled"}`);
+  console.log(`Encryption: ${isEncryptionEnabled() ? "enabled (AES-256-GCM)" : "disabled"}`);
   console.log("");
 }
 
@@ -776,6 +800,122 @@ Tip: When starting a new chat, tell the AI:
     }
     console.log(`\n${result.message}`);
     process.exit(result.blocked ? 1 : 0);
+  }
+
+  // --- AUTH (v3.0) ---
+  if (cmd === "auth") {
+    const sub = args[0];
+    if (!sub || sub === "status") {
+      const enabled = isAuthEnabled(root);
+      console.log(`\nAuth Status: ${enabled ? "ENABLED" : "DISABLED"}`);
+      if (enabled) {
+        const keys = listApiKeys(root);
+        const active = keys.keys.filter(k => k.active);
+        console.log(`Active keys: ${active.length}`);
+        for (const k of active) {
+          console.log(`  ${k.id} — ${k.name} (${k.role}) — last used: ${k.lastUsed || "never"}`);
+        }
+      } else {
+        console.log("Run 'speclock auth create-key --role admin' to enable auth.");
+      }
+      return;
+    }
+    if (sub === "create-key") {
+      const flags = parseFlags(args.slice(1));
+      const role = flags.role || "developer";
+      const name = flags.name || flags._.join(" ") || "";
+      const result = createApiKey(root, role, name);
+      if (!result.success) {
+        console.error(result.error);
+        process.exit(1);
+      }
+      console.log(`\nAPI Key Created`);
+      console.log("=".repeat(50));
+      console.log(`Key ID:  ${result.keyId}`);
+      console.log(`Role:    ${result.role}`);
+      console.log(`Name:    ${result.name}`);
+      console.log(`\nRaw Key: ${result.rawKey}`);
+      console.log(`\nSave this key — it CANNOT be retrieved later.`);
+      console.log(`\nUsage:`);
+      console.log(`  HTTP:  Authorization: Bearer ${result.rawKey}`);
+      console.log(`  MCP:   Set SPECLOCK_API_KEY=${result.rawKey} in MCP config`);
+      return;
+    }
+    if (sub === "rotate-key") {
+      const keyId = args[1];
+      if (!keyId) {
+        console.error("Usage: speclock auth rotate-key <keyId>");
+        process.exit(1);
+      }
+      const result = rotateApiKey(root, keyId);
+      if (!result.success) {
+        console.error(result.error);
+        process.exit(1);
+      }
+      console.log(`\nKey Rotated`);
+      console.log(`Old key: ${result.oldKeyId} (revoked)`);
+      console.log(`New key: ${result.newKeyId}`);
+      console.log(`Raw Key: ${result.rawKey}`);
+      console.log(`\nSave this key — it CANNOT be retrieved later.`);
+      return;
+    }
+    if (sub === "revoke-key") {
+      const keyId = args[1];
+      if (!keyId) {
+        console.error("Usage: speclock auth revoke-key <keyId>");
+        process.exit(1);
+      }
+      const reason = args.slice(2).join(" ") || "manual";
+      const result = revokeApiKey(root, keyId, reason);
+      if (!result.success) {
+        console.error(result.error);
+        process.exit(1);
+      }
+      console.log(`Key revoked: ${result.keyId} (${result.name}, ${result.role})`);
+      return;
+    }
+    if (sub === "list-keys") {
+      const result = listApiKeys(root);
+      console.log(`\nAPI Keys (auth ${result.enabled ? "enabled" : "disabled"}):`);
+      console.log("=".repeat(50));
+      if (result.keys.length === 0) {
+        console.log("  No keys configured.");
+      } else {
+        for (const k of result.keys) {
+          const status = k.active ? "active" : `revoked (${k.revokedAt?.substring(0, 10) || "unknown"})`;
+          console.log(`  ${k.id} — ${k.name} (${k.role}) [${status}]`);
+        }
+      }
+      return;
+    }
+    if (sub === "enable") {
+      enableAuth(root);
+      console.log("Auth enabled. API keys are now required for HTTP access.");
+      return;
+    }
+    if (sub === "disable") {
+      disableAuth(root);
+      console.log("Auth disabled. All operations allowed without keys.");
+      return;
+    }
+    console.error("Usage: speclock auth <create-key|rotate-key|revoke-key|list-keys|enable|disable|status>");
+    process.exit(1);
+  }
+
+  // --- ENCRYPT STATUS (v3.0) ---
+  if (cmd === "encrypt") {
+    const sub = args[0];
+    if (sub === "status" || !sub) {
+      const enabled = isEncryptionEnabled();
+      console.log(`\nEncryption: ${enabled ? "ENABLED (AES-256-GCM)" : "DISABLED"}`);
+      if (!enabled) {
+        console.log("Set SPECLOCK_ENCRYPTION_KEY env var to enable encryption.");
+        console.log("All data will be encrypted at rest (brain.json + events.log).");
+      }
+      return;
+    }
+    console.error("Usage: speclock encrypt [status]");
+    process.exit(1);
   }
 
   // --- STATUS ---

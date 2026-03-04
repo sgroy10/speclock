@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { signEvent, isAuditEnabled } from "./audit.js";
+import { isEncryptionEnabled, encrypt, decrypt, isEncrypted } from "./crypto.js";
 
 export function nowIso() {
   return new Date().toISOString();
@@ -121,7 +122,11 @@ export function migrateBrainV1toV2(brain) {
 export function readBrain(root) {
   const p = brainPath(root);
   if (!fs.existsSync(p)) return null;
-  const raw = fs.readFileSync(p, "utf8");
+  let raw = fs.readFileSync(p, "utf8");
+  // Transparent decryption (v3.0)
+  if (isEncrypted(raw)) {
+    try { raw = decrypt(raw); } catch { return null; }
+  }
   let brain = JSON.parse(raw);
   if (brain.version < 2) {
     brain = migrateBrainV1toV2(brain);
@@ -137,7 +142,12 @@ export function readBrain(root) {
 export function writeBrain(root, brain) {
   brain.project.updatedAt = nowIso();
   const p = brainPath(root);
-  fs.writeFileSync(p, JSON.stringify(brain, null, 2));
+  let data = JSON.stringify(brain, null, 2);
+  // Transparent encryption (v3.0)
+  if (isEncryptionEnabled()) {
+    data = encrypt(data);
+  }
+  fs.writeFileSync(p, data);
 }
 
 export function appendEvent(root, event) {
@@ -149,7 +159,11 @@ export function appendEvent(root, event) {
   } catch {
     // Audit error — write event without hash (graceful degradation)
   }
-  const line = JSON.stringify(event);
+  let line = JSON.stringify(event);
+  // Transparent per-line encryption (v3.0)
+  if (isEncryptionEnabled()) {
+    line = encrypt(line);
+  }
   fs.appendFileSync(eventsPath(root), `${line}\n`);
 }
 
@@ -163,7 +177,12 @@ export function readEvents(root, opts = {}) {
 
   let events = raw.split("\n").map((line) => {
     try {
-      return JSON.parse(line);
+      // Transparent per-line decryption (v3.0)
+      let decoded = line;
+      if (isEncrypted(decoded)) {
+        try { decoded = decrypt(decoded); } catch { return null; }
+      }
+      return JSON.parse(decoded);
     } catch {
       return null;
     }
