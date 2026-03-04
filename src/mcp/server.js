@@ -33,6 +33,16 @@ import {
   getOverrideHistory,
   getEnforcementConfig,
   semanticAudit,
+  evaluatePolicy,
+  listPolicyRules,
+  addPolicyRule,
+  removePolicyRule,
+  initPolicy,
+  exportPolicy,
+  importPolicy,
+  isTelemetryEnabled,
+  getTelemetrySummary,
+  trackToolUsage,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -90,7 +100,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "3.0.0";
+const VERSION = "3.5.0";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(
@@ -1157,6 +1167,144 @@ server.tool(
         },
       ],
     };
+  }
+);
+
+// ========================================
+// POLICY-AS-CODE TOOLS (v3.5)
+// ========================================
+
+// Tool 29: speclock_policy_evaluate
+server.tool(
+  "speclock_policy_evaluate",
+  "Evaluate policy-as-code rules against a proposed action. Returns violations for any matching rules. Use alongside speclock_check_conflict for comprehensive protection.",
+  {
+    description: z.string().min(1).describe("Description of the action to evaluate"),
+    files: z.array(z.string()).optional().default([]).describe("Files affected by the action"),
+    type: z.enum(["modify", "delete", "create", "export"]).optional().default("modify").describe("Action type"),
+  },
+  async ({ description, files, type }) => {
+    const result = evaluatePolicy(PROJECT_ROOT, { description, text: description, files, type });
+
+    if (result.passed) {
+      return {
+        content: [{ type: "text", text: `Policy check passed. ${result.rulesChecked} rule(s) evaluated, no violations.` }],
+      };
+    }
+
+    const formatted = result.violations
+      .map(v => `- [${v.severity.toUpperCase()}] **${v.ruleName}** (${v.enforce})\n  ${v.description}\n  Files: ${v.matchedFiles.join(", ") || "(pattern match)"}`)
+      .join("\n\n");
+
+    return {
+      content: [{ type: "text", text: `## Policy Violations (${result.violations.length})\n\n${formatted}` }],
+      isError: result.blocked,
+    };
+  }
+);
+
+// Tool 30: speclock_policy_manage
+server.tool(
+  "speclock_policy_manage",
+  "Manage policy-as-code rules. Actions: list (show all rules), add (create new rule), remove (delete rule), init (create default policy), export (portable YAML).",
+  {
+    action: z.enum(["list", "add", "remove", "init", "export"]).describe("Policy action"),
+    rule: z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      match: z.object({
+        files: z.array(z.string()).optional(),
+        actions: z.array(z.string()).optional(),
+      }).optional(),
+      enforce: z.enum(["block", "warn", "log"]).optional(),
+      severity: z.enum(["critical", "high", "medium", "low"]).optional(),
+      notify: z.array(z.string()).optional(),
+    }).optional().describe("Rule definition (for add action)"),
+    ruleId: z.string().optional().describe("Rule ID (for remove action)"),
+  },
+  async ({ action, rule, ruleId }) => {
+    switch (action) {
+      case "list": {
+        const result = listPolicyRules(PROJECT_ROOT);
+        if (result.total === 0) {
+          return { content: [{ type: "text", text: "No policy rules defined. Use action 'init' to create a default policy." }] };
+        }
+        const formatted = result.rules.map(r =>
+          `- **${r.name}** (${r.id}) [${r.enforce}/${r.severity}]\n  Files: ${(r.match?.files || []).join(", ")}\n  Actions: ${(r.match?.actions || []).join(", ")}`
+        ).join("\n\n");
+        return { content: [{ type: "text", text: `## Policy Rules (${result.active}/${result.total} active)\n\n${formatted}` }] };
+      }
+      case "add": {
+        if (!rule || !rule.name) {
+          return { content: [{ type: "text", text: "Rule name is required." }], isError: true };
+        }
+        const result = addPolicyRule(PROJECT_ROOT, rule);
+        if (!result.success) return { content: [{ type: "text", text: result.error }], isError: true };
+        return { content: [{ type: "text", text: `Policy rule added: "${result.rule.name}" (${result.ruleId}) [${result.rule.enforce}]` }] };
+      }
+      case "remove": {
+        if (!ruleId) return { content: [{ type: "text", text: "ruleId is required." }], isError: true };
+        const result = removePolicyRule(PROJECT_ROOT, ruleId);
+        if (!result.success) return { content: [{ type: "text", text: result.error }], isError: true };
+        return { content: [{ type: "text", text: `Policy rule removed: "${result.removed.name}"` }] };
+      }
+      case "init": {
+        const result = initPolicy(PROJECT_ROOT);
+        if (!result.success) return { content: [{ type: "text", text: result.error }], isError: true };
+        return { content: [{ type: "text", text: "Policy-as-code initialized. Edit .speclock/policy.yml to add rules." }] };
+      }
+      case "export": {
+        const result = exportPolicy(PROJECT_ROOT);
+        if (!result.success) return { content: [{ type: "text", text: result.error }], isError: true };
+        return { content: [{ type: "text", text: `## Exported Policy\n\n\`\`\`yaml\n${result.yaml}\`\`\`` }] };
+      }
+      default:
+        return { content: [{ type: "text", text: `Unknown action: ${action}` }], isError: true };
+    }
+  }
+);
+
+// ========================================
+// TELEMETRY TOOLS (v3.5)
+// ========================================
+
+// Tool 31: speclock_telemetry
+server.tool(
+  "speclock_telemetry",
+  "Get telemetry and analytics summary. Shows tool usage counts, conflict rates, response times, and feature adoption. Opt-in only (SPECLOCK_TELEMETRY=true).",
+  {},
+  async () => {
+    const summary = getTelemetrySummary(PROJECT_ROOT);
+    if (!summary.enabled) {
+      return { content: [{ type: "text", text: summary.message }] };
+    }
+
+    const parts = [
+      `## Telemetry Summary`,
+      ``,
+      `Total API calls: **${summary.totalCalls}**`,
+      `Avg response: **${summary.avgResponseMs}ms**`,
+      `Sessions: **${summary.sessions.total}**`,
+      ``,
+      `### Conflicts`,
+      `Total: ${summary.conflicts.total} | Blocked: ${summary.conflicts.blocked} | Advisory: ${summary.conflicts.advisory}`,
+    ];
+
+    if (summary.topTools.length > 0) {
+      parts.push(``, `### Top Tools`);
+      for (const t of summary.topTools.slice(0, 5)) {
+        parts.push(`- ${t.name}: ${t.count} calls (avg ${t.avgMs}ms)`);
+      }
+    }
+
+    if (summary.features.length > 0) {
+      parts.push(``, `### Feature Adoption`);
+      for (const f of summary.features) {
+        parts.push(`- ${f.name}: ${f.count} uses`);
+      }
+    }
+
+    return { content: [{ type: "text", text: parts.join("\n") }] };
   }
 );
 

@@ -43,6 +43,24 @@ import {
   listApiKeys,
 } from "../core/auth.js";
 import { isEncryptionEnabled } from "../core/crypto.js";
+import {
+  initPolicy,
+  addPolicyRule,
+  removePolicyRule,
+  listPolicyRules,
+  evaluatePolicy,
+  exportPolicy,
+  importPolicy,
+} from "../core/policy.js";
+import {
+  isTelemetryEnabled,
+  getTelemetrySummary,
+} from "../core/telemetry.js";
+import {
+  isSSOEnabled,
+  getSSOConfig,
+  saveSSOConfig,
+} from "../core/sso.js";
 
 // --- Argument parsing ---
 
@@ -98,7 +116,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v3.0.0 — AI Constraint Engine (Auth + RBAC + Encryption + Hard Enforcement)
+SpecLock v3.5.0 — AI Constraint Engine (Policy-as-Code + SSO + Dashboard + Telemetry + Auth + RBAC + Encryption)
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -145,6 +163,17 @@ Options:
   --project <path>                Project root (for serve)
 
 Templates: nextjs, react, express, supabase, stripe, security-hardened
+
+Policy-as-Code (v3.5):
+  policy list                     List all policy rules
+  policy init                     Initialize policy-as-code
+  policy add --name <name>        Add a policy rule (--files, --enforce, --severity)
+  policy remove <ruleId>          Remove a policy rule
+  policy evaluate <action>        Evaluate action against policy rules
+  policy export                   Export policy as YAML
+  telemetry [status]              Show telemetry status and analytics
+  sso status                      Show SSO configuration
+  sso configure --issuer <url>    Configure SSO (--client-id, --client-secret)
 
 Security (v3.0):
   auth status                     Show auth status and active keys
@@ -210,6 +239,10 @@ function showStatus(root) {
   console.log(`Recent changes: ${brain.state.recentChanges.length}`);
   console.log(`Auth: ${isAuthEnabled(root) ? "enabled" : "disabled"}`);
   console.log(`Encryption: ${isEncryptionEnabled() ? "enabled (AES-256-GCM)" : "disabled"}`);
+  const policyRules = listPolicyRules(root);
+  console.log(`Policy rules: ${policyRules.active}/${policyRules.total}`);
+  console.log(`Telemetry: ${isTelemetryEnabled() ? "enabled" : "disabled"}`);
+  console.log(`SSO: ${isSSOEnabled(root) ? "configured" : "not configured"}`);
   console.log("");
 }
 
@@ -899,6 +932,146 @@ Tip: When starting a new chat, tell the AI:
       return;
     }
     console.error("Usage: speclock auth <create-key|rotate-key|revoke-key|list-keys|enable|disable|status>");
+    process.exit(1);
+  }
+
+  // --- POLICY (v3.5) ---
+  if (cmd === "policy") {
+    const sub = args[0];
+    if (!sub || sub === "list") {
+      const result = listPolicyRules(root);
+      console.log(`\nPolicy Rules (${result.active}/${result.total} active):`);
+      console.log("=".repeat(50));
+      if (result.rules.length === 0) {
+        console.log("  No rules. Run 'speclock policy init' to create a policy.");
+      } else {
+        for (const r of result.rules) {
+          const status = r.active !== false ? "active" : "inactive";
+          console.log(`  ${r.id} — ${r.name} [${r.enforce}/${r.severity}] (${status})`);
+          console.log(`    Files: ${(r.match?.files || []).join(", ")}`);
+          console.log(`    Actions: ${(r.match?.actions || []).join(", ")}`);
+          console.log("");
+        }
+      }
+      return;
+    }
+    if (sub === "init") {
+      const result = initPolicy(root);
+      if (!result.success) { console.error(result.error); process.exit(1); }
+      console.log("Policy-as-code initialized. Edit .speclock/policy.yml to add rules.");
+      return;
+    }
+    if (sub === "add") {
+      const flags = parseFlags(args.slice(1));
+      const name = flags.name || flags._.join(" ");
+      if (!name) { console.error("Usage: speclock policy add --name <name> --files '**/*.js' --enforce block"); process.exit(1); }
+      const rule = {
+        name,
+        description: flags.description || "",
+        match: {
+          files: flags.files ? flags.files.split(",").map(s => s.trim()) : ["**/*"],
+          actions: flags.actions ? flags.actions.split(",").map(s => s.trim()) : ["modify", "delete"],
+        },
+        enforce: flags.enforce || "warn",
+        severity: flags.severity || "medium",
+        notify: flags.notify ? flags.notify.split(",").map(s => s.trim()) : [],
+      };
+      const result = addPolicyRule(root, rule);
+      if (!result.success) { console.error(result.error); process.exit(1); }
+      console.log(`Policy rule added: "${result.rule.name}" (${result.ruleId}) [${result.rule.enforce}]`);
+      return;
+    }
+    if (sub === "remove") {
+      const ruleId = args[1];
+      if (!ruleId) { console.error("Usage: speclock policy remove <ruleId>"); process.exit(1); }
+      const result = removePolicyRule(root, ruleId);
+      if (!result.success) { console.error(result.error); process.exit(1); }
+      console.log(`Policy rule removed: "${result.removed.name}"`);
+      return;
+    }
+    if (sub === "evaluate") {
+      const text = args.slice(1).join(" ");
+      if (!text) { console.error("Usage: speclock policy evaluate 'what you plan to do'"); process.exit(1); }
+      const result = evaluatePolicy(root, { description: text, text, type: "modify" });
+      if (result.passed) {
+        console.log(`Policy check passed. ${result.rulesChecked} rules evaluated.`);
+      } else {
+        console.log(`\nPolicy Violations (${result.violations.length}):`);
+        for (const v of result.violations) {
+          console.log(`  [${v.severity.toUpperCase()}] ${v.ruleName} (${v.enforce})`);
+          if (v.matchedFiles.length) console.log(`    Files: ${v.matchedFiles.join(", ")}`);
+        }
+        if (result.blocked) process.exit(1);
+      }
+      return;
+    }
+    if (sub === "export") {
+      const result = exportPolicy(root);
+      if (!result.success) { console.error(result.error); process.exit(1); }
+      console.log(result.yaml);
+      return;
+    }
+    console.error("Usage: speclock policy <list|init|add|remove|evaluate|export>");
+    process.exit(1);
+  }
+
+  // --- TELEMETRY (v3.5) ---
+  if (cmd === "telemetry") {
+    const sub = args[0];
+    if (sub === "status" || !sub) {
+      const enabled = isTelemetryEnabled();
+      console.log(`\nTelemetry: ${enabled ? "ENABLED" : "DISABLED"}`);
+      if (!enabled) {
+        console.log("Set SPECLOCK_TELEMETRY=true to enable anonymous usage analytics.");
+        return;
+      }
+      const summary = getTelemetrySummary(root);
+      console.log(`Total calls: ${summary.totalCalls}`);
+      console.log(`Avg response: ${summary.avgResponseMs}ms`);
+      console.log(`Sessions: ${summary.sessions.total}`);
+      console.log(`Conflicts: ${summary.conflicts.total} (blocked: ${summary.conflicts.blocked})`);
+      if (summary.topTools.length > 0) {
+        console.log(`\nTop tools:`);
+        for (const t of summary.topTools.slice(0, 5)) {
+          console.log(`  ${t.name}: ${t.count} calls`);
+        }
+      }
+      return;
+    }
+    console.error("Usage: speclock telemetry [status]");
+    process.exit(1);
+  }
+
+  // --- SSO (v3.5) ---
+  if (cmd === "sso") {
+    const sub = args[0];
+    if (sub === "status" || !sub) {
+      const enabled = isSSOEnabled(root);
+      const config = getSSOConfig(root);
+      console.log(`\nSSO: ${enabled ? "CONFIGURED" : "NOT CONFIGURED"}`);
+      if (enabled) {
+        console.log(`Issuer: ${config.issuer}`);
+        console.log(`Client ID: ${config.clientId}`);
+        console.log(`Redirect: ${config.redirectUri}`);
+        console.log(`Default role: ${config.defaultRole}`);
+      } else {
+        console.log("Set SPECLOCK_SSO_ISSUER and SPECLOCK_SSO_CLIENT_ID to enable SSO.");
+      }
+      return;
+    }
+    if (sub === "configure") {
+      const flags = parseFlags(args.slice(1));
+      const config = getSSOConfig(root);
+      if (flags.issuer) config.issuer = flags.issuer;
+      if (flags["client-id"]) config.clientId = flags["client-id"];
+      if (flags["client-secret"]) config.clientSecret = flags["client-secret"];
+      if (flags["redirect-uri"]) config.redirectUri = flags["redirect-uri"];
+      if (flags["default-role"]) config.defaultRole = flags["default-role"];
+      saveSSOConfig(root, config);
+      console.log("SSO configuration saved.");
+      return;
+    }
+    console.error("Usage: speclock sso <status|configure> [--issuer URL --client-id ID]");
     process.exit(1);
   }
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": "0.2",
   "name": "speclock",
-  "version": "3.0.0",
-  "description": "AI constraint engine with API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 28 MCP tools + CLI. Enterprise-ready.",
+  "version": "3.5.0",
+  "description": "AI constraint engine with Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 31 MCP tools + CLI. Enterprise platform.",
   "author": {
     "name": "Sandeep Roy (https://github.com/sgroy10)"
   },

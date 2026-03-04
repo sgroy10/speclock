@@ -556,3 +556,41 @@ export {
   decrypt,
   clearKeyCache,
 } from "./crypto.js";
+
+// --- Policy-as-Code (v3.5) ---
+export {
+  loadPolicy,
+  savePolicy,
+  initPolicy,
+  addPolicyRule,
+  removePolicyRule,
+  listPolicyRules,
+  evaluatePolicy,
+  exportPolicy,
+  importPolicy,
+  generateNotifications,
+} from "./policy.js";
+
+// --- Telemetry & Analytics (v3.5) ---
+export {
+  isTelemetryEnabled,
+  trackToolUsage,
+  trackConflict,
+  trackFeature,
+  trackSession,
+  getTelemetrySummary,
+  flushToRemote,
+  resetTelemetry,
+} from "./telemetry.js";
+
+// --- OAuth/OIDC SSO (v3.5) ---
+export {
+  isSSOEnabled,
+  getSSOConfig,
+  saveSSOConfig,
+  getAuthorizationUrl,
+  handleCallback,
+  validateSession,
+  revokeSession,
+  listSessions,
+} from "./sso.js";

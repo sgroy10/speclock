@@ -1,7 +1,7 @@
 {
   "name": "speclock",
-  "version": "3.0.0",
-  "description": "AI constraint engine with API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 28 MCP tools + CLI. Enterprise-ready.",
+  "version": "3.5.0",
+  "description": "AI constraint engine with Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 31 MCP tools + CLI. Enterprise platform.",
   "type": "module",
   "main": "src/mcp/server.js",
   "bin": {
@@ -41,7 +41,13 @@
     "aes-256",
     "api-key",
     "authentication",
-    "rbac"
+    "rbac",
+    "policy-as-code",
+    "sso",
+    "oauth",
+    "oidc",
+    "dashboard",
+    "telemetry"
   ],
   "author": "Sandeep Roy (https://github.com/sgroy10)",
   "license": "MIT",
@@ -64,6 +70,7 @@
   "files": [
     "bin/",
     "src/",
+    "src/dashboard/",
     "README.md",
     "SPECLOCK-INSTRUCTIONS.md",
     "LICENSE"

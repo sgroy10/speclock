@@ -5,6 +5,7 @@
  */
 
 import os from "os";
+import fs from "fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
@@ -63,9 +64,34 @@ import {
   disableAuth,
   TOOL_PERMISSIONS,
 } from "../core/auth.js";
+import { isEncryptionEnabled } from "../core/crypto.js";
+import {
+  evaluatePolicy,
+  listPolicyRules,
+  addPolicyRule,
+  removePolicyRule,
+  initPolicy,
+  exportPolicy,
+  importPolicy,
+} from "../core/policy.js";
+import {
+  isTelemetryEnabled,
+  trackToolUsage,
+  getTelemetrySummary,
+} from "../core/telemetry.js";
+import {
+  isSSOEnabled,
+  getAuthorizationUrl,
+  handleCallback as ssoHandleCallback,
+  validateSession,
+  revokeSession,
+  listSessions,
+} from "../core/sso.js";
+import { fileURLToPath } from "url";
+import _path from "path";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "3.0.0";
+const VERSION = "3.5.0";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 
@@ -580,7 +606,136 @@ app.get("/", (req, res) => {
   });
 });
 
+// ========================================
+// DASHBOARD (v3.5)
+// ========================================
+
+// Serve dashboard HTML
+app.get("/dashboard", (req, res) => {
+  setCorsHeaders(res);
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = _path.dirname(__filename);
+  const htmlPath = _path.join(__dirname, "..", "dashboard", "index.html");
+  try {
+    const html = fs.readFileSync(htmlPath, "utf-8");
+    res.setHeader("Content-Type", "text/html");
+    res.end(html);
+  } catch {
+    res.status(404).end("Dashboard not found.");
+  }
+});
+
+// Dashboard API: brain data
+app.get("/dashboard/api/brain", (req, res) => {
+  setCorsHeaders(res);
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    if (!brain) return res.json({});
+    // Add metadata for dashboard
+    brain._encryption = isEncryptionEnabled();
+    brain._authEnabled = isAuthEnabled(PROJECT_ROOT);
+    try {
+      const keys = listApiKeys(PROJECT_ROOT);
+      brain._authKeys = keys.keys.filter(k => k.active).length;
+    } catch { brain._authKeys = 0; }
+    res.json(brain);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Dashboard API: recent events
+app.get("/dashboard/api/events", (req, res) => {
+  setCorsHeaders(res);
+  try {
+    const events = readEvents(PROJECT_ROOT, { limit: 50 });
+    res.json({ events });
+  } catch {
+    res.json({ events: [] });
+  }
+});
+
+// Dashboard API: telemetry summary
+app.get("/dashboard/api/telemetry", (req, res) => {
+  setCorsHeaders(res);
+  res.json(getTelemetrySummary(PROJECT_ROOT));
+});
+
+// ========================================
+// POLICY-AS-CODE ENDPOINTS (v3.5)
+// ========================================
+
+app.get("/policy", (req, res) => {
+  setCorsHeaders(res);
+  res.json(listPolicyRules(PROJECT_ROOT));
+});
+
+app.post("/policy", async (req, res) => {
+  setCorsHeaders(res);
+  const auth = authenticateRequest(req);
+  if (auth.authEnabled && (!auth.valid || !checkPermission(auth.role, "speclock_add_lock"))) {
+    return res.status(auth.valid ? 403 : 401).json({ error: "Write permission required." });
+  }
+
+  const { action } = req.body || {};
+  switch (action) {
+    case "init":
+      return res.json(initPolicy(PROJECT_ROOT));
+    case "add-rule":
+      return res.json(addPolicyRule(PROJECT_ROOT, req.body.rule || {}));
+    case "remove-rule":
+      return res.json(removePolicyRule(PROJECT_ROOT, req.body.ruleId));
+    case "evaluate":
+      return res.json(evaluatePolicy(PROJECT_ROOT, req.body.action || {}));
+    case "export":
+      return res.json(exportPolicy(PROJECT_ROOT));
+    case "import":
+      return res.json(importPolicy(PROJECT_ROOT, req.body.yaml || "", req.body.mode || "merge"));
+    default:
+      return res.status(400).json({ error: `Unknown policy action. Valid: init, add-rule, remove-rule, evaluate, export, import` });
+  }
+});
+
+// ========================================
+// SSO ENDPOINTS (v3.5)
+// ========================================
+
+app.get("/auth/sso/login", (req, res) => {
+  setCorsHeaders(res);
+  if (!isSSOEnabled(PROJECT_ROOT)) {
+    return res.status(400).json({ error: "SSO not configured." });
+  }
+  const result = getAuthorizationUrl(PROJECT_ROOT);
+  if (!result.success) return res.status(400).json(result);
+  res.redirect(result.url);
+});
+
+app.get("/auth/callback", async (req, res) => {
+  setCorsHeaders(res);
+  const { code, state, error } = req.query || {};
+  if (error) return res.status(400).json({ error });
+  if (!code || !state) return res.status(400).json({ error: "Missing code or state." });
+  const result = await ssoHandleCallback(PROJECT_ROOT, code, state);
+  if (!result.success) return res.status(401).json(result);
+  res.json({ message: "SSO login successful", ...result });
+});
+
+app.get("/auth/sso/sessions", (req, res) => {
+  setCorsHeaders(res);
+  res.json(listSessions(PROJECT_ROOT));
+});
+
+app.post("/auth/sso/logout", (req, res) => {
+  setCorsHeaders(res);
+  const { sessionId } = req.body || {};
+  res.json(revokeSession(PROJECT_ROOT, sessionId));
+});
+
+// ========================================
+
 const PORT = parseInt(process.env.PORT || "3000", 10);
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`SpecLock MCP HTTP Server v${VERSION} running on port ${PORT} — Developed by ${AUTHOR}`);
+  console.log(`  Dashboard: http://localhost:${PORT}/dashboard`);
 });

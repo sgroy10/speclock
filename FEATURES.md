@@ -503,4 +503,4 @@ AI:   Unlocked. Proceeding with auth file changes.
 
 ---
 
-*SpecLock v3.0.0 — Semantic conflict detection + enterprise audit & compliance + hard enforcement + security & access control. 100% detection, 0% false positives. HMAC audit chain, SOC 2/HIPAA exports, advisory/hard enforcement modes, override audit trail, semantic pre-commit, API key auth, RBAC, AES-256-GCM encrypted storage.*
+*SpecLock v3.5.0 — Enterprise platform with Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry & analytics, semantic conflict detection, HMAC audit chain, SOC 2/HIPAA compliance exports, advisory/hard enforcement modes, override audit trail, semantic pre-commit, API key auth, RBAC, AES-256-GCM encrypted storage. 31 MCP tools + CLI. 100% detection, 0% false positives.*

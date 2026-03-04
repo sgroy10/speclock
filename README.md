@@ -61,6 +61,10 @@ No other tool does this. Not Claude's native memory. Not Mem0. Not CLAUDE.md fil
 | **Hard enforcement (block violations)** | No | No | No | **Yes — hard mode blocks above threshold** |
 | **API Key Auth + RBAC** | No | No | No | **Yes** |
 | **Encrypted Storage (AES-256)** | No | No | No | **Yes** |
+| **Policy-as-Code DSL** | No | No | No | **Yes — declarative YAML rules** |
+| **OAuth/OIDC SSO** | No | No | No | **Yes — Okta, Azure AD, Auth0** |
+| **Admin Dashboard** | No | No | No | **Yes — real-time web UI** |
+| **Telemetry & Analytics** | No | No | No | **Yes — opt-in usage insights** |
 | Multi-agent timeline | No | No | No | **Yes** |
 | Cross-platform | Claude only | MCP only | Tool-specific | **Universal (MCP + npm)** |
 
@@ -195,10 +199,10 @@ Result:  NO CONFLICT (confidence: 7%)
 | Mode | Platforms | How It Works |
 |------|-----------|--------------|
 | **MCP Remote** | Lovable, bolt.diy, Base44 | Connect via URL — no install needed |
-| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 28 tools via MCP |
+| **MCP Local** | Claude Code, Cursor, Windsurf, Cline | `npx speclock serve` — 31 tools via MCP |
 | **npm File-Based** | Bolt.new, Aider, Rocket.new | `npx speclock setup` — AI reads SPECLOCK.md + uses CLI |
 
-## 28 MCP Tools
+## 31 MCP Tools
 
 ### Memory Management
 | Tool | Purpose |
@@ -259,6 +263,13 @@ Result:  NO CONFLICT (confidence: 7%)
 | `speclock_override_lock` | Override a lock with justification — logged to audit trail |
 | `speclock_semantic_audit` | Semantic pre-commit: analyze code changes vs locks |
 | `speclock_override_history` | View lock override history for audit review |
+
+### Enterprise Platform (v3.5)
+| Tool | Purpose |
+|------|---------|
+| `speclock_policy_evaluate` | Evaluate policy-as-code rules against proposed actions |
+| `speclock_policy_manage` | CRUD for policy rules — list, add, remove, init, export |
+| `speclock_telemetry` | View opt-in telemetry summary and usage analytics |
 
 ## Auto-Guard: Locks That Actually Work
 
@@ -333,6 +344,16 @@ speclock enforce <advisory|hard>       # Set enforcement mode
 speclock override <lockId> <reason>    # Override a lock with justification
 speclock overrides [--lock <id>]       # Show override history
 speclock audit-semantic                # Semantic pre-commit audit
+
+# Enterprise Platform (v3.5)
+speclock policy list                   # List policy rules
+speclock policy init                   # Initialize policy-as-code
+speclock policy add <name> --files <pattern> --actions <types> --enforce <level>
+speclock policy evaluate --files <f> --type <t>  # Evaluate against rules
+speclock policy export                 # Export policy as portable YAML
+speclock telemetry status              # View telemetry summary
+speclock sso status                    # Show SSO configuration
+speclock sso configure                 # Configure OAuth/OIDC SSO
 
 # Other
 speclock status                        # Show brain summary
@@ -419,7 +440,58 @@ SHA-256 hashed keys stored server-side. HTTP transport uses `Authorization: Bear
 Transparent encrypt-on-write / decrypt-on-read for `brain.json` and `events.log`. Encryption key is derived via PBKDF2 from the `SPECLOCK_ENCRYPTION_KEY` environment variable. Authenticated encryption (GCM) ensures both confidentiality and integrity. **HIPAA 2026 compliant.**
 
 ### Test Coverage
-**300 tests passing** (up from 186 in v2.5). Full coverage for authentication, authorization, encryption, semantic detection, and audit chain integrity.
+**330+ tests passing** across 6 test suites. Full coverage for authentication, authorization, encryption, semantic detection, audit chain integrity, policy-as-code, telemetry, and SSO.
+
+## Enterprise Platform (v3.5)
+
+### Policy-as-Code DSL
+Declarative YAML-based policy rules for enterprise constraint enforcement:
+
+```yaml
+# .speclock/policy.yml
+rules:
+  - name: "HIPAA PHI Protection"
+    match:
+      files: ["**/patient/**", "**/medical/**"]
+      actions: [delete, modify, export]
+    enforce: block
+    severity: critical
+    notify: ["security@company.com", "slack:#compliance"]
+```
+
+- **File pattern matching**: Glob patterns (`**/patient/**`, `src/api/*.js`)
+- **Action-type filtering**: Block specific operations (delete, modify, create, export)
+- **Enforcement levels**: `block` (hard stop), `warn` (advisory), `log` (record only)
+- **Severity levels**: critical, high, medium, low
+- **Notification hooks**: Email, Slack, webhook channels
+- **Import/export**: Share policies between organizations
+
+### OAuth/OIDC SSO
+Enterprise single sign-on with corporate identity providers:
+
+- **Providers**: Okta, Azure AD, Auth0, any OIDC-compliant IdP
+- **PKCE flow**: Authorization Code with Proof Key (S256)
+- **Role mapping**: Map OIDC groups/roles to SpecLock roles (viewer/developer/architect/admin)
+- **Session management**: 8-hour TTL, token refresh, session listing/revocation
+- **MCP June 2025 spec**: OAuth compliance
+
+### Admin Dashboard
+Real-time web UI served from the HTTP server:
+
+- **Access**: `http://localhost:PORT/dashboard`
+- **Views**: Lock overview, violation timeline, session history, health score
+- **Metrics**: Enforcement mode, auth status, encryption status, audit chain integrity
+- **Zero dependencies**: Vanilla HTML/JS — no framework overhead
+- **Auto-refresh**: Updates every 30 seconds
+
+### Telemetry & Analytics
+Opt-in usage insights for product improvement:
+
+- **Disabled by default** — enable with `SPECLOCK_TELEMETRY=true`
+- **Tracks**: Tool usage counts, conflict detection rates, response times, feature adoption
+- **Never tracks**: Lock content, project names, any PII
+- **Local storage**: `.speclock/telemetry.json` with optional remote flush
+- **30-day rolling window**: Daily stats with trend analysis
 
 ---
 
@@ -431,7 +503,7 @@ Transparent encrypt-on-write / decrypt-on-read for `brain.json` and `events.log`
 └──────────────┬──────────────────┬────────────────────┘
                │                  │
      MCP Protocol          File-Based (npm)
-    (28 tool calls)      (reads SPECLOCK.md +
+    (31 tool calls)      (reads SPECLOCK.md +
                         .speclock/context/latest.md,
                          runs CLI commands)
                │                  │

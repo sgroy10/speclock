@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpecLock Dashboard</title>
+<style>
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --border: #334155;
+    --text: #e2e8f0; --muted: #94a3b8; --accent: #3b82f6;
+    --green: #22c55e; --red: #ef4444; --yellow: #eab308; --purple: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header h1 span { color: var(--accent); }
+  .header .meta { font-size: 13px; color: var(--muted); }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .status-badge.healthy { background: rgba(34,197,94,0.15); color: var(--green); }
+  .status-badge.warning { background: rgba(234,179,8,0.15); color: var(--yellow); }
+
+  /* Grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .card .big-number { font-size: 36px; font-weight: 700; line-height: 1; }
+  .card .sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Stats row */
+  .stats-row { display: flex; gap: 12px; margin-top: 12px; }
+  .stat { flex: 1; text-align: center; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+  .stat .val { font-size: 20px; font-weight: 700; }
+  .stat .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Table */
+  .table-card { grid-column: span 2; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid rgba(51,65,85,0.5); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Badge */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge.high { background: rgba(239,68,68,0.2); color: var(--red); }
+  .badge.medium { background: rgba(234,179,8,0.2); color: var(--yellow); }
+  .badge.low { background: rgba(34,197,94,0.2); color: var(--green); }
+  .badge.active { background: rgba(59,130,246,0.2); color: var(--accent); }
+  .badge.inactive { background: rgba(148,163,184,0.2); color: var(--muted); }
+
+  /* Chart bar */
+  .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin-top: 12px; }
+  .bar { flex: 1; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; transition: height 0.3s; }
+  .bar:hover { opacity: 0.8; }
+  .bar .tip { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; display: none; }
+  .bar:hover .tip { display: block; }
+  .bar-labels { display: flex; gap: 4px; margin-top: 4px; }
+  .bar-labels span { flex: 1; text-align: center; font-size: 10px; color: var(--muted); }
+
+  /* Sections */
+  .full-width { grid-column: 1 / -1; }
+  .section-title { padding: 24px 24px 0; font-size: 16px; font-weight: 700; color: var(--muted); }
+
+  /* Loading */
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .error { color: var(--red); text-align: center; padding: 20px; }
+
+  /* Refresh button */
+  .refresh-btn { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .refresh-btn:hover { opacity: 0.9; }
+
+  /* Timeline */
+  .timeline { list-style: none; }
+  .timeline li { padding: 8px 0; border-bottom: 1px solid rgba(51,65,85,0.3); display: flex; gap: 12px; align-items: flex-start; }
+  .timeline .time { font-size: 11px; color: var(--muted); min-width: 130px; }
+  .timeline .event-type { font-size: 11px; font-weight: 600; min-width: 100px; }
+  .timeline .event-summary { font-size: 13px; }
+
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .table-card { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>SpecLock</span> Dashboard</h1>
+    <div class="meta">v3.5.0 &mdash; AI Constraint Engine</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="health-badge" class="status-badge healthy">Loading...</span>
+    <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+  </div>
+</div>
+
+<!-- Overview Cards -->
+<div class="grid">
+  <div class="card">
+    <h2>Active Locks</h2>
+    <div class="big-number" id="lock-count">-</div>
+    <div class="sub" id="lock-sub"></div>
+  </div>
+  <div class="card">
+    <h2>Decisions</h2>
+    <div class="big-number" id="decision-count">-</div>
+  </div>
+  <div class="card">
+    <h2>Events</h2>
+    <div class="big-number" id="event-count">-</div>
+    <div class="sub" id="event-sub"></div>
+  </div>
+  <div class="card">
+    <h2>Violations Blocked</h2>
+    <div class="big-number" id="violation-count">-</div>
+    <div class="stats-row">
+      <div class="stat"><div class="val" id="v-blocked" style="color:var(--red)">-</div><div class="label">Blocked</div></div>
+      <div class="stat"><div class="val" id="v-advisory" style="color:var(--yellow)">-</div><div class="label">Advisory</div></div>
+      <div class="stat"><div class="val" id="v-overrides" style="color:var(--purple)">-</div><div class="label">Overrides</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Enforcement & Security -->
+<div class="section-title">Enforcement & Security</div>
+<div class="grid">
+  <div class="card">
+    <h2>Enforcement Mode</h2>
+    <div class="big-number" id="enforce-mode" style="text-transform:uppercase">-</div>
+    <div class="sub" id="enforce-threshold"></div>
+  </div>
+  <div class="card">
+    <h2>Authentication</h2>
+    <div class="big-number" id="auth-status">-</div>
+    <div class="sub" id="auth-keys"></div>
+  </div>
+  <div class="card">
+    <h2>Encryption</h2>
+    <div class="big-number" id="encrypt-status">-</div>
+    <div class="sub" id="encrypt-algo"></div>
+  </div>
+  <div class="card">
+    <h2>Audit Chain</h2>
+    <div class="big-number" id="audit-status">-</div>
+    <div class="sub" id="audit-events"></div>
+  </div>
+</div>
+
+<!-- Active Locks Table -->
+<div class="section-title">Active Locks</div>
+<div class="grid">
+  <div class="card table-card">
+    <table>
+      <thead><tr><th>ID</th><th>Constraint</th><th>Source</th><th>Tags</th><th>Created</th></tr></thead>
+      <tbody id="locks-table"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Events Timeline -->
+<div class="section-title">Recent Events</div>
+<div class="grid">
+  <div class="card full-width">
+    <ul class="timeline" id="events-timeline">
+      <li class="loading">Loading...</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Sessions -->
+<div class="section-title">Session History</div>
+<div class="grid">
+  <div class="card table-card">
+    <table>
+      <thead><tr><th>Tool</th><th>Started</th><th>Duration</th><th>Events</th><th>Summary</th></tr></thead>
+      <tbody id="sessions-table"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;">
+  SpecLock v3.5.0 &mdash; Developed by Sandeep Roy &mdash; <a href="https://github.com/sgroy10/speclock" style="color:var(--accent)">GitHub</a>
+</div>
+
+<script>
+const API_BASE = window.location.origin;
+
+async function apiFetch(path) {
+  try {
+    const res = await fetch(`${API_BASE}${path}`);
+    if (!res.ok) throw new Error(`${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error(`API error ${path}:`, e);
+    return null;
+  }
+}
+
+async function loadAll() {
+  loadHealth();
+  loadContext();
+  loadEvents();
+}
+
+async function loadHealth() {
+  const h = await apiFetch('/health');
+  const badge = document.getElementById('health-badge');
+  if (h) {
+    badge.textContent = h.status === 'healthy' ? 'Healthy' : 'Warning';
+    badge.className = `status-badge ${h.status === 'healthy' ? 'healthy' : 'warning'}`;
+    document.getElementById('audit-status').textContent = h.auditChain === 'valid' ? 'Valid' : h.auditChain;
+    document.getElementById('audit-status').style.color = h.auditChain === 'valid' ? 'var(--green)' : 'var(--red)';
+    document.getElementById('auth-status').textContent = h.authEnabled ? 'Enabled' : 'Disabled';
+    document.getElementById('auth-status').style.color = h.authEnabled ? 'var(--green)' : 'var(--muted)';
+  } else {
+    badge.textContent = 'Error';
+    badge.className = 'status-badge warning';
+  }
+}
+
+async function loadContext() {
+  // Use a direct brain fetch via the dashboard API
+  const data = await apiFetch('/dashboard/api/brain');
+  if (!data) return;
+
+  const brain = data;
+  const activeLocks = (brain.specLock?.items || []).filter(l => l.active !== false);
+
+  // Overview
+  document.getElementById('lock-count').textContent = activeLocks.length;
+  document.getElementById('lock-sub').textContent = `${brain.specLock?.items?.length || 0} total (${activeLocks.length} active)`;
+  document.getElementById('decision-count').textContent = brain.decisions?.length || 0;
+  document.getElementById('event-count').textContent = brain.events?.count || 0;
+  document.getElementById('event-sub').textContent = `Last: ${brain.events?.lastEventId || 'none'}`;
+
+  // Violations
+  const violations = brain.state?.violations || [];
+  document.getElementById('violation-count').textContent = violations.length;
+  document.getElementById('v-blocked').textContent = violations.filter(v => v.blocked).length;
+  document.getElementById('v-advisory').textContent = violations.filter(v => !v.blocked).length;
+
+  // Overrides count
+  let overrideCount = 0;
+  for (const lock of (brain.specLock?.items || [])) {
+    overrideCount += (lock.overrides || []).length;
+  }
+  document.getElementById('v-overrides').textContent = overrideCount;
+
+  // Enforcement
+  const enforcement = brain.enforcement || { mode: 'advisory', blockThreshold: 70 };
+  document.getElementById('enforce-mode').textContent = enforcement.mode;
+  document.getElementById('enforce-mode').style.color = enforcement.mode === 'hard' ? 'var(--red)' : 'var(--yellow)';
+  document.getElementById('enforce-threshold').textContent = `Block threshold: ${enforcement.blockThreshold}%`;
+
+  // Encryption
+  document.getElementById('encrypt-status').textContent = data._encryption ? 'Enabled' : 'Disabled';
+  document.getElementById('encrypt-status').style.color = data._encryption ? 'var(--green)' : 'var(--muted)';
+  document.getElementById('encrypt-algo').textContent = data._encryption ? 'AES-256-GCM' : 'Set SPECLOCK_ENCRYPTION_KEY to enable';
+
+  // Auth keys
+  document.getElementById('auth-keys').textContent = data._authKeys ? `${data._authKeys} active key(s)` : '';
+
+  // Locks table
+  const locksBody = document.getElementById('locks-table');
+  if (activeLocks.length === 0) {
+    locksBody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No active locks</td></tr>';
+  } else {
+    locksBody.innerHTML = activeLocks.map(l => `
+      <tr>
+        <td><code>${l.id}</code></td>
+        <td>${escHtml(l.text)}</td>
+        <td><span class="badge active">${l.source || 'agent'}</span></td>
+        <td>${(l.tags || []).map(t => `<span class="badge low">${t}</span>`).join(' ') || '-'}</td>
+        <td>${(l.createdAt || '').substring(0, 16)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Sessions table
+  const sessions = brain.sessions?.history || [];
+  const sessBody = document.getElementById('sessions-table');
+  if (sessions.length === 0) {
+    sessBody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No sessions yet</td></tr>';
+  } else {
+    sessBody.innerHTML = sessions.slice(0, 20).map(s => {
+      const dur = s.startedAt && s.endedAt ? Math.round((new Date(s.endedAt) - new Date(s.startedAt)) / 60000) + ' min' : '-';
+      return `
+        <tr>
+          <td><span class="badge active">${s.toolUsed || 'unknown'}</span></td>
+          <td>${(s.startedAt || '').substring(0, 16)}</td>
+          <td>${dur}</td>
+          <td>${s.eventsInSession || 0}</td>
+          <td>${escHtml((s.summary || '').substring(0, 80))}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+async function loadEvents() {
+  const data = await apiFetch('/dashboard/api/events');
+  const timeline = document.getElementById('events-timeline');
+  if (!data || !data.events || data.events.length === 0) {
+    timeline.innerHTML = '<li style="color:var(--muted)">No events yet</li>';
+    return;
+  }
+
+  timeline.innerHTML = data.events.slice(0, 30).map(e => `
+    <li>
+      <span class="time">${(e.at || '').substring(0, 19)}</span>
+      <span class="event-type badge ${getEventColor(e.type)}">${e.type}</span>
+      <span class="event-summary">${escHtml(e.summary || e.eventId || '')}</span>
+    </li>
+  `).join('');
+}
+
+function getEventColor(type) {
+  if (type?.includes('lock') || type?.includes('violation')) return 'high';
+  if (type?.includes('session') || type?.includes('decision')) return 'medium';
+  return 'low';
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// Auto-refresh every 30 seconds
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+
+</body>
+</html>
