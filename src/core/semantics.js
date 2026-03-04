@@ -5,7 +5,7 @@
 // ===================================================================
 
 // ===================================================================
-// SYNONYM GROUPS (55 groups)
+// SYNONYM GROUPS (75+ groups)
 // Each group contains words/phrases that are semantically equivalent.
 // ===================================================================
 
@@ -144,6 +144,40 @@ export const SYNONYM_GROUPS = [
    "archival", "preservation", "lifecycle"],
   ["consent", "user consent", "opt-in", "opt-out",
    "data subject", "right to erasure"],
+
+  // --- Logistics / Supply Chain ---
+  ["shipment", "shipping", "consignment", "delivery", "dispatch",
+   "freight", "cargo", "package", "parcel"],
+  ["manifest", "bill of lading", "shipping document", "waybill",
+   "consignment note", "packing list"],
+  ["warehouse", "fulfillment center", "distribution center",
+   "storage facility", "depot"],
+  ["carrier", "shipping provider", "logistics provider",
+   "transport company", "freight forwarder"],
+  ["eta", "estimated arrival", "delivery time", "arrival time",
+   "expected delivery"],
+  ["customs", "customs clearance", "import", "export",
+   "tariff", "duty", "declaration"],
+  ["tracking number", "tracking id", "shipment tracking",
+   "delivery tracking", "consignment tracking"],
+
+  // --- Travel / Booking ---
+  ["reservation", "booking", "appointment", "ticket",
+   "confirmation", "itinerary"],
+  ["passenger", "traveler", "guest", "visitor", "tourist"],
+  ["passport", "passport data", "travel document",
+   "identity document", "visa"],
+  ["flight", "airline", "aviation", "air travel"],
+  ["hotel", "accommodation", "lodging", "stay", "room"],
+
+  // --- E-commerce ---
+  ["checkout", "cart", "shopping cart", "basket",
+   "purchase flow", "buy flow"],
+  ["order", "purchase", "buy", "acquisition"],
+  ["product", "item", "sku", "merchandise", "product listing", "catalog"],
+  ["price", "pricing", "cost", "rate", "amount", "charge"],
+  ["coupon", "discount", "promo", "promotion", "voucher", "deal"],
+  ["inventory", "stock", "supply", "availability"],
 ];
 
 // ===================================================================
@@ -201,6 +235,37 @@ export const EUPHEMISM_MAP = {
   "bypass":         ["disable", "circumvent", "skip"],
   "work around":    ["bypass", "circumvent"],
   "shortcut":       ["bypass", "skip"],
+
+  // Financial / accounting euphemisms
+  "reconcile":      ["modify", "adjust", "change", "alter"],
+  "reverse":        ["undo", "revert", "modify", "change"],
+  "recalculate":    ["modify", "change", "update", "alter"],
+  "backdate":       ["modify", "tamper", "falsify", "change"],
+  "rebalance":      ["modify", "adjust", "change", "redistribute"],
+  "reclassify":     ["modify", "change", "recategorize"],
+  "redistribute":   ["modify", "change", "move", "reallocate"],
+  "reallocate":     ["modify", "change", "move"],
+  "write off":      ["delete", "remove", "eliminate"],
+  "write down":     ["modify", "reduce", "change"],
+  "void":           ["delete", "cancel", "remove", "nullify"],
+  "post":           ["modify", "change", "write", "record"],
+  "unpost":         ["revert", "undo", "modify", "delete"],
+  "journal":        ["modify", "record", "change"],
+  "accrue":         ["modify", "add", "change"],
+  "amortize":       ["modify", "reduce", "change"],
+  "depreciate":     ["modify", "reduce", "change"],
+
+  // Logistics euphemisms
+  "reroute":        ["modify", "change", "redirect"],
+  "divert":         ["modify", "change", "redirect", "reroute"],
+  "reassign":       ["modify", "change", "move", "transfer"],
+  "remanifest":     ["modify", "change", "update"],
+  "deconsolidate":  ["split", "separate", "modify"],
+
+  // Travel / booking euphemisms
+  "rebook":         ["modify", "change", "replace", "cancel"],
+  "no-show":        ["cancel", "void", "remove"],
+  "waitlist":       ["modify", "change", "queue"],
 
   // Database euphemisms
   "truncate":       ["delete", "remove", "wipe", "empty"],
@@ -285,7 +350,7 @@ export const CONCEPT_MAP = {
   "hipaa":             ["phi", "patient data", "health information",
                         "medical records", "compliance"],
 
-  // Financial
+  // Financial / Fintech
   "pci":               ["cardholder data", "payment data", "card data",
                         "pci dss", "payment security"],
   "cardholder data":   ["pci", "payment data", "card data", "credit card", "pan"],
@@ -293,6 +358,74 @@ export const CONCEPT_MAP = {
   "trade":             ["executed trade", "trade record", "order", "position"],
   "executed trade":    ["trade", "trade record", "order"],
   "trade record":      ["trade", "executed trade", "transaction record"],
+  "transaction":       ["payment", "transfer", "ledger entry", "posting",
+                        "settlement", "billing", "charge", "balance"],
+  "ledger":            ["transaction", "financial records", "accounting",
+                        "general ledger", "journal", "balance sheet", "posting"],
+  "balance":           ["account balance", "ledger", "transaction", "funds",
+                        "financial records", "settlement"],
+  "account":           ["balance", "ledger", "financial records", "customer account",
+                        "account balance"],
+  "settlement":        ["transaction", "payment", "clearing", "reconciliation",
+                        "transfer"],
+  "fraud detection":   ["fraud", "fraud prevention", "anti-fraud", "fraud monitoring",
+                        "suspicious activity", "transaction monitoring"],
+  "fraud":             ["fraud detection", "fraud prevention", "suspicious activity",
+                        "anti-fraud"],
+  "posting":           ["transaction", "ledger entry", "journal entry", "record"],
+  "reconciliation":    ["balance", "ledger", "account", "transaction", "audit"],
+  "checkout":          ["payment", "cart", "purchase", "transaction", "billing",
+                        "payment processing", "order"],
+  "revenue":           ["payment", "billing", "income", "sales", "earnings",
+                        "transaction"],
+  "invoice":           ["billing", "payment", "charge", "transaction", "accounts receivable"],
+
+  // Logistics / Supply Chain
+  "shipment":          ["cargo", "freight", "consignment", "delivery", "package",
+                        "manifest", "tracking", "shipping"],
+  "manifest":          ["shipment", "cargo", "freight", "bill of lading",
+                        "shipping document", "consignment"],
+  "cargo":             ["shipment", "freight", "manifest", "consignment", "goods"],
+  "freight":           ["shipment", "cargo", "manifest", "logistics"],
+  "delivery":          ["shipment", "shipping", "tracking", "eta", "transit"],
+  "eta":               ["delivery time", "estimated arrival", "timestamp",
+                        "delivery", "tracking", "schedule"],
+  "warehouse":         ["inventory", "stock", "storage", "fulfillment"],
+  "inventory":         ["warehouse", "stock", "supply", "goods"],
+  "customs":           ["import", "export", "tariff", "duty", "clearance",
+                        "border", "declaration"],
+  "carrier":           ["shipping provider", "logistics provider", "trucker",
+                        "transport", "shipping company"],
+  "tracking":          ["shipment tracking", "delivery tracking", "status",
+                        "location", "transit"],
+  "bill of lading":    ["manifest", "shipping document", "consignment note"],
+
+  // Travel / Booking
+  "reservation":       ["booking", "appointment", "ticket", "confirmation",
+                        "itinerary", "payment record"],
+  "booking":           ["reservation", "appointment", "ticket", "itinerary",
+                        "confirmation"],
+  "passenger":         ["traveler", "guest", "customer", "pii", "personal data",
+                        "user data", "passenger data"],
+  "itinerary":         ["booking", "reservation", "travel plan", "route",
+                        "schedule", "flight"],
+  "passport":          ["pii", "personal data", "identity document", "travel document",
+                        "passenger data"],
+  "passport data":     ["pii", "personal data", "identity", "passenger",
+                        "travel document"],
+  "flight":            ["booking", "reservation", "itinerary", "travel"],
+  "hotel":             ["booking", "reservation", "accommodation", "lodging"],
+  "rate limiting":     ["throttle", "request limit", "api limit", "rate limit",
+                        "quota", "access control"],
+
+  // E-commerce
+  "cart":              ["checkout", "purchase", "shopping cart"],
+  "payment processing":["payment", "checkout", "billing", "transaction",
+                        "stripe", "payment gateway"],
+  "payment gateway":   ["payment processing", "stripe", "paypal", "checkout",
+                        "billing", "transaction"],
+  "product":           ["item", "sku", "catalog", "merchandise", "product listing"],
+  "price":             ["pricing", "cost", "amount", "rate", "charge"],
 
   // Audit/logging
   "audit logging":     ["audit log", "audit trail", "logging", "monitoring"],
@@ -325,6 +458,13 @@ export const CONCEPT_MAP = {
   // Ban records
   "ban records":       ["ban record", "banned users", "suspension records",
                         "blocked users", "moderation records"],
+
+  // Approval / moderation concepts
+  "approve":           ["moderation", "content review", "content moderation",
+                        "review queue"],
+  "batch approve":     ["bypass moderation", "skip review", "auto-approve",
+                        "content moderation", "moderation"],
+  "approval queue":    ["moderation", "review queue", "content review"],
 
   // Authentication/2FA
   "2fa":               ["two-factor", "two factor authentication", "mfa",
@@ -568,13 +708,30 @@ export function tokenize(text) {
   }
 
   // Extract single words (>= 2 chars)
-  const words = lower
+  const rawWords = lower
     .replace(/[^a-z0-9\-\/&]+/g, " ")
     .split(/\s+/)
     .filter(w => w.length >= 2);
 
-  const all = [...new Set([...phrases, ...words])];
-  return { words, phrases, all };
+  // Basic plural normalization — add both singular and plural forms
+  // so "databases" matches "database" and vice versa
+  const words = [...rawWords];
+  for (const w of rawWords) {
+    if (w.endsWith("ses") && w.length > 4) {
+      // "databases" → "database"
+      words.push(w.slice(0, -1));
+    } else if (w.endsWith("ies") && w.length > 4) {
+      // "entries" → "entry"
+      words.push(w.slice(0, -3) + "y");
+    } else if (w.endsWith("s") && !w.endsWith("ss") && !w.endsWith("us") && w.length > 3) {
+      // "records" → "record", "logs" → "log"
+      words.push(w.slice(0, -1));
+    }
+  }
+  const uniqueWords = [...new Set(words)];
+
+  const all = [...new Set([...phrases, ...uniqueWords])];
+  return { words: uniqueWords, phrases, all };
 }
 
 // ===================================================================
@@ -969,13 +1126,43 @@ export function scoreConflict({ actionText, lockText }) {
   // However, subject-level synonyms like "content safety" → "CSAM detection"
   // should still count as subject relevance (same concept, different words).
   const ACTION_VERBS_SET = new Set([
-    "modify", "change", "alter", "update", "delete", "remove", "add", "create",
-    "disable", "enable", "replace", "swap", "switch", "move", "migrate",
-    "install", "uninstall", "deploy", "rewrite", "revise", "restructure",
-    "refactor", "clean", "purge", "wipe", "drop", "kill", "destroy",
-    "reduce", "simplify", "fix", "repair", "restore", "recover", "break",
-    "expose", "hide", "connect", "disconnect", "merge", "split", "truncate",
-    "bypass", "skip", "ignore", "override", "adjust", "tweak", "tune",
+    // Modification verbs
+    "modify", "change", "alter", "update", "mutate", "transform", "rewrite",
+    "revise", "amend", "adjust", "tweak", "tune", "rework", "overhaul",
+    // Destructive verbs
+    "delete", "remove", "drop", "kill", "destroy", "purge", "wipe", "erase",
+    "eliminate", "obliterate", "expunge", "nuke", "truncate", "clear", "empty",
+    "flush", "reset", "void",
+    // Creation verbs
+    "add", "create", "introduce", "insert", "generate", "produce", "spawn",
+    // Toggle verbs
+    "disable", "enable", "activate", "deactivate", "start", "stop", "halt",
+    "pause", "suspend", "freeze",
+    // Replacement verbs
+    "replace", "swap", "substitute", "switch", "exchange", "override", "overwrite",
+    // Movement verbs
+    "move", "relocate", "migrate", "transfer", "shift", "rearrange", "reorganize",
+    "merge", "split", "separate", "partition", "divide", "fork",
+    // Installation verbs
+    "install", "uninstall", "deploy", "connect", "disconnect", "detach",
+    // Structural verbs
+    "refactor", "restructure", "simplify", "reduce", "consolidate",
+    "clean", "normalize", "flatten",
+    // Recovery verbs
+    "fix", "repair", "restore", "recover", "break", "revert", "rollback",
+    // Visibility verbs
+    "expose", "hide", "reveal", "leak",
+    // Bypass verbs
+    "bypass", "skip", "ignore", "circumvent",
+    // Financial verbs (new)
+    "reconcile", "reverse", "recalculate", "backdate", "rebalance",
+    "post", "unpost", "accrue", "amortize", "depreciate", "journal",
+    // Logistics verbs (new)
+    "reroute", "divert", "reassign", "deconsolidate",
+    // Booking verbs (new)
+    "rebook", "cancel",
+    // Upgrade/downgrade
+    "upgrade", "downgrade", "patch", "bump", "advance",
   ]);
 
   // Check if any synonym/concept match involves a non-verb term (= subject match)
@@ -992,9 +1179,11 @@ export function scoreConflict({ actionText, lockText }) {
     euphemismMatches.length > 0;
 
   // If the ONLY matches are verb-level (euphemism/synonym) with no subject
-  // overlap, drastically reduce the score — these are likely false positives
+  // overlap, reduce the score — these are likely false positives.
+  // Use 0.25 (not 0.15) to avoid killing legitimate cross-domain detections
+  // where concept links are present but subject wording differs.
   if (!hasSubjectMatch && (synonymMatches.length > 0 || euphemismMatches.length > 0)) {
-    score = Math.floor(score * 0.15);
+    score = Math.floor(score * 0.25);
   }
 
   const prohibitedVerb = extractProhibitedVerb(lockText);
@@ -1046,6 +1235,26 @@ export function scoreConflict({ actionText, lockText }) {
       // are NOT safe — they modify the target system. Adding to a locked area
       // IS a modification. Only truly read-only and activation verbs are safe.
     ]);
+
+    // OBSERVABILITY ACTIONS: "add logging", "add monitoring", "add tracking"
+    // are constructive observability actions, NOT modifications to the locked system.
+    // If the action verb is "add/create/implement" AND the object is an
+    // observability concept, treat it as safe.
+    const OBSERVABILITY_KEYWORDS = new Set([
+      "logging", "log", "logs", "monitoring", "monitor", "tracking",
+      "tracing", "trace", "metrics", "alerting", "alerts", "alert",
+      "observability", "telemetry", "analytics", "reporting", "auditing",
+      "profiling", "instrumentation", "dashboard",
+    ]);
+    const actionLower = actionText.toLowerCase();
+    const actionWords = actionLower.split(/\s+/);
+    const hasObservabilityObject = actionWords.some(w => OBSERVABILITY_KEYWORDS.has(w));
+    const CONSTRUCTIVE_VERBS = new Set(["add", "create", "implement", "introduce", "set up", "enable"]);
+    if (CONSTRUCTIVE_VERBS.has(actionPrimaryVerb) && hasObservabilityObject) {
+      intentAligned = true;
+      reasons.push(
+        `intent alignment: observability action "${actionPrimaryVerb} ... ${actionWords.find(w => OBSERVABILITY_KEYWORDS.has(w))}" is non-destructive`);
+    }
 
     const PROHIBITED_ACTION_VERBS = new Set([
       "modify", "change", "alter", "delete", "remove", "disable",
