@@ -48,7 +48,7 @@ import {
 } from "../core/git.js";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "2.1.0";
+const VERSION = "2.1.1";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 

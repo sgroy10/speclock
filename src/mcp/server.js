@@ -61,7 +61,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "2.1.0";
+const VERSION = "2.1.1";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(
