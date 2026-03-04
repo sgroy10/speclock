@@ -20,6 +20,9 @@ import {
   applyTemplate,
   generateReport,
   auditStagedFiles,
+  verifyAuditChain,
+  exportCompliance,
+  getLicenseInfo,
 } from "../core/engine.js";
 import { generateContext } from "../core/context.js";
 import { readBrain } from "../core/storage.js";
@@ -79,7 +82,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v2.0.0 — AI Constraint Engine
+SpecLock v2.1.0 — AI Constraint Engine (Enterprise)
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -102,6 +105,9 @@ Commands:
   hook install                    Install git pre-commit hook
   hook remove                     Remove git pre-commit hook
   audit                           Audit staged files against locks
+  audit-verify                    Verify HMAC audit chain integrity
+  export --format <soc2|hipaa|csv>  Export compliance report
+  license                         Show license tier and usage info
   context                         Generate and print context pack
   facts deploy [--provider X]     Set deployment facts
   watch                           Start file watcher (auto-track changes)
@@ -115,18 +121,23 @@ Options:
   --goal <text>                   Goal text (for setup command)
   --template <name>               Template to apply during setup
   --lock <text>                   Lock text (for guard command)
+  --format <soc2|hipaa|csv>       Compliance export format
   --project <path>                Project root (for serve)
 
 Templates: nextjs, react, express, supabase, stripe, security-hardened
 
+Enterprise:
+  SPECLOCK_AUDIT_SECRET           HMAC secret for audit chain (env var)
+  SPECLOCK_LICENSE_KEY            License key for Pro/Enterprise features
+  SPECLOCK_LLM_KEY                API key for LLM-powered conflict detection
+
 Examples:
   npx speclock setup --goal "Build PawPalace pet shop" --template nextjs
   npx speclock lock "Never modify auth files"
-  npx speclock template apply supabase
   npx speclock check "Adding social login to auth page"
-  npx speclock report
-  npx speclock hook install
-  npx speclock audit
+  npx speclock audit-verify
+  npx speclock export --format soc2
+  npx speclock license
   npx speclock status
 `);
 }
@@ -595,6 +606,72 @@ Tip: When starting a new chat, tell the AI:
       console.log("Commit blocked. Unlock files or unstage them to proceed.");
       process.exit(1);
     }
+  }
+
+  // --- AUDIT-VERIFY (v2.1 enterprise) ---
+  if (cmd === "audit-verify") {
+    ensureInit(root);
+    const result = verifyAuditChain(root);
+    console.log(`\nAudit Chain Verification`);
+    console.log("=".repeat(50));
+    console.log(`Status: ${result.valid ? "VALID" : "BROKEN"}`);
+    console.log(`Total events: ${result.totalEvents}`);
+    console.log(`Hashed events: ${result.hashedEvents}`);
+    console.log(`Legacy events (pre-v2.1): ${result.unhashedEvents}`);
+    if (!result.valid && result.errors) {
+      console.log(`\nErrors:`);
+      for (const err of result.errors) {
+        console.log(`  Line ${err.line}: ${err.error}`);
+      }
+    }
+    console.log(`\n${result.message}`);
+    process.exit(result.valid ? 0 : 1);
+  }
+
+  // --- EXPORT (v2.1 enterprise) ---
+  if (cmd === "export") {
+    const flags = parseFlags(args);
+    const format = flags.format;
+    if (!format || !["soc2", "hipaa", "csv"].includes(format)) {
+      console.error("Error: Valid format is required.");
+      console.error("Usage: speclock export --format <soc2|hipaa|csv>");
+      process.exit(1);
+    }
+    ensureInit(root);
+    const result = exportCompliance(root, format);
+    if (result.error) {
+      console.error(result.error);
+      process.exit(1);
+    }
+    if (format === "csv") {
+      console.log(result.data);
+    } else {
+      console.log(JSON.stringify(result.data, null, 2));
+    }
+    return;
+  }
+
+  // --- LICENSE (v2.1 enterprise) ---
+  if (cmd === "license") {
+    const info = getLicenseInfo(root);
+    console.log(`\nSpecLock License Info`);
+    console.log("=".repeat(50));
+    console.log(`Tier: ${info.tier} (${info.tierKey})`);
+    if (info.expiresAt) console.log(`Expires: ${info.expiresAt}`);
+    if (info.expired) console.log(`STATUS: EXPIRED — reverted to Free tier`);
+    console.log(`\nUsage:`);
+    if (info.usage) {
+      const { locks, decisions, events } = info.usage;
+      console.log(`  Locks: ${locks.current}/${locks.max === Infinity ? "unlimited" : locks.max}`);
+      console.log(`  Decisions: ${decisions.current}/${decisions.max === Infinity ? "unlimited" : decisions.max}`);
+      console.log(`  Events: ${events.current}/${events.max === Infinity ? "unlimited" : events.max}`);
+    }
+    if (info.warnings && info.warnings.length > 0) {
+      console.log(`\nWarnings:`);
+      for (const w of info.warnings) console.log(`  - ${w}`);
+    }
+    console.log(`\nFeatures: ${info.features.join(", ")}`);
+    return;
   }
 
   // --- STATUS ---

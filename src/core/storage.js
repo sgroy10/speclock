@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { signEvent, isAuditEnabled } from "./audit.js";
 
 export function nowIso() {
   return new Date().toISOString();
@@ -140,6 +141,14 @@ export function writeBrain(root, brain) {
 }
 
 export function appendEvent(root, event) {
+  // HMAC audit chain — sign event if audit is enabled
+  try {
+    if (isAuditEnabled(root)) {
+      signEvent(root, event);
+    }
+  } catch {
+    // Audit error — write event without hash (graceful degradation)
+  }
   const line = JSON.stringify(event);
   fs.appendFileSync(eventsPath(root), `${line}\n`);
 }

@@ -18,6 +18,10 @@ import {
 import { hasGit, getHead, getDefaultBranch, captureDiff, getStagedFiles } from "./git.js";
 import { getTemplateNames, getTemplate } from "./templates.js";
 import { analyzeConflict } from "./semantics.js";
+import { ensureAuditKeyGitignored } from "./audit.js";
+import { verifyAuditChain } from "./audit.js";
+import { exportCompliance } from "./compliance.js";
+import { checkFeature, checkLimits, getLicenseInfo } from "./license.js";
 
 // --- Internal helpers ---
 
@@ -41,6 +45,7 @@ function writePatch(root, eventId, content) {
 
 export function ensureInit(root) {
   ensureSpeclockDirs(root);
+  try { ensureAuditKeyGitignored(root); } catch { /* non-critical */ }
   let brain = readBrain(root);
   if (!brain) {
     const gitExists = hasGit(root);
@@ -1215,3 +1220,9 @@ export function auditStagedFiles(root) {
     message,
   };
 }
+
+// --- Enterprise features (v2.1) ---
+
+export { verifyAuditChain } from "./audit.js";
+export { exportCompliance } from "./compliance.js";
+export { checkFeature, checkLimits, getLicenseInfo } from "./license.js";

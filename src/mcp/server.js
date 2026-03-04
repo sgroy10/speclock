@@ -23,6 +23,10 @@ import {
   applyTemplate,
   generateReport,
   auditStagedFiles,
+  verifyAuditChain,
+  exportCompliance,
+  checkLimits,
+  getLicenseInfo,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -57,7 +61,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(
@@ -879,6 +883,77 @@ server.tool(
           text: `## Audit Failed\n\n${formatted}\n\n${result.message}`,
         },
       ],
+    };
+  }
+);
+
+// ========================================
+// ENTERPRISE TOOLS (v2.1)
+// ========================================
+
+// Tool 23: speclock_verify_audit
+server.tool(
+  "speclock_verify_audit",
+  "Verify the integrity of the HMAC audit chain. Detects tampering or corruption in the event log. Returns chain status, total events, and any broken links.",
+  {},
+  async () => {
+    ensureInit(PROJECT_ROOT);
+    const result = verifyAuditChain(PROJECT_ROOT);
+
+    const status = result.valid ? "VALID" : "BROKEN";
+    const parts = [
+      `## Audit Chain Verification`,
+      ``,
+      `Status: **${status}**`,
+      `Total events: ${result.totalEvents}`,
+      `Hashed events: ${result.hashedEvents}`,
+      `Legacy events (pre-v2.1): ${result.unhashedEvents}`,
+    ];
+
+    if (!result.valid && result.errors) {
+      parts.push(``, `### Errors`);
+      for (const err of result.errors) {
+        parts.push(`- Line ${err.line}: ${err.error}${err.eventId ? ` (${err.eventId})` : ""}`);
+      }
+    }
+
+    parts.push(``, result.message);
+    parts.push(``, `Verified at: ${result.verifiedAt}`);
+
+    return {
+      content: [{ type: "text", text: parts.join("\n") }],
+    };
+  }
+);
+
+// Tool 24: speclock_export_compliance
+server.tool(
+  "speclock_export_compliance",
+  "Generate compliance reports for enterprise auditing. Supports SOC 2 Type II, HIPAA, and CSV formats. Reports include constraint management, access logs, audit chain integrity, and violation history.",
+  {
+    format: z
+      .enum(["soc2", "hipaa", "csv"])
+      .describe("Export format: soc2 (JSON), hipaa (JSON), csv (spreadsheet)"),
+  },
+  async ({ format }) => {
+    ensureInit(PROJECT_ROOT);
+    const result = exportCompliance(PROJECT_ROOT, format);
+
+    if (result.error) {
+      return {
+        content: [{ type: "text", text: result.error }],
+        isError: true,
+      };
+    }
+
+    if (format === "csv") {
+      return {
+        content: [{ type: "text", text: `## Compliance Export (CSV)\n\n\`\`\`csv\n${result.data}\n\`\`\`` }],
+      };
+    }
+
+    return {
+      content: [{ type: "text", text: `## Compliance Export (${format.toUpperCase()})\n\n\`\`\`json\n${JSON.stringify(result.data, null, 2)}\n\`\`\`` }],
     };
   }
 );

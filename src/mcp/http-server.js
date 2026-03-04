@@ -28,6 +28,8 @@ import {
   applyTemplate,
   generateReport,
   auditStagedFiles,
+  verifyAuditChain,
+  exportCompliance,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -46,8 +48,51 @@ import {
 } from "../core/git.js";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 const AUTHOR = "Sandeep Roy";
+const START_TIME = Date.now();
+
+// --- Rate Limiting ---
+const RATE_LIMIT = parseInt(process.env.SPECLOCK_RATE_LIMIT || "100", 10);
+const RATE_WINDOW_MS = 60_000;
+const rateLimitMap = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, []);
+  }
+  const timestamps = rateLimitMap.get(ip).filter((t) => now - t < RATE_WINDOW_MS);
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return timestamps.length <= RATE_LIMIT;
+}
+
+// Clean up stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, timestamps] of rateLimitMap) {
+    const active = timestamps.filter((t) => now - t < RATE_WINDOW_MS);
+    if (active.length === 0) rateLimitMap.delete(ip);
+    else rateLimitMap.set(ip, active);
+  }
+}, 5 * 60_000);
+
+// --- CORS Configuration ---
+const ALLOWED_ORIGINS = process.env.SPECLOCK_CORS_ORIGINS
+  ? process.env.SPECLOCK_CORS_ORIGINS.split(",").map((s) => s.trim())
+  : ["*"];
+
+function setCorsHeaders(res) {
+  const origin = ALLOWED_ORIGINS.includes("*") ? "*" : ALLOWED_ORIGINS.join(", ");
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
+
+// --- Request Size Limit ---
+const MAX_BODY_SIZE = 1024 * 1024; // 1MB
 
 function createSpecLockServer() {
   const server = new McpServer(
@@ -293,13 +338,57 @@ function createSpecLockServer() {
     return { content: [{ type: "text", text: `## Audit Failed\n\n${text}\n\n${result.message}` }] };
   });
 
+  // Tool 23: speclock_verify_audit
+  server.tool("speclock_verify_audit", "Verify the integrity of the HMAC audit chain.", {}, async () => {
+    ensureInit(PROJECT_ROOT);
+    const result = verifyAuditChain(PROJECT_ROOT);
+    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+  });
+
+  // Tool 24: speclock_export_compliance
+  server.tool("speclock_export_compliance", "Generate compliance reports (SOC 2, HIPAA, CSV).", { format: z.enum(["soc2", "hipaa", "csv"]).describe("Export format") }, async ({ format }) => {
+    ensureInit(PROJECT_ROOT);
+    const result = exportCompliance(PROJECT_ROOT, format);
+    if (result.error) return { content: [{ type: "text", text: result.error }], isError: true };
+    const output = format === "csv" ? result.data : JSON.stringify(result.data, null, 2);
+    return { content: [{ type: "text", text: output }] };
+  });
+
   return server;
 }
 
 // --- HTTP Server ---
 const app = createMcpExpressApp({ host: "0.0.0.0" });
 
+// CORS preflight handler
+app.options("*", (req, res) => {
+  setCorsHeaders(res);
+  res.writeHead(204).end();
+});
+
 app.post("/mcp", async (req, res) => {
+  setCorsHeaders(res);
+
+  // Rate limiting
+  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: `Rate limit exceeded (${RATE_LIMIT} req/min). Try again later.` },
+      id: null,
+    });
+  }
+
+  // Request size check
+  const contentLength = parseInt(req.headers["content-length"] || "0", 10);
+  if (contentLength > MAX_BODY_SIZE) {
+    return res.status(413).json({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: `Request too large (max ${MAX_BODY_SIZE / 1024}KB)` },
+      id: null,
+    });
+  }
+
   const server = createSpecLockServer();
   try {
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
@@ -318,22 +407,47 @@ app.post("/mcp", async (req, res) => {
 });
 
 app.get("/mcp", async (req, res) => {
+  setCorsHeaders(res);
   res.writeHead(405).end(JSON.stringify({ jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed." }, id: null }));
 });
 
 app.delete("/mcp", async (req, res) => {
+  setCorsHeaders(res);
   res.writeHead(405).end(JSON.stringify({ jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed." }, id: null }));
 });
 
-// Health check endpoint
+// Health check endpoint (enhanced for enterprise)
+app.get("/health", (req, res) => {
+  setCorsHeaders(res);
+  let auditStatus = "unknown";
+  try {
+    const result = verifyAuditChain(PROJECT_ROOT);
+    auditStatus = result.valid ? "valid" : "broken";
+  } catch {
+    auditStatus = "unavailable";
+  }
+
+  res.json({
+    status: "healthy",
+    version: VERSION,
+    uptime: Math.floor((Date.now() - START_TIME) / 1000),
+    tools: 24,
+    auditChain: auditStatus,
+    rateLimit: { limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS },
+  });
+});
+
+// Root info endpoint
 app.get("/", (req, res) => {
+  setCorsHeaders(res);
   res.json({
     name: "speclock",
     version: VERSION,
     author: AUTHOR,
-    description: "AI Continuity Engine — Kill AI amnesia",
-    tools: 22,
+    description: "AI Continuity Engine with enterprise audit, compliance, and enforcement",
+    tools: 24,
     mcp_endpoint: "/mcp",
+    health_endpoint: "/health",
     npm: "https://www.npmjs.com/package/speclock",
     github: "https://github.com/sgroy10/speclock",
   });

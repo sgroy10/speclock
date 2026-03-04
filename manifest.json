@@ -1,8 +1,8 @@
 {
   "manifest_version": "0.2",
   "name": "speclock",
-  "version": "2.0.0",
-  "description": "AI constraint engine with real semantic conflict detection (v2). 100% detection rate, 0% false positives across 61 adversarial tests. 22 MCP tools, CLI, npm. Memory + enforcement for AI coding tools.",
+  "version": "2.1.0",
+  "description": "AI constraint engine with semantic conflict detection, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 24 MCP tools + CLI. Enterprise-ready memory + enforcement.",
   "author": {
     "name": "Sandeep Roy (https://github.com/sgroy10)"
   },

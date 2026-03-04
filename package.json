@@ -1,7 +1,7 @@
 {
   "name": "speclock",
-  "version": "2.0.0",
-  "description": "AI constraint engine with real semantic conflict detection. 100% detection rate, 0% false positives. 22 MCP tools + CLI. Memory + enforcement for Bolt.new, Claude Code, Cursor, Lovable.",
+  "version": "2.1.0",
+  "description": "AI constraint engine with semantic conflict detection, HMAC audit chain, SOC 2/HIPAA compliance exports. 100% detection, 0% false positives. 24 MCP tools + CLI. Enterprise-ready memory + enforcement.",
   "type": "module",
   "main": "src/mcp/server.js",
   "bin": {
@@ -30,7 +30,13 @@
     "ai-amnesia",
     "model-context-protocol",
     "drift-detection",
-    "constraint-enforcement"
+    "constraint-enforcement",
+    "enterprise",
+    "soc2",
+    "hipaa",
+    "compliance",
+    "audit-trail",
+    "hmac"
   ],
   "author": "Sandeep Roy (https://github.com/sgroy10)",
   "license": "MIT",
