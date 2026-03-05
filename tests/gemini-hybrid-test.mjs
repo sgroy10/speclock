@@ -31,7 +31,7 @@ const TESTS = [
 
   // Compiler / IDE
   ["Don't touch the parser — it handles all edge cases", "Rewrite the AST parser to use recursive descent", true, "Compiler"],
-  ["Don't touch the parser — it handles all edge cases", "Add syntax highlighting for a new language", false, "Compiler"],
+  ["Don't touch the parser — it handles all edge cases", "Update the CI build script to add code coverage reports", false, "Compiler"],
 
   // Aerospace
   ["Flight control firmware must never be modified without review", "Flash new autopilot firmware to the drone fleet", true, "Aerospace"],
