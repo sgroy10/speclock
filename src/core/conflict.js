@@ -68,6 +68,7 @@ export function checkConflict(root, proposedAction) {
   }
 
   const conflicting = [];
+  let maxNonConflictScore = 0;
   for (const lock of activeLocks) {
     const result = analyzeConflict(proposedAction, lock.text);
     if (result.isConflict) {
@@ -79,6 +80,8 @@ export function checkConflict(root, proposedAction) {
         level: result.level,
         reasons: result.reasons,
       });
+    } else if (result.confidence > maxNonConflictScore) {
+      maxNonConflictScore = result.confidence;
     }
   }
 
@@ -86,6 +89,7 @@ export function checkConflict(root, proposedAction) {
     return {
       hasConflict: false,
       conflictingLocks: [],
+      _maxNonConflictScore: maxNonConflictScore,
       analysis: `Checked against ${activeLocks.length} active lock(s). No conflicts detected (semantic analysis v2). Proceed with caution.`,
     };
   }
@@ -102,6 +106,7 @@ export function checkConflict(root, proposedAction) {
   const result = {
     hasConflict: true,
     conflictingLocks: conflicting,
+    _maxNonConflictScore: maxNonConflictScore,
     analysis: `Potential conflict with ${conflicting.length} lock(s):\n${details}\nReview before proceeding.`,
   };
 
@@ -118,51 +123,65 @@ export function checkConflict(root, proposedAction) {
 }
 
 /**
- * Async conflict check with LLM fallback for ambiguous cases.
- * Strategy: Run heuristic first (fast, free). If any match falls in the
- * "medium confidence" zone (30–70%), optionally verify with LLM.
- * HIGH confidence (>70%) and NO conflict (<30%) are trusted as-is.
+ * Async conflict check with LLM fallback for grey-zone cases.
+ * Strategy: Run heuristic first (fast, free, offline).
+ *   - Score > 70% on ALL conflicts → trust heuristic (skip LLM)
+ *   - Score == 0 everywhere (no signal at all) → trust heuristic (skip LLM)
+ *   - Score 1–70% on ANY lock → GREY ZONE → call LLM for universal domain coverage
+ * This catches vocabulary gaps where the heuristic has partial/no signal
+ * but an LLM (which knows every domain) would detect the conflict.
  */
 export async function checkConflictAsync(root, proposedAction) {
   // 1. Always run the fast heuristic first
   const heuristicResult = checkConflict(root, proposedAction);
 
-  // 2. If no conflict at all, trust the heuristic
-  if (!heuristicResult.hasConflict) return heuristicResult;
+  // 2. Determine the max score across ALL locks (conflict + non-conflict)
+  const maxConflictScore = heuristicResult.conflictingLocks.length > 0
+    ? Math.max(...heuristicResult.conflictingLocks.map((c) => c.confidence))
+    : 0;
+  const maxNonConflictScore = heuristicResult._maxNonConflictScore || 0;
+  const maxScore = Math.max(maxConflictScore, maxNonConflictScore);
 
-  // 3. Check if any conflicts are in the ambiguous zone (30–70%)
-  const ambiguous = heuristicResult.conflictingLocks.filter(
-    (c) => c.confidence >= 30 && c.confidence <= 70
-  );
+  // 3. Fast path: zero signal anywhere → truly unrelated, skip LLM
+  if (maxScore === 0 && !heuristicResult.hasConflict) {
+    return heuristicResult;
+  }
 
-  // If all conflicts are HIGH confidence (>70%), trust the heuristic
-  if (ambiguous.length === 0) return heuristicResult;
+  // 4. Fast path: all conflicts are HIGH (>70%) → heuristic is certain, skip LLM
+  if (
+    heuristicResult.hasConflict &&
+    heuristicResult.conflictingLocks.every((c) => c.confidence > 70)
+  ) {
+    return heuristicResult;
+  }
 
-  // 4. Try LLM verification for the ambiguous cases
+  // 5. GREY ZONE: some signal (1-70%) or low-confidence conflicts → call LLM
   try {
     const { llmCheckConflict } = await import("./llm-checker.js");
     const llmResult = await llmCheckConflict(root, proposedAction);
     if (llmResult) {
-      // Merge: keep HIGH heuristic results, replace ambiguous with LLM
+      // Keep HIGH heuristic conflicts (>70%) — they're already certain
       const highConfidence = heuristicResult.conflictingLocks.filter(
         (c) => c.confidence > 70
       );
       const llmConflicts = llmResult.conflictingLocks || [];
       const merged = [...highConfidence, ...llmConflicts];
 
-      // Deduplicate by lock text
-      const seen = new Set();
-      const unique = merged.filter((c) => {
-        if (seen.has(c.text)) return false;
-        seen.add(c.text);
-        return true;
-      });
+      // Deduplicate by lock text, keeping the higher-confidence entry
+      const byText = new Map();
+      for (const c of merged) {
+        const existing = byText.get(c.text);
+        if (!existing || c.confidence > existing.confidence) {
+          byText.set(c.text, c);
+        }
+      }
+      const unique = [...byText.values()];
 
       if (unique.length === 0) {
         return {
           hasConflict: false,
           conflictingLocks: [],
-          analysis: `Heuristic flagged ${ambiguous.length} ambiguous case(s), LLM verified as safe. No conflicts.`,
+          analysis: `Heuristic had partial signal, LLM verified as safe. No conflicts.`,
         };
       }
 

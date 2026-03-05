@@ -1,8 +1,10 @@
 // ===================================================================
 // SpecLock LLM-Powered Conflict Checker (Optional)
-// Uses OpenAI or Anthropic APIs for enterprise-grade detection.
+// Uses Gemini, OpenAI, or Anthropic APIs for universal detection.
 // Zero mandatory dependencies — uses built-in fetch().
 // Falls back gracefully if no API key is configured.
+//
+// Developed by Sandeep Roy (https://github.com/sgroy10)
 // ===================================================================
 
 import { readBrain } from "./storage.js";
@@ -38,9 +40,22 @@ function cacheSet(key, value) {
 // --- Configuration ---
 
 function getConfig(root) {
-  // Priority: env var > brain.json config
-  const apiKey = process.env.SPECLOCK_LLM_KEY || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
-  const provider = process.env.SPECLOCK_LLM_PROVIDER || "openai"; // "openai" or "anthropic"
+  // Priority: explicit SPECLOCK key > provider-specific keys > brain.json
+  const apiKey =
+    process.env.SPECLOCK_LLM_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.OPENAI_API_KEY ||
+    process.env.ANTHROPIC_API_KEY;
+
+  // Auto-detect provider from which env var is set
+  const provider =
+    process.env.SPECLOCK_LLM_PROVIDER ||
+    (process.env.SPECLOCK_LLM_KEY ? "gemini" : null) ||
+    (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY ? "gemini" : null) ||
+    (process.env.OPENAI_API_KEY ? "openai" : null) ||
+    (process.env.ANTHROPIC_API_KEY ? "anthropic" : null) ||
+    "gemini"; // default to gemini (cheapest, free tier)
 
   if (apiKey) {
     return { apiKey, provider };
@@ -52,7 +67,7 @@ function getConfig(root) {
     if (brain?.facts?.llm) {
       return {
         apiKey: brain.facts.llm.apiKey,
-        provider: brain.facts.llm.provider || "openai",
+        provider: brain.facts.llm.provider || "gemini",
       };
     }
   } catch (_) {}
@@ -156,6 +171,43 @@ async function callAnthropic(apiKey, userPrompt) {
   }
 }
 
+async function callGemini(apiKey, userPrompt) {
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: SYSTEM_PROMPT + "\n\n" + userPrompt },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 1000,
+        },
+      }),
+    }
+  );
+
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!content) return null;
+
+  try {
+    return JSON.parse(content);
+  } catch (_) {
+    // Try to extract JSON from markdown code block
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (match) return JSON.parse(match[1]);
+    return null;
+  }
+}
+
 // --- Main export ---
 
 /**
@@ -199,7 +251,9 @@ export async function llmCheckConflict(root, proposedAction, activeLocks) {
   // Call LLM
   let llmResult = null;
   try {
-    if (config.provider === "anthropic") {
+    if (config.provider === "gemini") {
+      llmResult = await callGemini(config.apiKey, userPrompt);
+    } else if (config.provider === "anthropic") {
       llmResult = await callAnthropic(config.apiKey, userPrompt);
     } else {
       llmResult = await callOpenAI(config.apiKey, userPrompt);

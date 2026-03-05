@@ -470,10 +470,10 @@ server.tool(
 // CONTINUITY PROTECTION TOOLS
 // ========================================
 
-// Tool 12: speclock_check_conflict (v2.5: uses enforcer — hard mode returns isError)
+// Tool 12: speclock_check_conflict (v4.1: hybrid heuristic + Gemini LLM)
 server.tool(
   "speclock_check_conflict",
-  "Check if a proposed action conflicts with any active SpecLock. Use before making significant changes. In hard enforcement mode, conflicts above the threshold will BLOCK the action (isError: true).",
+  "Check if a proposed action conflicts with any active SpecLock. Uses fast heuristic + Gemini LLM for universal domain coverage. In hard enforcement mode, conflicts above the threshold will BLOCK the action (isError: true).",
   {
     proposedAction: z
       .string()
@@ -481,18 +481,18 @@ server.tool(
       .describe("Description of the action you plan to take"),
   },
   async ({ proposedAction }) => {
-    // Try LLM-enhanced check first, fall back to heuristic enforcer
-    let result;
-    try {
-      const { llmCheckConflict } = await import("../core/llm-checker.js");
-      const llmResult = await llmCheckConflict(PROJECT_ROOT, proposedAction);
-      if (llmResult) {
-        result = llmResult;
-      }
-    } catch (_) {}
+    // Hybrid check: heuristic first, LLM for grey-zone (1-70%)
+    let result = await checkConflictAsync(PROJECT_ROOT, proposedAction);
 
-    if (!result) {
-      result = enforceConflictCheck(PROJECT_ROOT, proposedAction);
+    // If async hybrid returned no conflict, also check enforcer for hard mode
+    if (!result.hasConflict) {
+      const enforced = enforceConflictCheck(PROJECT_ROOT, proposedAction);
+      if (enforced.blocked) {
+        return {
+          content: [{ type: "text", text: enforced.analysis }],
+          isError: true,
+        };
+      }
     }
 
     // In hard mode with blocking conflict, return isError: true
