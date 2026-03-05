@@ -21,6 +21,7 @@ import {
 } from "./storage.js";
 import { hasGit, getHead, getDefaultBranch } from "./git.js";
 import { ensureAuditKeyGitignored } from "./audit.js";
+import { normalizeLock } from "./lock-author.js";
 
 // --- Internal helpers ---
 
@@ -82,25 +83,33 @@ export function setGoal(root, text) {
 export function addLock(root, text, tags, source) {
   const brain = ensureInit(root);
   const lockId = newId("lock");
+
+  // Smart Lock Authoring — auto-normalize to prevent verb contamination
+  const normResult = normalizeLock(text);
+
   brain.specLock.items.unshift({
     id: lockId,
-    text,
+    text: normResult.normalized,
+    originalText: normResult.wasRewritten ? normResult.original : undefined,
     createdAt: nowIso(),
     source: source || "user",
     tags: tags || [],
     active: true,
   });
   const eventId = newId("evt");
+  const rewriteNote = normResult.wasRewritten
+    ? ` (auto-rewritten from: "${normResult.original.substring(0, 60)}")`
+    : "";
   const event = {
     eventId,
     type: "lock_added",
     at: nowIso(),
     files: [],
-    summary: `Lock added: ${text.substring(0, 80)}`,
+    summary: `Lock added: ${normResult.normalized.substring(0, 80)}${rewriteNote}`,
     patchPath: "",
   };
   recordEvent(root, brain, event);
-  return { brain, lockId };
+  return { brain, lockId, rewritten: normResult.wasRewritten, rewriteReason: normResult.reason };
 }
 
 export function removeLock(root, lockId) {

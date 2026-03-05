@@ -220,10 +220,15 @@ server.tool(
       .describe("Who created this lock"),
   },
   async ({ text, tags, source }) => {
-    const { lockId } = addLock(PROJECT_ROOT, text, tags, source);
+    const { lockId, rewritten, rewriteReason } = addLock(PROJECT_ROOT, text, tags, source);
+
+    // Read the stored lock to get the normalized text
+    const brain = readBrain(PROJECT_ROOT);
+    const storedLock = brain?.specLock?.items?.find(l => l.id === lockId);
+    const storedText = storedLock?.text || text;
 
     // Auto-guard related files
-    const guardResult = autoGuardRelatedFiles(PROJECT_ROOT, text);
+    const guardResult = autoGuardRelatedFiles(PROJECT_ROOT, storedText);
     const guardMsg = guardResult.guarded.length > 0
       ? `\nAuto-guarded ${guardResult.guarded.length} file(s): ${guardResult.guarded.join(", ")}`
       : "";
@@ -231,9 +236,14 @@ server.tool(
     // Sync active locks to package.json
     syncLocksToPackageJson(PROJECT_ROOT);
 
+    // Report rewrite if it happened
+    const rewriteMsg = rewritten
+      ? `\n\nSmart Lock Authoring: Rewritten for accuracy.\n  Original: "${text}"\n  Stored as: "${storedText}"\n  Reason: ${rewriteReason}`
+      : "";
+
     return {
       content: [
-        { type: "text", text: `Lock added (${lockId}): "${text}"${guardMsg}` },
+        { type: "text", text: `Lock added (${lockId}): "${storedText}"${guardMsg}${rewriteMsg}` },
       ],
     };
   }

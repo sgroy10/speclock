@@ -321,8 +321,16 @@ console.log("John says: 'Actually, unlock the auth files, I want to add Google l
   startSession(ROOT, "bolt.new");
 
   // Find the auth lock ID — brain.specLock.items
+  // Note: Smart Lock Authoring may have rewritten the lock text, so check
+  // both text and originalText (case-insensitive)
   const brain = readBrain(ROOT);
-  const authLock = brain.specLock.items.find(l => l.text.includes("authentication system") && l.active);
+  const authLock = brain.specLock.items.find(l =>
+    l.active && (
+      l.text.toLowerCase().includes("authentication system") ||
+      l.text.toLowerCase().includes("authentication") ||
+      (l.originalText && l.originalText.toLowerCase().includes("authentication system"))
+    )
+  );
   assert(authLock !== undefined, "Auth lock found in brain");
 
   // Unlock it — removeLock returns { brain, removed, lockText }

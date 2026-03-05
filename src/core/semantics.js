@@ -1,6 +1,6 @@
 // ===================================================================
-// SpecLock Semantic Analysis Engine v2
-// Replaces keyword matching with real semantic conflict detection.
+// SpecLock Semantic Analysis Engine v3
+// Subject-aware conflict detection with scope matching.
 // Zero external dependencies — pure JavaScript.
 // ===================================================================
 
@@ -55,7 +55,7 @@ export const SYNONYM_GROUPS = [
    "interface", "service"],
   ["request", "call", "invoke", "query", "fetch"],
   ["response", "reply", "result", "output", "payload"],
-  ["network", "connectivity", "connection", "socket", "port", "protocol"],
+  ["network", "connectivity", "connection", "socket", "websocket", "port", "protocol"],
 
   // --- Testing ---
   ["test", "testing", "spec", "coverage", "assertion", "unit test",
@@ -66,13 +66,15 @@ export const SYNONYM_GROUPS = [
    "production", "go live", "launch", "push to prod"],
 
   // --- Security & auth ---
-  ["security", "auth", "authentication", "authorization", "token",
-   "credential", "permission", "access control", "rbac", "acl"],
+  ["security", "auth", "authentication", "authorization", "login",
+   "token", "credential", "permission", "access control", "rbac", "acl"],
   ["encrypt", "encryption", "cipher", "hash", "cryptographic",
    "tls", "ssl", "https"],
   ["certificate", "cert", "signing", "signature", "verification", "verify"],
   ["firewall", "waf", "rate limit", "throttle", "ip block",
    "deny list", "allow list"],
+  ["mfa", "multi-factor authentication", "multi-factor", "2fa",
+   "two-factor authentication", "two-factor"],
   ["audit", "audit log", "audit trail", "logging", "log",
    "monitoring", "observability", "telemetry", "tracking"],
 
@@ -366,6 +368,9 @@ export const CONCEPT_MAP = {
                         "financial records", "settlement"],
   "account":           ["balance", "ledger", "financial records", "customer account",
                         "account balance"],
+  "credit card":       ["payment data", "cardholder data", "card data", "pci",
+                        "card number", "pan"],
+  "card number":       ["credit card", "cardholder data", "payment data", "pan"],
   "settlement":        ["transaction", "payment", "clearing", "reconciliation",
                         "transfer"],
   "fraud detection":   ["fraud", "fraud prevention", "anti-fraud", "fraud monitoring",
@@ -448,6 +453,12 @@ export const CONCEPT_MAP = {
   "pii":               ["personal data", "user data", "personally identifiable information",
                         "user information", "gdpr"],
   "personal data":     ["pii", "user data", "user information", "gdpr", "data protection"],
+  "gdpr":              ["data protection", "consent", "privacy", "personal data", "pii",
+                        "data subject", "right to erasure", "user data"],
+  "data protection":   ["gdpr", "privacy", "consent", "personal data", "pii",
+                        "data subject", "compliance"],
+  "consent":           ["gdpr", "data protection", "opt-in", "opt-out", "user consent",
+                        "privacy", "data subject"],
   "user data":         ["pii", "personal data", "user information", "user records"],
 
   // Encryption
@@ -473,6 +484,20 @@ export const CONCEPT_MAP = {
                         "credential", "session", "token"],
   "auth":              ["authentication", "login", "sign in", "2fa",
                         "credential", "access control"],
+  "mfa":               ["multi-factor authentication", "multi-factor", "2fa",
+                        "two-factor", "authentication"],
+  "multi-factor":      ["mfa", "2fa", "two-factor", "authentication",
+                        "multi-factor authentication"],
+  "sso":               ["saml", "oidc", "single sign-on", "oauth",
+                        "authentication", "identity provider"],
+  "saml":              ["sso", "oidc", "single sign-on", "authentication",
+                        "identity provider"],
+
+  // Networking
+  "websocket":         ["socket", "real-time connection", "ws", "wss",
+                        "socket connection"],
+  "socket":            ["websocket", "connection", "real-time connection",
+                        "socket connection"],
 
   // Encryption
   "encryption":        ["encrypt", "tls", "ssl", "https", "cryptographic",
@@ -560,7 +585,7 @@ const STOPWORDS = new Set([
 
 const POSITIVE_INTENT_MARKERS = [
   "enable", "activate", "turn on", "switch on", "start",
-  "add", "create", "implement", "introduce", "set up",
+  "add", "create", "implement", "introduce", "set up", "build",
   "install", "deploy", "launch", "initialize",
   "enforce", "strengthen", "harden", "improve", "enhance",
   "increase", "expand", "extend", "upgrade", "boost",
@@ -712,6 +737,15 @@ export function tokenize(text) {
     .replace(/[^a-z0-9\-\/&]+/g, " ")
     .split(/\s+/)
     .filter(w => w.length >= 2);
+
+  // Split slash-separated tokens into parts — "sso/saml" also adds "sso", "saml"
+  for (const w of [...rawWords]) {
+    if (w.includes('/')) {
+      for (const part of w.split('/')) {
+        if (part.length >= 2 && !rawWords.includes(part)) rawWords.push(part);
+      }
+    }
+  }
 
   // Basic plural normalization — add both singular and plural forms
   // so "databases" matches "database" and vice versa
@@ -960,10 +994,20 @@ function extractProhibitedVerb(lockText) {
   return null;
 }
 
+// Neutral modification/replacement verbs — not inherently positive or negative,
+// but important for extractPrimaryVerb to detect as action verbs.
+const NEUTRAL_ACTION_VERBS = [
+  "modify", "change", "alter", "reconfigure", "rework",
+  "overhaul", "restructure", "refactor", "redesign",
+  "replace", "swap", "switch", "migrate", "substitute",
+  "touch", "mess", "configure", "optimize", "tweak",
+  "extend", "shorten", "adjust", "customize", "personalize",
+];
+
 function extractPrimaryVerb(actionText) {
   const lower = actionText.toLowerCase();
-  // Find first matching marker in text
-  const allMarkers = [...POSITIVE_INTENT_MARKERS, ...NEGATIVE_INTENT_MARKERS]
+  // Find first matching marker in text (includes neutral action verbs)
+  const allMarkers = [...POSITIVE_INTENT_MARKERS, ...NEGATIVE_INTENT_MARKERS, ...NEUTRAL_ACTION_VERBS]
     .sort((a, b) => b.length - a.length);
 
   let earliest = null;
@@ -1024,7 +1068,322 @@ function checkOpposites(verb1, verb2) {
 
 function isProhibitiveLock(lockText) {
   return /\b(never|must not|do not|don't|cannot|can't|forbidden|prohibited|disallowed)\b/i.test(lockText)
-    || /\bno\s+\w/i.test(lockText);
+    || /\bno\s+\w/i.test(lockText)
+    // Normalized lock patterns from lock-author.js rewriting
+    || /\bis\s+frozen\b/i.test(lockText)
+    || /\bmust\s+(remain|be\s+preserved|stay|always)\b/i.test(lockText);
+}
+
+// ===================================================================
+// INLINE SUBJECT EXTRACTION (avoids circular dependency with lock-author.js)
+// Extracts noun-phrase subjects from action/lock text for scope matching.
+// ===================================================================
+
+const _CONTAMINATING_VERBS = new Set([
+  "add", "create", "introduce", "insert", "implement", "build", "make",
+  "include", "put", "set", "use", "install", "deploy", "attach", "connect",
+  "remove", "delete", "drop", "destroy", "kill", "purge", "wipe", "erase",
+  "eliminate", "clear", "empty", "nuke",
+  "change", "modify", "alter", "update", "mutate", "transform", "rewrite",
+  "edit", "adjust", "tweak", "revise", "amend", "touch", "rework",
+  "move", "migrate", "transfer", "shift", "relocate", "switch", "swap",
+  "replace", "substitute", "exchange",
+  "enable", "disable", "activate", "deactivate", "start", "stop",
+  "turn", "pause", "suspend", "halt",
+  "push", "pull", "send", "expose", "leak", "reveal", "show",
+  "allow", "permit", "let", "give", "grant", "open",
+  "bypass", "skip", "ignore", "circumvent",
+  "refactor", "restructure", "simplify", "consolidate",
+  "mess",
+  "fix", "repair", "restore", "recover", "break", "revert", "rollback",
+  "reconcile", "reverse", "recalculate", "backdate", "rebalance",
+  "reroute", "divert", "reassign", "rebook", "cancel",
+  "upgrade", "downgrade", "patch", "bump",
+]);
+
+const _FILLER_WORDS = new Set([
+  // Articles & determiners
+  "the", "a", "an", "any", "another", "other", "new", "additional",
+  "more", "extra", "further", "existing", "current", "old", "all",
+  "our", "their", "user", "users",
+  // Prepositions
+  "to", "of", "in", "on", "for", "from", "with", "by", "at", "up",
+  "as", "into", "through", "between", "about", "before", "after",
+  "without", "within", "during", "under", "over", "above", "below",
+  // Conjunctions — CRITICAL: "and"/"or" must not create false bigram overlaps
+  "and", "or", "nor", "but", "yet", "so",
+  // Auxiliary/modal verbs — these are grammar, not subjects
+  "is", "be", "are", "was", "were", "been", "being",
+  "must", "never", "should", "shall", "can", "could", "would",
+  "will", "may", "might", "do", "does", "did", "has", "have", "had",
+  // Negation
+  "not", "no", "none",
+  // Common adverbs
+  "just", "only", "also", "always", "every",
+]);
+
+const _PROHIBITION_PATTERNS = [
+  /^never\s+/i, /^must\s+not\s+/i, /^do\s+not\s+/i, /^don'?t\s+/i,
+  /^cannot\s+/i, /^can'?t\s+/i, /^should\s+not\s+/i, /^shouldn'?t\s+/i,
+  /^no\s+(?:one\s+(?:should|may|can)\s+)?/i,
+  /^(?:it\s+is\s+)?(?:forbidden|prohibited|not\s+allowed)\s+to\s+/i,
+  /^avoid\s+/i, /^prevent\s+/i, /^refrain\s+from\s+/i, /^stop\s+/i,
+];
+
+// Generic words that are too vague to establish subject overlap on their own
+const _GENERIC_SUBJECT_WORDS = new Set([
+  "system", "service", "module", "component", "feature", "function",
+  "method", "class", "model", "handler", "controller", "manager",
+  "process", "workflow", "flow", "logic", "config", "configuration",
+  "settings", "options", "parameters", "data", "information", "record",
+  "records", "file", "files", "page", "section", "area", "zone",
+  "layer", "level", "tier", "part", "piece", "item", "items",
+  "thing", "stuff", "code", "app", "application", "project",
+  // Rewritten lock qualifiers (from lock-author.js output)
+  "frozen", "prohibited", "preserved", "active", "enabled",
+  "disabled", "allowed", "introduced", "added", "modifications",
+  "deletion", "removal", "migration", "replacement",
+]);
+
+// Check if a word is a verb form (past participle / gerund) of a contaminating verb.
+// e.g., "exposed" → "expose", "logged" → "log", "modified" → "modif" → "modify"
+function _isVerbForm(word) {
+  // -ed suffix: "exposed" → "expos" → check "expose"; "logged" → "logg" → check "log"
+  if (word.endsWith("ed")) {
+    const stem1 = word.slice(0, -1);  // "exposed" → "expose"
+    if (_CONTAMINATING_VERBS.has(stem1)) return true;
+    const stem2 = word.slice(0, -2);  // "logged" → "logg" — nope
+    if (_CONTAMINATING_VERBS.has(stem2)) return true;
+    const stem3 = word.slice(0, -3);  // "logged" → "log" (double consonant)
+    if (_CONTAMINATING_VERBS.has(stem3)) return true;
+    // "modified" → "modifi" → "modify" (ied → y)
+    if (word.endsWith("ied")) {
+      const stem4 = word.slice(0, -3) + "y";  // "modified" → "modify"
+      if (_CONTAMINATING_VERBS.has(stem4)) return true;
+    }
+  }
+  // -ing suffix: "exposing" → "expos" → check "expose"; "logging" → "logg" → "log"
+  if (word.endsWith("ing")) {
+    const stem1 = word.slice(0, -3);  // "building" → "build"
+    if (_CONTAMINATING_VERBS.has(stem1)) return true;
+    const stem2 = word.slice(0, -3) + "e";  // "exposing" → "expose"
+    if (_CONTAMINATING_VERBS.has(stem2)) return true;
+    const stem3 = word.slice(0, -4);  // "logging" → "log" (double consonant)
+    if (_CONTAMINATING_VERBS.has(stem3)) return true;
+  }
+  // -s suffix: "exposes" → "expose"
+  if (word.endsWith("s") && !word.endsWith("ss")) {
+    const stem1 = word.slice(0, -1);
+    if (_CONTAMINATING_VERBS.has(stem1)) return true;
+    // "pushes" → "push"
+    if (word.endsWith("es")) {
+      const stem2 = word.slice(0, -2);
+      if (_CONTAMINATING_VERBS.has(stem2)) return true;
+    }
+  }
+  return false;
+}
+
+function _extractSubjectsInline(text) {
+  const lower = text.toLowerCase().trim();
+  const subjects = [];
+
+  // Strip prohibition prefix
+  let content = lower;
+  for (const pattern of _PROHIBITION_PATTERNS) {
+    const match = content.match(pattern);
+    if (match) {
+      content = content.slice(match[0].length).trim();
+      break;
+    }
+  }
+
+  // Handle rewritten lock format — truncate at qualifier phrases
+  // "Authentication system is frozen — no modifications allowed."
+  // "Patient records must be preserved — deletion and removal are prohibited."
+  // "Audit logging must remain active and enabled at all times."
+  content = content.replace(/\s+is\s+frozen\b.*$/i, "").trim();
+  content = content.replace(/\s+must\s+(?:be\s+)?(?:preserved|remain)\b.*$/i, "").trim();
+  content = content.replace(/\s*[—–]\s+(?:prohibited|no\s+|must\s+not|deletion|do\s+not|migration)\b.*$/i, "").trim();
+
+  // Strip leading verb
+  const words = content.split(/\s+/);
+  let startIdx = 0;
+  for (let i = 0; i < Math.min(2, words.length); i++) {
+    const w = words[i].replace(/[^a-z]/g, "");
+    if (_CONTAMINATING_VERBS.has(w)) {
+      startIdx = i + 1;
+      break;
+    }
+  }
+
+  // Skip fillers
+  while (startIdx < words.length - 1) {
+    const w = words[startIdx].replace(/[^a-z]/g, "");
+    if (_FILLER_WORDS.has(w)) {
+      startIdx++;
+    } else {
+      break;
+    }
+  }
+
+  const subjectWords = words.slice(startIdx);
+  if (subjectWords.length === 0) return subjects;
+
+  // Full noun phrase
+  const fullPhrase = subjectWords.join(" ").replace(/[^a-z0-9\s\-\/]/g, "").trim();
+  if (fullPhrase.length > 1) subjects.push(fullPhrase);
+
+  // Split on conjunctions
+  const conjSplit = fullPhrase.split(/\s+(?:and|or|,)\s+/).map(s => s.trim()).filter(s => s.length > 1);
+  if (conjSplit.length > 1) {
+    for (const s of conjSplit) subjects.push(s);
+  }
+
+  // Individual significant words (excluding generic words)
+  const significantWords = subjectWords
+    .map(w => w.replace(/[^a-z0-9\-\/]/g, ""))
+    .filter(w => w.length > 2 && !_FILLER_WORDS.has(w));
+
+  for (const w of significantWords) {
+    if (_GENERIC_SUBJECT_WORDS.has(w) || w.length <= 3) continue;
+    if (_CONTAMINATING_VERBS.has(w)) continue;
+    // Also skip past participles/gerunds of contaminating verbs
+    // "exposed" → "expose", "logged" → "log", "modified" → "modify"
+    if (_isVerbForm(w)) continue;
+    subjects.push(w);
+  }
+
+  // Adjacent bigrams from significant words
+  for (let i = 0; i < significantWords.length - 1; i++) {
+    const bigram = `${significantWords[i]} ${significantWords[i + 1]}`;
+    if (!subjects.includes(bigram)) {
+      subjects.push(bigram);
+    }
+  }
+
+  return [...new Set(subjects)];
+}
+
+function _compareSubjectsInline(actionText, lockText) {
+  const lockSubjects = _extractSubjectsInline(lockText);
+  const actionSubjects = _extractSubjectsInline(actionText);
+
+  if (lockSubjects.length === 0 || actionSubjects.length === 0) {
+    return { overlaps: false, overlapScore: 0, matchedSubjects: [], lockSubjects, actionSubjects };
+  }
+
+  const matched = [];
+
+  // Expand subjects through concept map for cross-domain matching.
+  // IMPORTANT: Do NOT seed with originals — only concept-derived terms go here.
+  // Including originals causes self-matches: if "device" is in both sides,
+  // actionExpanded.has("device") fires for EVERY (ls, as) pair, creating
+  // spurious "concept: dashboard ~ device" matches that inflate strongMatchCount.
+  const lockExpanded = new Set();
+  const actionExpanded = new Set();
+
+  for (const ls of lockSubjects) {
+    // Check concept map — if a lock subject maps to a concept that
+    // contains an action subject (or vice versa), it's a scope match
+    if (CONCEPT_MAP[ls]) {
+      for (const related of CONCEPT_MAP[ls]) {
+        lockExpanded.add(related);
+      }
+    }
+    // Also check individual words within the subject
+    for (const word of ls.split(/\s+/)) {
+      if (CONCEPT_MAP[word]) {
+        for (const related of CONCEPT_MAP[word]) {
+          lockExpanded.add(related);
+        }
+      }
+    }
+  }
+
+  for (const as of actionSubjects) {
+    if (CONCEPT_MAP[as]) {
+      for (const related of CONCEPT_MAP[as]) {
+        actionExpanded.add(related);
+      }
+    }
+    for (const word of as.split(/\s+/)) {
+      if (CONCEPT_MAP[word]) {
+        for (const related of CONCEPT_MAP[word]) {
+          actionExpanded.add(related);
+        }
+      }
+    }
+  }
+
+  let strongMatchCount = 0;  // multi-word phrase or containment matches
+
+  for (const ls of lockSubjects) {
+    for (const as of actionSubjects) {
+      // Exact match
+      if (ls === as) {
+        matched.push(ls);
+        // Multi-word exact = STRONG. Single word exact = WEAK (one shared entity word).
+        if (ls.includes(" ")) strongMatchCount++;
+        continue;
+      }
+      // Word-level containment — "patient records" is inside "old patient records archive"
+      // Multi-word containment is always a STRONG match.
+      const asRegex = new RegExp(`\\b${as.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+      const lsRegex = new RegExp(`\\b${ls.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+      if (asRegex.test(ls) || lsRegex.test(as)) {
+        matched.push(`${as} ⊂ ${ls}`);
+        // STRONG only if the contained phrase is multi-word (a compound concept inside a bigger one)
+        // "patient records" ⊂ "old patient records" = STRONG (multi-word phrase match)
+        // "device" ⊂ "device api" = WEAK (single word found in a bigram — just one shared word)
+        if (as.includes(" ") && ls.includes(" ")) strongMatchCount++;
+        continue;
+      }
+      // Concept-expanded match — only STRONG if BOTH sides are multi-word phrases
+      // Single-word concept matches (account~ledger, device~iot) are too ambiguous
+      // to be considered strong scope overlap.
+      if (actionExpanded.has(ls) || lockExpanded.has(as)) {
+        matched.push(`concept: ${as} ~ ${ls}`);
+        if (as.includes(" ") && ls.includes(" ") && !_GENERIC_SUBJECT_WORDS.has(as) && !_GENERIC_SUBJECT_WORDS.has(ls)) {
+          strongMatchCount++;
+        }
+        continue;
+      }
+      // Word-level overlap for multi-word subjects — skip generic words
+      if (ls.includes(" ") && as.includes(" ")) {
+        const lsWords = new Set(ls.split(/\s+/));
+        const asWords = new Set(as.split(/\s+/));
+        const intersection = [...lsWords].filter(w =>
+          asWords.has(w) && w.length > 2 &&
+          !_FILLER_WORDS.has(w) && !_CONTAMINATING_VERBS.has(w) &&
+          !_GENERIC_SUBJECT_WORDS.has(w));
+        if (intersection.length >= 2 && intersection.length >= Math.min(lsWords.size, asWords.size) * 0.4) {
+          // 2+ shared words in a multi-word subject = STRONG
+          matched.push(`word overlap: ${intersection.join(", ")}`);
+          strongMatchCount++;
+        } else if (intersection.length >= 1 && intersection.length >= Math.min(lsWords.size, asWords.size) * 0.4) {
+          // 1 shared word in multi-word subjects = WEAK (different components of same entity)
+          matched.push(`weak overlap: ${intersection.join(", ")}`);
+        }
+      }
+    }
+  }
+
+  // Count unique single-word exact matches — 2+ different single words = STRONG
+  const singleWordMatches = new Set(
+    matched.filter(m => !m.includes(" ") && !m.includes("⊂") && !m.includes("~") && !m.includes(":"))
+  );
+  if (singleWordMatches.size >= 2) strongMatchCount++;
+
+  const uniqueMatched = [...new Set(matched)];
+  return {
+    overlaps: uniqueMatched.length > 0,
+    strongOverlap: strongMatchCount > 0,
+    overlapScore: uniqueMatched.length > 0 ? Math.min(uniqueMatched.length / Math.max(lockSubjects.length, 1), 1.0) : 0,
+    matchedSubjects: uniqueMatched,
+    lockSubjects,
+    actionSubjects,
+  };
 }
 
 export function scoreConflict({ actionText, lockText }) {
@@ -1091,6 +1450,31 @@ export function scoreConflict({ actionText, lockText }) {
       euphemismMatches.push(`"${info.via}" (euphemism for ${term})`);
     }
   }
+
+  // 4b. Destructive method verbs — "by replacing", "through overwriting", "via deleting"
+  // When an action uses a positive primary verb but employs a destructive method,
+  // the method verb is the real operation. "Optimize X by replacing Y" = replacement.
+  const DESTRUCTIVE_METHODS = new Set([
+    "replace", "remove", "delete", "destroy", "rewrite", "overwrite",
+    "restructure", "reconfigure", "migrate", "swap", "switch",
+    "override", "bypass", "eliminate", "strip", "gut", "scrap",
+    "discard", "drop", "disable", "break", "wipe", "erase",
+  ]);
+  const methodVerbMatch = actionText.toLowerCase().match(
+    /\b(?:by|through|via)\s+(\w+ing)\b/i);
+  if (methodVerbMatch) {
+    const gerund = methodVerbMatch[1];
+    const stem1 = gerund.slice(0, -3);        // "switching" → "switch"
+    const stem2 = gerund.slice(0, -3) + "e";  // "replacing" → "replace"
+    const stem3 = gerund.slice(0, -4);        // "dropping" → "drop"
+    for (const verb of DESTRUCTIVE_METHODS) {
+      if (verb === stem1 || verb === stem2 || verb === stem3) {
+        euphemismMatches.push(`"${gerund}" (destructive method: ${verb})`);
+        break;
+      }
+    }
+  }
+
   if (euphemismMatches.length > 0) {
     const pts = Math.min(euphemismMatches.length, 3) * SCORING.euphemismMatch;
     score += pts;
@@ -1118,13 +1502,22 @@ export function scoreConflict({ actionText, lockText }) {
     reasons.push(`concept match: ${conceptMatches.slice(0, 2).join("; ")}`);
   }
 
-  // 6. Subject relevance gate — prevent false positives where only verb-level
-  // matches exist (euphemism/synonym on verbs) but the subjects are different.
-  // "Optimize images" should NOT conflict with "Do not modify calculateShipping"
-  // because the subjects (images vs shipping function) don't overlap.
+  // 6. SUBJECT RELEVANCE GATE (v3 — scope-aware)
+  // The core innovation: extract noun-phrase subjects from BOTH the lock
+  // and the action, then check if they target the same component.
   //
-  // However, subject-level synonyms like "content safety" → "CSAM detection"
-  // should still count as subject relevance (same concept, different words).
+  // "Update WhatsApp message formatting" vs "Never modify WhatsApp session handler"
+  //   → Lock subject: "whatsapp session handler"
+  //   → Action subject: "whatsapp message formatting"
+  //   → Subjects DON'T match (different components) → reduce score
+  //
+  // "Delete patient records" vs "Never delete patient records"
+  //   → Lock subject: "patient records"
+  //   → Action subject: "patient records"
+  //   → Subjects MATCH → keep score
+  //
+  // This replaces the old verb-only check with proper scope awareness.
+
   const ACTION_VERBS_SET = new Set([
     // Modification verbs
     "modify", "change", "alter", "update", "mutate", "transform", "rewrite",
@@ -1154,12 +1547,12 @@ export function scoreConflict({ actionText, lockText }) {
     "expose", "hide", "reveal", "leak",
     // Bypass verbs
     "bypass", "skip", "ignore", "circumvent",
-    // Financial verbs (new)
+    // Financial verbs
     "reconcile", "reverse", "recalculate", "backdate", "rebalance",
     "post", "unpost", "accrue", "amortize", "depreciate", "journal",
-    // Logistics verbs (new)
+    // Logistics verbs
     "reroute", "divert", "reassign", "deconsolidate",
-    // Booking verbs (new)
+    // Booking verbs
     "rebook", "cancel",
     // Upgrade/downgrade
     "upgrade", "downgrade", "patch", "bump", "advance",
@@ -1167,23 +1560,44 @@ export function scoreConflict({ actionText, lockText }) {
 
   // Check if any synonym/concept match involves a non-verb term (= subject match)
   const hasSynonymSubjectMatch = synonymMatches.some(m => {
-    // Format: "term → expansion" — check if expansion is not a common verb
     const parts = m.split(" → ");
     const expansion = (parts[1] || "").trim();
     return !ACTION_VERBS_SET.has(expansion);
   });
 
-  const hasSubjectMatch = directOverlap.length > 0 || phraseOverlap.length > 0 ||
+  // OLD check (vocabulary overlap) — kept as one input
+  const hasVocabSubjectMatch = directOverlap.length > 0 || phraseOverlap.length > 0 ||
     conceptMatches.length > 0 || hasSynonymSubjectMatch;
+
+  // NEW check (scope-aware subject extraction)
+  // Extract actual noun-phrase subjects and compare scopes
+  const subjectComparison = _compareSubjectsInline(actionText, lockText);
+  const hasScopeMatch = subjectComparison.overlaps;
+  // strongOverlap = multi-word phrase match, containment, or 2+ individual word matches
+  // Single-word overlaps like "product" alone are WEAK — different components of same entity
+  const hasStrongScopeMatch = subjectComparison.strongOverlap;
+
+  // Combined subject match: EITHER vocabulary overlap on non-verbs
+  // OR proper subject/scope overlap
+  const hasSubjectMatch = hasVocabSubjectMatch || hasScopeMatch;
   const hasAnyMatch = hasSubjectMatch || synonymMatches.length > 0 ||
     euphemismMatches.length > 0;
 
-  // If the ONLY matches are verb-level (euphemism/synonym) with no subject
-  // overlap, reduce the score — these are likely false positives.
-  // Use 0.25 (not 0.15) to avoid killing legitimate cross-domain detections
-  // where concept links are present but subject wording differs.
+  // A "strong" vocabulary match means 2+ direct keyword overlap or a multi-word
+  // phrase match. A single shared word + synonym/concept expansion = WEAK.
+  // Synonym expansion inflates score ("device" → "iot, sensor, actuator") but
+  // doesn't prove scope overlap — the action could be about a different "device".
+  const hasStrongVocabMatch = directOverlap.length >= 2 || phraseOverlap.length > 0;
+
+  // Apply the subject relevance gate based on match quality
   if (!hasSubjectMatch && (synonymMatches.length > 0 || euphemismMatches.length > 0)) {
-    score = Math.floor(score * 0.25);
+    // NO subject match at all — verb-only match → heavy reduction
+    score = Math.floor(score * 0.15);
+    reasons.push("subject gate: no subject overlap — verb-only match, likely false positive");
+  } else if (hasVocabSubjectMatch && !hasScopeMatch && subjectComparison.lockSubjects.length > 0 && subjectComparison.actionSubjects.length > 0) {
+    // Vocabulary overlap exists but subjects point to DIFFERENT scopes
+    score = Math.floor(score * 0.35);
+    reasons.push(`scope gate: shared vocabulary but different scope — lock targets "${subjectComparison.lockSubjects[0]}", action targets "${subjectComparison.actionSubjects[0]}"`);
   }
 
   const prohibitedVerb = extractProhibitedVerb(lockText);
@@ -1207,8 +1621,39 @@ export function scoreConflict({ actionText, lockText }) {
   if (!intentAligned && lockIsProhibitive && actionIntent.intent === "positive" && prohibitedVerb) {
     const prohibitedIsNegative = NEGATIVE_INTENT_MARKERS.some(m =>
       prohibitedVerb === m || prohibitedVerb.startsWith(m));
-    const hasEuphemismOrSynonymMatch = euphemismMatches.length > 0 || synonymMatches.length > 0;
-    if (prohibitedIsNegative && !actionIntent.negated && !hasEuphemismOrSynonymMatch) {
+    // Only block alignment if the action actually performs the prohibited operation.
+    // Noun synonyms ("price → pricing") are incidental and should NOT block.
+    // But if the action contains the prohibited verb or its synonym ("shows" ≈ "expose"),
+    // that's a real violation signal.
+    const hasDestructiveLanguageMatch = euphemismMatches.length > 0;
+
+    // Check if action text contains the prohibited verb or its synonyms
+    let actionPerformsProhibitedOp = false;
+    if (prohibitedVerb) {
+      const actionWordsLower = actionText.toLowerCase().split(/\s+/)
+        .map(w => w.replace(/[^a-z]/g, ""));
+      for (const w of actionWordsLower) {
+        if (!w) continue;
+        // Direct match (including conjugations: show/shows/showing/showed)
+        if (w === prohibitedVerb || w.startsWith(prohibitedVerb)) {
+          actionPerformsProhibitedOp = true;
+          break;
+        }
+        // Synonym match: check if word is in the same synonym group as prohibited verb
+        for (const group of SYNONYM_GROUPS) {
+          if (group.includes(prohibitedVerb)) {
+            if (group.some(syn => w === syn || w.startsWith(syn) && w.length <= syn.length + 3)) {
+              actionPerformsProhibitedOp = true;
+            }
+            break;
+          }
+        }
+        if (actionPerformsProhibitedOp) break;
+      }
+    }
+
+    if (prohibitedIsNegative && !actionIntent.negated &&
+        !hasDestructiveLanguageMatch && !actionPerformsProhibitedOp) {
       intentAligned = true;
       reasons.push(
         `intent alignment: positive action "${actionPrimaryVerb}" against ` +
@@ -1272,6 +1717,80 @@ export function scoreConflict({ actionText, lockText }) {
     }
   }
 
+  // Check 4: Enhancement/constructive actions against preservation/maintenance locks
+  // "Increase the rate limit" is COMPLIANT with "rate limiting must remain active"
+  // "Add better rate limit error messages" is COMPLIANT (doesn't disable rate limiting)
+  // But "Add a way to bypass rate limiting" is NOT safe (contains negative op "bypass")
+  if (!intentAligned && actionPrimaryVerb) {
+    const ENHANCEMENT_VERBS = new Set([
+      "increase", "improve", "enhance", "boost", "strengthen",
+      "upgrade", "raise", "expand", "extend", "grow",
+    ]);
+    const CONSTRUCTIVE_FOR_PRESERVATION = new Set([
+      "build", "add", "create", "implement", "make", "design",
+      "develop", "introduce",
+    ]);
+    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay/i.test(lockText);
+    if (lockIsPreservation) {
+      if (ENHANCEMENT_VERBS.has(actionPrimaryVerb)) {
+        // Enhancement verbs always align with preservation locks
+        intentAligned = true;
+        reasons.push(
+          `intent alignment: enhancement action "${actionPrimaryVerb}" is ` +
+          `compliant with preservation lock`);
+      } else if (CONSTRUCTIVE_FOR_PRESERVATION.has(actionPrimaryVerb)) {
+        // Constructive verbs align ONLY if the action doesn't contain negative ops
+        const actionLower = actionText.toLowerCase();
+        const hasNegativeOp = NEGATIVE_INTENT_MARKERS.some(m =>
+          new RegExp(`\\b${escapeRegex(m)}\\b`, "i").test(actionLower));
+        if (!hasNegativeOp) {
+          intentAligned = true;
+          reasons.push(
+            `intent alignment: constructive "${actionPrimaryVerb}" is ` +
+            `compliant with preservation lock (no negative operations)`);
+        }
+      }
+    }
+  }
+
+  // Check 5: Constructive actions with weak/no scope overlap
+  // "Build a device dashboard" shares "device" with "Device API keys" lock,
+  // but building a dashboard doesn't modify API key handling.
+  {
+    const FEATURE_BUILDING_VERBS = new Set([
+      "build", "add", "create", "implement", "make", "design",
+      "develop", "introduce", "setup", "establish", "launch",
+      "integrate", "include", "support",
+    ]);
+    // 5a: Weak scope overlap (single shared word, no strong vocab match)
+    if (!intentAligned && hasScopeMatch && !hasStrongScopeMatch && !hasStrongVocabMatch) {
+      if (FEATURE_BUILDING_VERBS.has(actionPrimaryVerb)) {
+        // Guard: if the shared word is a long, specific entity name (10+ chars),
+        // it strongly identifies the target system — not an incidental overlap.
+        // "authentication" (14 chars) clearly points to the auth system.
+        // "product" (7 chars) or "device" (6 chars) are generic modifiers.
+        const hasSpecificOverlap = directOverlap.some(w => w.length >= 10);
+        if (!hasSpecificOverlap) {
+          intentAligned = true;
+          reasons.push(
+            `intent alignment: constructive "${actionPrimaryVerb}" with ` +
+            `weak scope overlap — new feature, not modification of locked component`);
+        }
+      }
+    }
+    // 5b: Vocab overlap but NO scope overlap (subjects point to different things)
+    // Even weaker signal — shared vocabulary but different actual components.
+    if (!intentAligned && hasVocabSubjectMatch && !hasScopeMatch &&
+        subjectComparison.lockSubjects.length > 0 && subjectComparison.actionSubjects.length > 0) {
+      if (FEATURE_BUILDING_VERBS.has(actionPrimaryVerb)) {
+        intentAligned = true;
+        reasons.push(
+          `intent alignment: constructive "${actionPrimaryVerb}" with ` +
+          `no scope overlap — different components despite shared vocabulary`);
+      }
+    }
+  }
+
   // If intent is ALIGNED, the action is COMPLIANT — slash the score to near zero
   // Shared keywords are expected (both discuss the same subject) but the action
   // is doing the right thing.
@@ -1281,27 +1800,37 @@ export function scoreConflict({ actionText, lockText }) {
   } else {
     // NOT aligned — apply standard conflict bonuses
 
-    // 7. Negation conflict bonus — requires subject match, not just verb-level matches
-    if (lockIsProhibitive && hasSubjectMatch) {
+    // 7. Negation conflict bonus — requires STRONG subject match
+    //    Either: scope overlap (subject extraction confirms same target)
+    //    Or: 2+ direct word overlaps (not just a single shared word)
+    //    Or: phrase overlap (multi-word match is strong signal)
+    //    Or: concept match (domain-level relevance)
+    // Concept matches contribute to base score but should NOT gate the negation
+    // bonus — they're too indirect ("account" → "ledger" via concept map shouldn't
+    // trigger the +35 negation bonus). Only direct evidence counts.
+    const hasStrongSubjectMatch = hasStrongScopeMatch ||
+      directOverlap.length >= 2 ||
+      phraseOverlap.length > 0;
+    if (lockIsProhibitive && hasStrongSubjectMatch) {
       score += SCORING.negationConflict;
       reasons.push("lock prohibits this action (negation detected)");
     }
 
-    // 8. Intent conflict bonus — requires subject match
-    if (lockIsProhibitive && actionIntent.intent === "negative" && hasSubjectMatch) {
+    // 8. Intent conflict bonus — requires strong subject match
+    if (lockIsProhibitive && actionIntent.intent === "negative" && hasStrongSubjectMatch) {
       score += SCORING.intentConflict;
       reasons.push(
         `intent conflict: action "${actionIntent.actionVerb}" ` +
         `conflicts with lock prohibition`);
     }
 
-    // 9. Destructive action bonus — requires subject match
+    // 9. Destructive action bonus — requires strong subject match
     const DESTRUCTIVE = new Set(["remove", "delete", "drop", "destroy",
       "kill", "purge", "wipe", "break", "disable", "truncate",
       "erase", "nuke", "obliterate"]);
     const actionIsDestructive = actionTokens.all.some(t => DESTRUCTIVE.has(t)) ||
       actionIntent.intent === "negative";
-    if (actionIsDestructive && hasSubjectMatch) {
+    if (actionIsDestructive && hasStrongSubjectMatch) {
       score += SCORING.destructiveAction;
       reasons.push("destructive action against locked constraint");
     }

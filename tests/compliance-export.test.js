@@ -142,7 +142,7 @@ console.log("\n--- Category 2: HIPAA Export ---");
     const phiConstraints = report.phiProtection.constraints;
     assert(phiConstraints.length === 2, "HIPAA: 2 PHI-related constraints found", `found ${phiConstraints.length}`);
     assert(
-      phiConstraints.some((c) => c.text.includes("patient records")),
+      phiConstraints.some((c) => c.text.toLowerCase().includes("patient records")),
       "HIPAA: patient records lock included"
     );
     assert(

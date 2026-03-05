@@ -117,15 +117,67 @@ export function checkConflict(root, proposedAction) {
   return result;
 }
 
+/**
+ * Async conflict check with LLM fallback for ambiguous cases.
+ * Strategy: Run heuristic first (fast, free). If any match falls in the
+ * "medium confidence" zone (30–70%), optionally verify with LLM.
+ * HIGH confidence (>70%) and NO conflict (<30%) are trusted as-is.
+ */
 export async function checkConflictAsync(root, proposedAction) {
+  // 1. Always run the fast heuristic first
+  const heuristicResult = checkConflict(root, proposedAction);
+
+  // 2. If no conflict at all, trust the heuristic
+  if (!heuristicResult.hasConflict) return heuristicResult;
+
+  // 3. Check if any conflicts are in the ambiguous zone (30–70%)
+  const ambiguous = heuristicResult.conflictingLocks.filter(
+    (c) => c.confidence >= 30 && c.confidence <= 70
+  );
+
+  // If all conflicts are HIGH confidence (>70%), trust the heuristic
+  if (ambiguous.length === 0) return heuristicResult;
+
+  // 4. Try LLM verification for the ambiguous cases
   try {
     const { llmCheckConflict } = await import("./llm-checker.js");
     const llmResult = await llmCheckConflict(root, proposedAction);
-    if (llmResult) return llmResult;
+    if (llmResult) {
+      // Merge: keep HIGH heuristic results, replace ambiguous with LLM
+      const highConfidence = heuristicResult.conflictingLocks.filter(
+        (c) => c.confidence > 70
+      );
+      const llmConflicts = llmResult.conflictingLocks || [];
+      const merged = [...highConfidence, ...llmConflicts];
+
+      // Deduplicate by lock text
+      const seen = new Set();
+      const unique = merged.filter((c) => {
+        if (seen.has(c.text)) return false;
+        seen.add(c.text);
+        return true;
+      });
+
+      if (unique.length === 0) {
+        return {
+          hasConflict: false,
+          conflictingLocks: [],
+          analysis: `Heuristic flagged ${ambiguous.length} ambiguous case(s), LLM verified as safe. No conflicts.`,
+        };
+      }
+
+      unique.sort((a, b) => b.confidence - a.confidence);
+      return {
+        hasConflict: true,
+        conflictingLocks: unique,
+        analysis: `${unique.length} conflict(s) confirmed (${highConfidence.length} heuristic + ${llmConflicts.length} LLM-verified).`,
+      };
+    }
   } catch (_) {
-    // LLM checker not available — fall through
+    // LLM not available — return heuristic result as-is
   }
-  return checkConflict(root, proposedAction);
+
+  return heuristicResult;
 }
 
 export function suggestLocks(root) {

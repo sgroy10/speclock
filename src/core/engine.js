@@ -594,3 +594,13 @@ export {
   revokeSession,
   listSessions,
 } from "./sso.js";
+
+// --- Smart Lock Authoring (v4.0) ---
+export {
+  normalizeLock,
+  detectVerbContamination,
+  extractSubjects,
+  compareSubjects,
+  extractLockSubject,
+  rewriteLock,
+} from "./lock-author.js";
