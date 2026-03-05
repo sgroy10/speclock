@@ -142,12 +142,7 @@ export async function checkConflictAsync(root, proposedAction) {
   const maxNonConflictScore = heuristicResult._maxNonConflictScore || 0;
   const maxScore = Math.max(maxConflictScore, maxNonConflictScore);
 
-  // 3. Fast path: zero signal anywhere → truly unrelated, skip LLM
-  if (maxScore === 0 && !heuristicResult.hasConflict) {
-    return heuristicResult;
-  }
-
-  // 4. Fast path: all conflicts are HIGH (>70%) → heuristic is certain, skip LLM
+  // 3. Fast path: all conflicts are HIGH (>70%) → heuristic is certain, skip LLM
   if (
     heuristicResult.hasConflict &&
     heuristicResult.conflictingLocks.every((c) => c.confidence > 70)
@@ -155,7 +150,9 @@ export async function checkConflictAsync(root, proposedAction) {
     return heuristicResult;
   }
 
-  // 5. GREY ZONE: some signal (1-70%) or low-confidence conflicts → call LLM
+  // 4. Call LLM for everything else — including score 0.
+  // Score 0 means "heuristic vocabulary doesn't cover this domain",
+  // which is EXACTLY when an LLM (which knows every domain) adds value.
   try {
     const { llmCheckConflict } = await import("./llm-checker.js");
     const llmResult = await llmCheckConflict(root, proposedAction);
