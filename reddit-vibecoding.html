@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reddit r/vibecoding — Ready to Post</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { color: #fff; margin-bottom: 8px; font-size: 24px; }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card h2 { font-size: 16px; color: #fff; }
+  .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; background: #3a1a1a; color: #ff6b6b; }
+  .label { color: #888; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .title-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+  .reply-box { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.6; color: #ccc; white-space: pre-wrap; margin-bottom: 12px; max-height: 350px; overflow-y: auto; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .btn-copy { background: #2563eb; color: #fff; }
+  .btn-copy:hover { background: #3b82f6; }
+  .btn-copy.copied { background: #16a34a; }
+  .btn-open { background: #ff4500; color: #fff; text-decoration: none; display: inline-block; text-align: center; }
+  .btn-open:hover { background: #ff5722; }
+  .instructions { background: #1a1a2a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.8; color: #a0a0c0; }
+  .instructions strong { color: #fff; }
+  .step-num { display: inline-block; background: #ff4500; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 8px; }
+  .divider { border: none; border-top: 1px solid #222; margin: 20px 0; }
+  .note { background: #2a2a1a; border: 1px solid #4a4a2a; border-radius: 8px; padding: 12px; font-size: 12px; color: #c0c080; margin-top: 16px; }
+  .pick { background: #1a3a1a; border: 1px solid #2a4a2a; color: #4ade80; padding: 8px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<h1>Reddit r/vibecoding — Ready to Post</h1>
+<p class="subtitle">Pick one post. Copy title, copy body, paste on Reddit, submit.</p>
+
+<div class="instructions">
+  <strong>How to post:</strong><br><br>
+  <span class="step-num">1</span> Click <strong>"Open r/vibecoding"</strong> to go to the subreddit<br><br>
+  <span class="step-num">2</span> Click <strong>"Create Post"</strong> on Reddit<br><br>
+  <span class="step-num">3</span> Click <strong>"Copy Title"</strong> below → paste into the Reddit title field<br><br>
+  <span class="step-num">4</span> Click <strong>"Copy Body"</strong> below → paste into the Reddit body field<br><br>
+  <span class="step-num">5</span> Submit. Done!<br><br>
+  <strong>Pick Option A or Option B below — don't post both.</strong>
+</div>
+
+<!-- OPTION A — Story-driven, links to Dev.to article -->
+<div class="card">
+  <div class="card-header">
+    <h2>Option A: Story Post (links to Dev.to article)</h2>
+    <span class="badge">r/vibecoding</span>
+  </div>
+  <div class="pick">RECOMMENDED — Post this AFTER you publish the Dev.to article</div>
+
+  <p class="label">Title (copy this)</p>
+  <div class="title-box" id="titleA">I told Bolt "never touch auth" — it rewrote my auth system anyway. So I built a tool that actually stops it.</div>
+
+  <p class="label">Body (copy this)</p>
+  <div class="reply-box" id="bodyA">Last month I was building a SaaS on Bolt.new. Session 1 — auth working, Supabase connected, everything clean.
+
+Session 2, I asked for a dark theme. Bolt added the dark theme AND rewrote my auth, changed database queries, broke 3 pages I didn't touch.
+
+I know I'm not the only one. This sub is full of people dealing with the same thing — AI "helpfully" breaking stuff you told it not to touch.
+
+So I spent 6 months building **SpecLock** — an open-source constraint engine. You set "locks" on things the AI should never touch, and it actually blocks the AI when it tries to violate them.
+
+**How it works:**
+- You lock a constraint: "Never modify auth files"
+- SpecLock embeds it in package.json (so every new session sees it)
+- It injects guard headers into protected files
+- Semantic conflict detection catches violations before they happen
+
+**I tested it 4 times on Bolt.new:**
+- "Add social media login" → **Blocked** (auth is locked)
+- "Add dark theme" → **Allowed** (not locked)
+- "Switch database to Firebase" → **Blocked** (Supabase is locked)
+- Bolt tried to edit Auth.tsx → **Blocked** (file-level guard)
+
+Locked things get blocked. Unlocked things work normally.
+
+**Works on:** Bolt.new (npm), Cursor, Claude Code, Windsurf, Cline (MCP), Lovable (remote MCP)
+
+I wrote a detailed article about the problem and how it works: https://dev.to/sandeep_roy_c4e518c3f2641/i-told-my-ai-never-touch-auth-it-did-anyway-heres-how-i-fixed-it-4bog
+
+GitHub: https://github.com/sgroy10/speclock
+
+Free, open source, MIT license. What constraint would you lock first?</div>
+
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyText('titleA', this, 'Copy Title')">Copy Title</button>
+    <button class="btn btn-copy" onclick="copyText('bodyA', this, 'Copy Body')">Copy Body</button>
+    <a class="btn btn-open" href="https://www.reddit.com/r/vibecoding/submit" target="_blank">Open r/vibecoding</a>
+  </div>
+  <div class="note">NOTE: Replace https://dev.to/sandeep_roy_c4e518c3f2641/i-told-my-ai-never-touch-auth-it-did-anyway-heres-how-i-fixed-it-4bog with your actual Dev.to article URL after publishing it.</div>
+</div>
+
+<hr class="divider">
+
+<!-- OPTION B — Direct, no Dev.to dependency -->
+<div class="card">
+  <div class="card-header">
+    <h2>Option B: Direct Post (no Dev.to link needed)</h2>
+    <span class="badge">r/vibecoding</span>
+  </div>
+  <div class="pick" style="background: #1a2a3a; color: #60a5fa;">USE THIS if you haven't published the Dev.to article yet</div>
+
+  <p class="label">Title (copy this)</p>
+  <div class="title-box" id="titleB">I got tired of Bolt rewriting code I told it not to touch, so I built an open-source tool that actually blocks it</div>
+
+  <p class="label">Body (copy this)</p>
+  <div class="reply-box" id="bodyB">Anyone else deal with this?
+
+- You tell the AI "never touch my auth system"
+- 2 sessions later it rewrites your auth while "fixing" something else
+- You tell it "database must be Supabase"
+- It switches to Firebase because it "seemed better"
+
+Memory isn't the problem. Bolt has memory. Cursor has .cursorrules. Claude has AGENTS.md.
+
+The problem is **enforcement**. The AI remembers your constraints, then ignores them when they're inconvenient.
+
+So I built **SpecLock** — an open-source constraint engine that actually stops the AI before it breaks your locked code.
+
+**What it does:**
+- You set "locks" — non-negotiable constraints like "never modify auth files"
+- Locks get embedded in package.json (visible to AI every session)
+- Protected files get guard headers (AI reads them before editing)
+- Semantic conflict detection catches violations — synonym matching, negation detection, not just keywords
+
+**Tested on Bolt.new — 4/4 tests passed:**
+
+| What I Asked | Result |
+|---|---|
+| "Add social media login" | Blocked (auth locked) |
+| "Add dark theme" | Allowed (not locked) |
+| "Switch to Firebase" | Blocked (Supabase locked) |
+| Edit Auth.tsx directly | Blocked (file guard) |
+
+**Setup:**
+- Bolt.new: `npx speclock setup --goal "your project"`
+- Cursor/Claude Code: Add MCP server to config
+- Lovable: Remote MCP URL, no install
+
+GitHub: https://github.com/sgroy10/speclock
+npm: https://www.npmjs.com/package/speclock
+
+Free, open source. Would love feedback from this community — you guys deal with this problem more than anyone.</div>
+
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyText('titleB', this, 'Copy Title')">Copy Title</button>
+    <button class="btn btn-copy" onclick="copyText('bodyB', this, 'Copy Body')">Copy Body</button>
+    <a class="btn btn-open" href="https://www.reddit.com/r/vibecoding/submit" target="_blank">Open r/vibecoding</a>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- BONUS: r/ChatGPTCoding version -->
+<div class="card">
+  <div class="card-header">
+    <h2>Bonus: r/ChatGPTCoding version</h2>
+    <span class="badge" style="background: #1a3a2a; color: #4ade80;">r/ChatGPTCoding</span>
+  </div>
+
+  <p class="label">Title (copy this)</p>
+  <div class="title-box" id="titleC">Built an open-source tool that stops AI coding assistants from breaking code you told them not to touch</div>
+
+  <p class="label">Body (copy this)</p>
+  <div class="reply-box" id="bodyC">The biggest problem I've had with AI coding tools (Cursor, Bolt, Claude Code) — they remember my constraints but don't respect them.
+
+I say "never touch auth." Next session, I ask for a dark theme, and the AI rewrites my auth "while it's at it."
+
+So I built **SpecLock** — an open-source constraint engine. You set locks on things the AI can't touch, and it blocks violations before they happen.
+
+**3 enforcement layers:**
+1. Locks embedded in package.json — AI sees them every session
+2. Semantic conflict detection — catches synonyms and negation, not just keywords
+3. File-level guards — warning headers injected into protected files
+
+Tested on Bolt.new — blocked auth changes, blocked database switches, allowed unlocked changes. Works exactly as expected.
+
+**Setup:**
+- Any npm platform (Bolt, Aider): `npx speclock setup --goal "your project"`
+- Cursor/Claude Code/Windsurf: MCP server in config
+- Lovable: Remote MCP URL
+
+Free, open source: https://github.com/sgroy10/speclock
+
+Would love feedback — especially from people who've dealt with AI breaking things they explicitly told it not to touch.</div>
+
+  <div class="btn-row">
+    <button class="btn btn-copy" onclick="copyText('titleC', this, 'Copy Title')">Copy Title</button>
+    <button class="btn btn-copy" onclick="copyText('bodyC', this, 'Copy Body')">Copy Body</button>
+    <a class="btn btn-open" href="https://www.reddit.com/r/ChatGPTCoding/submit" target="_blank">Open r/ChatGPTCoding</a>
+  </div>
+</div>
+
+<script>
+function copyText(id, btn, originalText) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>

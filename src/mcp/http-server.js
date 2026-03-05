@@ -91,7 +91,7 @@ import { fileURLToPath } from "url";
 import _path from "path";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "4.3.0";
+const VERSION = "4.3.1";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 
@@ -262,21 +262,63 @@ function createSpecLockServer() {
     return { content: [{ type: "text", text: events.length ? JSON.stringify(events, null, 2) : "No matching events." }] };
   });
 
-  // Tool 12: speclock_check_conflict (v2.5: uses enforcer)
-  server.tool("speclock_check_conflict", "Check if a proposed action conflicts with any active SpecLock. In hard mode, blocks above threshold.", { proposedAction: z.string().min(1).describe("Description of the action") }, async ({ proposedAction }) => {
+  // Tool 12: speclock_check_conflict (v4.3: hybrid heuristic + Gemini LLM)
+  server.tool("speclock_check_conflict", "Check if a proposed action conflicts with any active SpecLock. Uses fast heuristic + Gemini LLM for universal domain coverage. In hard enforcement mode, conflicts above the threshold will BLOCK the action.", { proposedAction: z.string().min(1).describe("Description of the action") }, async ({ proposedAction }) => {
     ensureInit(PROJECT_ROOT);
-    const result = enforceConflictCheck(PROJECT_ROOT, proposedAction);
+    // Hybrid check: heuristic first, LLM for grey-zone
+    let result = await checkConflictAsync(PROJECT_ROOT, proposedAction);
+
+    // If async hybrid returned no conflict, also check enforcer for hard mode
+    if (!result.hasConflict) {
+      const enforced = enforceConflictCheck(PROJECT_ROOT, proposedAction);
+      if (enforced.blocked) {
+        return { content: [{ type: "text", text: enforced.analysis }], isError: true };
+      }
+    }
+
+    // In hard mode with blocking conflict, return isError: true
     if (result.blocked) {
       return { content: [{ type: "text", text: result.analysis }], isError: true };
     }
+
     return { content: [{ type: "text", text: result.analysis }] };
   });
 
-  // Tool 13: speclock_session_briefing
+  // Tool 13: speclock_session_briefing (v4.3: try-catch + rich output)
   server.tool("speclock_session_briefing", "Start a new session and get a full briefing.", { toolName: z.enum(["claude-code", "cursor", "codex", "windsurf", "cline", "unknown"]).default("unknown") }, async ({ toolName }) => {
-    ensureInit(PROJECT_ROOT);
-    const briefing = getSessionBriefing(PROJECT_ROOT, toolName);
-    return { content: [{ type: "text", text: briefing }] };
+    try {
+      ensureInit(PROJECT_ROOT);
+      const briefing = getSessionBriefing(PROJECT_ROOT, toolName);
+      const contextMd = generateContext(PROJECT_ROOT);
+
+      const parts = [];
+      parts.push(`# SpecLock Session Briefing`);
+      parts.push(`Session started (${toolName}). ID: ${briefing.session?.id || "new"}`);
+      parts.push("");
+
+      if (briefing.lastSession) {
+        parts.push("## Last Session");
+        parts.push(`- Tool: **${briefing.lastSession.toolUsed || "unknown"}**`);
+        parts.push(`- Ended: ${briefing.lastSession.endedAt || "unknown"}`);
+        if (briefing.lastSession.summary) parts.push(`- Summary: ${briefing.lastSession.summary}`);
+        parts.push(`- Events: ${briefing.lastSession.eventsInSession || 0}`);
+        parts.push(`- Changes since then: ${briefing.changesSinceLastSession || 0}`);
+        parts.push("");
+      }
+
+      if (briefing.warnings?.length > 0) {
+        parts.push("## Warnings");
+        for (const w of briefing.warnings) parts.push(`- ${w}`);
+        parts.push("");
+      }
+
+      parts.push("---");
+      parts.push(contextMd);
+
+      return { content: [{ type: "text", text: parts.join("\n") }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `# SpecLock Session Briefing\n\nError loading session: ${err.message}\n\nTry running speclock_init first.\n\n---\n*SpecLock v${VERSION}*` }] };
+    }
   });
 
   // Tool 14: speclock_session_summary
@@ -329,24 +371,70 @@ function createSpecLockServer() {
     return { content: [{ type: "text", text: `## Drift Detected\n\n${text}` }] };
   });
 
-  // Tool 19: speclock_health
+  // Tool 19: speclock_health (v4.3: null-safe)
   server.tool("speclock_health", "Health check with completeness score and multi-agent timeline.", {}, async () => {
-    ensureInit(PROJECT_ROOT);
-    const brain = readBrain(PROJECT_ROOT);
-    const events = readEvents(PROJECT_ROOT);
-    let score = 0;
-    const checks = [];
-    if (brain.project.goal) { score += 20; checks.push("- [x] Goal set"); } else checks.push("- [ ] Goal missing");
-    if (brain.state.locks.filter(l => l.active).length > 0) { score += 20; checks.push("- [x] Locks defined"); } else checks.push("- [ ] No active locks");
-    if (brain.state.decisions.length > 0) { score += 15; checks.push("- [x] Decisions recorded"); } else checks.push("- [ ] No decisions");
-    if (brain.state.sessions.length > 0) { score += 15; checks.push("- [x] Sessions tracked"); } else checks.push("- [ ] No sessions");
-    if (brain.deploy?.provider) { score += 10; checks.push("- [x] Deploy facts set"); } else checks.push("- [ ] Deploy facts missing");
-    if (brain.state.notes.length > 0) { score += 10; checks.push("- [x] Notes present"); } else checks.push("- [ ] No notes");
-    if (events.length > 10) { score += 10; checks.push("- [x] Rich event history"); } else checks.push("- [ ] Limited events");
-    const grade = score >= 90 ? "A" : score >= 70 ? "B" : score >= 50 ? "C" : score >= 30 ? "D" : "F";
-    const sessions = brain.state.sessions.slice(-5);
-    const agentTimeline = sessions.length ? "\n\n### Recent Sessions\n" + sessions.map(s => `- **${s.tool || "unknown"}** @ ${s.startedAt}${s.summary ? ": " + s.summary : ""}`).join("\n") : "";
-    return { content: [{ type: "text", text: `## SpecLock Health Check\n\nScore: **${score}/100** (Grade: ${grade})\nEvents: ${brain.events.count} | Reverts: ${brain.state.reverts.length}\n\n### Checks\n${checks.join("\n")}${agentTimeline}\n\n---\n*SpecLock v${VERSION} — Developed by ${AUTHOR}*` }] };
+    try {
+      const brain = ensureInit(PROJECT_ROOT);
+      const activeLocks = (brain.specLock?.items || []).filter((l) => l.active !== false);
+
+      let score = 0;
+      const checks = [];
+
+      if (brain.goal?.text) { score += 20; checks.push("[PASS] Goal is set"); }
+      else checks.push("[MISS] No project goal set");
+
+      if (activeLocks.length > 0) { score += 25; checks.push(`[PASS] ${activeLocks.length} active lock(s)`); }
+      else checks.push("[MISS] No SpecLock constraints defined");
+
+      if ((brain.decisions || []).length > 0) { score += 15; checks.push(`[PASS] ${brain.decisions.length} decision(s) recorded`); }
+      else checks.push("[MISS] No decisions recorded");
+
+      if ((brain.notes || []).length > 0) { score += 10; checks.push(`[PASS] ${brain.notes.length} note(s)`); }
+      else checks.push("[MISS] No notes added");
+
+      const sessionHistory = brain.sessions?.history || [];
+      if (sessionHistory.length > 0) { score += 15; checks.push(`[PASS] ${sessionHistory.length} session(s) in history`); }
+      else checks.push("[MISS] No session history yet");
+
+      const recentChanges = brain.state?.recentChanges || [];
+      if (recentChanges.length > 0) { score += 10; checks.push(`[PASS] ${recentChanges.length} change(s) tracked`); }
+      else checks.push("[MISS] No changes tracked");
+
+      if (brain.facts?.deploy?.provider && brain.facts.deploy.provider !== "unknown") { score += 5; checks.push("[PASS] Deploy facts configured"); }
+      else checks.push("[MISS] Deploy facts not configured");
+
+      // Multi-agent timeline
+      const agentMap = {};
+      for (const session of sessionHistory) {
+        const tool = session.toolUsed || "unknown";
+        if (!agentMap[tool]) agentMap[tool] = { count: 0, lastUsed: "", summaries: [] };
+        agentMap[tool].count++;
+        if (!agentMap[tool].lastUsed || (session.endedAt && session.endedAt > agentMap[tool].lastUsed)) {
+          agentMap[tool].lastUsed = session.endedAt || session.startedAt || "";
+        }
+        if (session.summary && agentMap[tool].summaries.length < 3) {
+          agentMap[tool].summaries.push(session.summary.substring(0, 80));
+        }
+      }
+
+      let agentTimeline = "";
+      if (Object.keys(agentMap).length > 0) {
+        agentTimeline = "\n\n## Multi-Agent Timeline\n" +
+          Object.entries(agentMap)
+            .map(([tool, info]) =>
+              `- **${tool}**: ${info.count} session(s), last active ${info.lastUsed ? info.lastUsed.substring(0, 16) : "unknown"}\n  Recent: ${info.summaries.length > 0 ? info.summaries.map(s => `"${s}"`).join(", ") : "(no summaries)"}`
+            )
+            .join("\n");
+      }
+
+      const grade = score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : score >= 20 ? "D" : "F";
+      const evtCount = brain.events?.count || 0;
+      const revertCount = (brain.state?.reverts || []).length;
+
+      return { content: [{ type: "text", text: `## SpecLock Health Check\n\nScore: **${score}/100** (Grade: ${grade})\nEvents: ${evtCount} | Reverts: ${revertCount}\n\n### Checks\n${checks.join("\n")}${agentTimeline}\n\n---\n*SpecLock v${VERSION} — Developed by ${AUTHOR}*` }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `## SpecLock Health Check\n\nError: ${err.message}\n\nTry running speclock_init first to initialize the project.\n\n---\n*SpecLock v${VERSION}*` }] };
+    }
   });
 
   // Tool 20: speclock_apply_template
@@ -612,7 +700,7 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
   res.json({
     name: "SpecLock",
     version: VERSION,
-    description: "AI Constraint Engine — memory + enforcement for AI coding tools. Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 100% detection, 0% false positives. 31 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
+    description: "AI Constraint Engine — memory + enforcement for AI coding tools. Hybrid heuristic + Gemini LLM for universal domain coverage. Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 31 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
     author: {
       name: "Sandeep Roy",
       url: "https://github.com/sgroy10",
