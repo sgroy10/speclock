@@ -1964,10 +1964,34 @@ export function scoreConflict({ actionText, lockText }) {
     }
   }
 
+  // Check 3b: Safe/verification verbs against preservation/maintenance locks
+  // "Test that Stripe is working" is COMPLIANT with "must always use Stripe"
+  // "Debug the Stripe webhook" is COMPLIANT — it's verifying the preserved system
+  if (!intentAligned && actionPrimaryVerb) {
+    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay/i.test(lockText);
+
+    if (lockIsPreservation) {
+      const SAFE_FOR_PRESERVATION = new Set([
+        "test", "verify", "check", "validate", "confirm", "ensure",
+        "debug", "inspect", "review", "examine", "monitor", "observe",
+        "watch", "scan", "detect", "audit", "report", "document",
+        "read", "view", "generate", "fix", "repair", "patch",
+        "protect", "secure", "guard", "maintain", "preserve",
+      ]);
+      if (SAFE_FOR_PRESERVATION.has(actionPrimaryVerb)) {
+        intentAligned = true;
+        reasons.push(
+          `intent alignment: verification/maintenance "${actionPrimaryVerb}" is ` +
+          `compliant with preservation lock`);
+      }
+    }
+  }
+
   // Check 4: Enhancement/constructive actions against preservation/maintenance locks
   // "Increase the rate limit" is COMPLIANT with "rate limiting must remain active"
   // "Add better rate limit error messages" is COMPLIANT (doesn't disable rate limiting)
   // But "Add a way to bypass rate limiting" is NOT safe (contains negative op "bypass")
+  // And "Add Razorpay" vs "must always use Stripe" is NOT safe (competing alternative)
   if (!intentAligned && actionPrimaryVerb) {
     const ENHANCEMENT_VERBS = new Set([
       "increase", "improve", "enhance", "boost", "strengthen",
@@ -1986,15 +2010,23 @@ export function scoreConflict({ actionText, lockText }) {
           `intent alignment: enhancement action "${actionPrimaryVerb}" is ` +
           `compliant with preservation lock`);
       } else if (CONSTRUCTIVE_FOR_PRESERVATION.has(actionPrimaryVerb)) {
-        // Constructive verbs align ONLY if the action doesn't contain negative ops
+        // Constructive verbs align ONLY if:
+        // 1. No negative operations in the action
+        // 2. The action doesn't introduce a COMPETING alternative
+        //    "Add Razorpay" vs "must always use Stripe" → competitor (same synonym group)
+        //    "Add dark mode" vs "must always use Stripe" → unrelated (safe)
         const actionLower = actionText.toLowerCase();
         const hasNegativeOp = NEGATIVE_INTENT_MARKERS.some(m =>
           new RegExp(`\\b${escapeRegex(m)}\\b`, "i").test(actionLower));
-        if (!hasNegativeOp) {
+        // Check if action introduces a competing product/brand from the same category
+        const hasCompetitorMatch = subjectComparison.matchedSubjects.some(m =>
+          typeof m === "string" && m.startsWith("synonym:")
+        );
+        if (!hasNegativeOp && !hasCompetitorMatch) {
           intentAligned = true;
           reasons.push(
             `intent alignment: constructive "${actionPrimaryVerb}" is ` +
-            `compliant with preservation lock (no negative operations)`);
+            `compliant with preservation lock (no negative operations, no competitor)`);
         }
       }
     }
