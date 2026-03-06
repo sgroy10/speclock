@@ -82,6 +82,16 @@ export const SYNONYM_GROUPS = [
   ["audit", "audit log", "audit trail", "logging", "log",
    "monitoring", "observability", "telemetry", "tracking"],
 
+  // --- Auth providers ---
+  ["auth0", "okta", "cognito", "keycloak", "supabase auth"],
+
+  // --- API keys & secrets ---
+  ["api key", "api keys", "secret key", "secret keys", "publishable key",
+   "private key", "access key", "api secret", "api token",
+   "credentials", "credential"],
+  ["frontend", "frontend code", "client-side", "client side",
+   "browser", "react state", "ui component"],
+
   // --- Dependencies ---
   ["dependency", "package", "library", "module", "import", "require",
    "vendor", "third-party"],
@@ -619,6 +629,30 @@ export const CONCEPT_MAP = {
   "saml":              ["sso", "oidc", "single sign-on", "authentication",
                         "identity provider"],
 
+  // API keys & secrets
+  "api key":           ["api keys", "secret key", "api secret", "api token",
+                        "credential", "publishable key", "access key",
+                        "secret", "key", "frontend code", "expose"],
+  "api keys":          ["api key", "secret key", "api secret", "credential",
+                        "publishable key", "access key", "frontend code", "expose"],
+  "secret key":        ["api key", "api secret", "credential", "secret",
+                        "publishable key", "private key"],
+  "publishable key":   ["api key", "public key", "stripe key", "client key",
+                        "frontend", "credential"],
+  "secret":            ["api key", "secret key", "credential", "api secret",
+                        "private", "sensitive"],
+  "localstorage":      ["client-side storage", "browser storage", "frontend",
+                        "expose", "client-side"],
+  // Auth providers
+  "auth0":             ["authentication", "auth", "identity provider", "sso",
+                        "oauth", "supabase", "cognito", "okta", "keycloak"],
+  "cognito":           ["authentication", "auth", "identity provider",
+                        "auth0", "supabase", "okta"],
+  "okta":              ["authentication", "auth", "identity provider", "sso",
+                        "auth0", "supabase", "cognito"],
+  "keycloak":          ["authentication", "auth", "identity provider", "sso",
+                        "auth0", "supabase"],
+
   // Networking
   "websocket":         ["socket", "real-time connection", "ws", "wss",
                         "socket connection"],
@@ -847,7 +881,16 @@ function buildKnownPhrases() {
 const KNOWN_PHRASES = buildKnownPhrases();
 
 export function tokenize(text) {
-  const lower = text.toLowerCase();
+  // Pre-process: split UPPER_CASE_ENV_VARS into component words
+  // "STRIPE_SECRET_KEY" → "STRIPE SECRET KEY"
+  // "process.env.STRIPE_KEY" → "process env STRIPE KEY"
+  let preprocessed = text.replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g, match =>
+    match.replace(/_/g, " ")
+  );
+  // Also handle process.env.X patterns
+  preprocessed = preprocessed.replace(/process\.env\./gi, "env ");
+
+  const lower = preprocessed.toLowerCase();
   const phrases = [];
 
   // Extract known multi-word phrases (greedy, longest first)
@@ -1167,6 +1210,7 @@ const NEUTRAL_ACTION_VERBS = [
   "replace", "swap", "switch", "migrate", "transition", "substitute",
   "touch", "mess", "configure", "optimize", "tweak",
   "extend", "shorten", "adjust", "customize", "personalize",
+  "update", "rewrite",
 ];
 
 function extractPrimaryVerb(actionText) {
@@ -1605,6 +1649,7 @@ export function scoreConflict({ actionText, lockText }) {
 
   let score = 0;
   const reasons = [];
+  let hasSecurityViolationPattern = false;  // Set when credential-exposure detected
 
   // 1. Direct word overlap (minus stopwords)
   const directOverlap = actionTokens.words.filter(w =>
@@ -1906,6 +1951,24 @@ export function scoreConflict({ actionText, lockText }) {
       }
     }
 
+    // Special case: "add/put/store/embed key/secret/credential in/to frontend/component/state"
+    // is SEMANTICALLY EQUIVALENT to "expose key in frontend" — NOT an opposite action.
+    // Placing credentials in client-side code IS exposing them.
+    if (!actionPerformsProhibitedOp && (prohibitedVerb === "expose" || prohibitedVerb === "leak" || prohibitedVerb === "reveal")) {
+      // Pre-process env vars: STRIPE_SECRET_KEY → stripe secret key
+      const actionNorm = actionText
+        .replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g, m => m.replace(/_/g, " "))
+        .toLowerCase();
+      const hasCredentialWord = /\b(key|keys|secret|secrets|credential|credentials|token|api.?key|password|cert)\b/i.test(actionNorm);
+      const hasFrontendLocation = /\b(frontend|front.?end|client|component|state|localstorage|session.?storage|browser|ui|react|vue|angular|svelte|html|template)\b/i.test(actionNorm);
+      const hasPlacementVerb = /\b(add|put|store|embed|include|place|insert|set|hardcode|inline)\b/i.test(actionNorm);
+      if (hasCredentialWord && hasFrontendLocation && hasPlacementVerb) {
+        actionPerformsProhibitedOp = true;
+        hasSecurityViolationPattern = true;
+        reasons.push("security: placing credentials in client-side code is equivalent to exposing them");
+      }
+    }
+
     if (prohibitedIsNegative && !actionIntent.negated &&
         !hasDestructiveLanguageMatch && !actionPerformsProhibitedOp) {
       intentAligned = true;
@@ -1974,10 +2037,10 @@ export function scoreConflict({ actionText, lockText }) {
   // Check 3b: Safe/verification verbs against preservation/maintenance locks
   // "Test that Stripe is working" is COMPLIANT with "must always use Stripe"
   // "Debug the Stripe webhook" is COMPLIANT — it's verifying the preserved system
-  if (!intentAligned && actionPrimaryVerb) {
+  {
     const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay/i.test(lockText);
 
-    if (lockIsPreservation) {
+    if (!intentAligned && lockIsPreservation) {
       const SAFE_FOR_PRESERVATION = new Set([
         "test", "verify", "check", "validate", "confirm", "ensure",
         "debug", "inspect", "review", "examine", "monitor", "observe",
@@ -1985,11 +2048,75 @@ export function scoreConflict({ actionText, lockText }) {
         "read", "view", "generate", "fix", "repair", "patch",
         "protect", "secure", "guard", "maintain", "preserve",
       ]);
-      if (SAFE_FOR_PRESERVATION.has(actionPrimaryVerb)) {
+      if (actionPrimaryVerb && SAFE_FOR_PRESERVATION.has(actionPrimaryVerb)) {
         intentAligned = true;
         reasons.push(
           `intent alignment: verification/maintenance "${actionPrimaryVerb}" is ` +
           `compliant with preservation lock`);
+      }
+      // "Write tests for X" — the verb is "write" but the intent is testing
+      // Uses raw text match since "write" may not be in NEUTRAL_ACTION_VERBS
+      if (!intentAligned && /\bwrite\s+tests?\b/i.test(actionText)) {
+        intentAligned = true;
+        reasons.push(
+          `intent alignment: "write tests" is a testing/verification action — ` +
+          `compliant with preservation lock`);
+      }
+    }
+  }
+
+  // Check 3c: Working WITH locked technology (not replacing it)
+  // "Update the Stripe UI components" vs "must always use Stripe" → working WITH Stripe → safe
+  // "Optimize Supabase queries" vs "Supabase Auth lock" → improving existing Supabase → safe
+  // "Write tests for Supabase queries" vs "Supabase lock" → testing existing tech → safe
+  // But: "Update payment to use Razorpay" vs "Stripe lock" → introducing competitor → NOT safe
+  if (!intentAligned && actionPrimaryVerb) {
+    const lockIsPreservationOrFreeze = /must remain|must be preserved|must always|at all times|must stay|do not replace|do not remove|do not switch|don't replace|don't remove|don't switch|uses .+ library/i.test(lockText);
+    if (lockIsPreservationOrFreeze) {
+      // Extract specific brand/tech names from the lock text
+      const lockWords = lockText.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z0-9]/g, "")).filter(w => w.length > 2);
+      const actionWords = actionText.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z0-9]/g, "")).filter(w => w.length > 2);
+
+      // Find brand/technology names that appear in BOTH action and lock
+      // These are specific nouns (not verbs, not stopwords) that identify the technology
+      const TECH_BRANDS = new Set([
+        "stripe", "razorpay", "paypal", "phonepe", "paytm", "ccavenue", "cashfree",
+        "braintree", "adyen", "square", "billdesk", "instamojo", "juspay",
+        "postgresql", "postgres", "mysql", "mongodb", "mongo", "firebase",
+        "firestore", "supabase", "dynamodb", "redis", "sqlite", "mariadb",
+        "cassandra", "couchdb", "neo4j",
+        "baileys", "twilio", "whatsapp",
+        "auth0", "okta", "cognito", "keycloak",
+        "react", "vue", "angular", "svelte", "nextjs", "nuxt",
+        "docker", "kubernetes", "terraform", "ansible",
+        "aws", "gcp", "azure", "vercel", "netlify", "railway", "heroku",
+      ]);
+      const sharedBrands = lockWords.filter(w => TECH_BRANDS.has(w) && actionWords.includes(w));
+
+      if (sharedBrands.length > 0) {
+        // Action references the SAME tech as the lock — check if it's working WITH it
+        const hasCompetitorInAction = actionWords.some(w =>
+          TECH_BRANDS.has(w) && !lockWords.includes(w)
+        );
+        const WORKING_WITH_VERBS = new Set([
+          "update", "modify", "change", "refactor", "restructure",
+          "optimize", "improve", "enhance", "write", "rewrite",
+          "style", "format", "clean", "cleanup", "simplify",
+          "test", "verify", "check", "validate", "debug", "fix",
+          "repair", "patch", "maintain", "document", "monitor",
+          "configure", "customize", "extend", "expand",
+        ]);
+        const DESTRUCTIVE_VERBS = new Set([
+          "remove", "delete", "drop", "destroy", "kill", "purge", "wipe",
+          "disable", "deactivate", "replace", "switch", "migrate", "move",
+        ]);
+        if (WORKING_WITH_VERBS.has(actionPrimaryVerb) && !hasCompetitorInAction &&
+            !DESTRUCTIVE_VERBS.has(actionPrimaryVerb)) {
+          intentAligned = true;
+          reasons.push(
+            `intent alignment: "${actionPrimaryVerb}" works WITH locked tech ` +
+            `${sharedBrands.join(", ")} — not replacing it`);
+        }
       }
     }
   }
@@ -2002,7 +2129,7 @@ export function scoreConflict({ actionText, lockText }) {
   if (!intentAligned && actionPrimaryVerb) {
     const ENHANCEMENT_VERBS = new Set([
       "increase", "improve", "enhance", "boost", "strengthen",
-      "upgrade", "raise", "expand", "extend", "grow",
+      "upgrade", "raise", "expand", "extend", "grow", "optimize",
     ]);
     const CONSTRUCTIVE_FOR_PRESERVATION = new Set([
       "build", "add", "create", "implement", "make", "design",
@@ -2049,7 +2176,8 @@ export function scoreConflict({ actionText, lockText }) {
       "integrate", "include", "support",
     ]);
     // 5a: Weak scope overlap (single shared word, no strong vocab match)
-    if (!intentAligned && hasScopeMatch && !hasStrongScopeMatch && !hasStrongVocabMatch) {
+    // Skip if a security violation pattern was detected (credential exposure)
+    if (!intentAligned && !hasSecurityViolationPattern && hasScopeMatch && !hasStrongScopeMatch && !hasStrongVocabMatch) {
       if (FEATURE_BUILDING_VERBS.has(actionPrimaryVerb)) {
         // Guard: if the shared word is a long, specific entity name (10+ chars),
         // it strongly identifies the target system — not an incidental overlap.
@@ -2066,7 +2194,7 @@ export function scoreConflict({ actionText, lockText }) {
     }
     // 5b: Vocab overlap but NO scope overlap (subjects point to different things)
     // Even weaker signal — shared vocabulary but different actual components.
-    if (!intentAligned && hasVocabSubjectMatch && !hasScopeMatch &&
+    if (!intentAligned && !hasSecurityViolationPattern && hasVocabSubjectMatch && !hasScopeMatch &&
         subjectComparison.lockSubjects.length > 0 && subjectComparison.actionSubjects.length > 0) {
       if (FEATURE_BUILDING_VERBS.has(actionPrimaryVerb)) {
         intentAligned = true;
