@@ -409,6 +409,21 @@ The AI opens the file and sees:
 
 ---
 
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SPECLOCK_API_KEY` | — | API key for authenticated access |
+| `SPECLOCK_ENCRYPTION_KEY` | — | Enables AES-256-GCM encryption at rest |
+| `SPECLOCK_NO_PROXY` | `false` | Set `true` for heuristic-only mode (~250ms). Skips the Gemini proxy (~2s) |
+| `SPECLOCK_LLM_KEY` | — | Your own LLM API key (Gemini/OpenAI/Anthropic) |
+| `GEMINI_API_KEY` | — | Google Gemini API key for hybrid conflict detection |
+| `SPECLOCK_TELEMETRY` | `false` | Opt-in anonymous usage analytics |
+
+> **Tip:** The heuristic engine alone scores 95%+ accuracy at ~250ms. The Gemini proxy adds cross-domain coverage but takes ~2s. For fastest response, set `SPECLOCK_NO_PROXY=true`.
+
+---
+
 ## Test Results
 
 | Suite | Tests | Pass Rate |
@@ -457,4 +472,4 @@ Built by **[Sandeep Roy](https://github.com/sgroy10)**
 
 ---
 
-<p align="center"><i>v4.5.5 — 600+ tests, 31 MCP tools, 0 false positives, Gemini hybrid. Because remembering isn't enough.</i></p>
+<p align="center"><i>v4.5.6 — 600+ tests, 31 MCP tools, 0 false positives, Gemini hybrid. Because remembering isn't enough.</i></p>

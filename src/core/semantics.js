@@ -124,7 +124,7 @@ export const SYNONYM_GROUPS = [
    "payment service", "payment platform"],
   ["razorpay", "stripe", "paypal", "phonepe", "paytm", "ccavenue",
    "cashfree", "braintree", "adyen", "square", "google pay", "gpay",
-   "juspay", "billdesk", "instamojo"],
+   "juspay", "billdesk", "instamojo", "payu"],
 
   // --- IoT / firmware ---
   ["firmware", "firmware update", "ota", "over the air",
@@ -467,6 +467,8 @@ export const CONCEPT_MAP = {
                         "transaction", "billing", "razorpay", "ccavenue"],
   "instamojo":         ["payment gateway", "payment processing", "payment",
                         "transaction", "billing", "razorpay", "cashfree"],
+  "payu":              ["payment gateway", "payment processing", "payment",
+                        "transaction", "billing", "razorpay", "stripe", "cashfree"],
   "upi":               ["payment gateway", "payment processing", "phonepe",
                         "paytm", "google pay", "razorpay",
                         "transaction", "payment"],
@@ -2077,7 +2079,7 @@ export function scoreConflict({ actionText, lockText }) {
       // These are specific nouns (not verbs, not stopwords) that identify the technology
       const TECH_BRANDS = new Set([
         "stripe", "razorpay", "paypal", "phonepe", "paytm", "ccavenue", "cashfree",
-        "braintree", "adyen", "square", "billdesk", "instamojo", "juspay",
+        "braintree", "adyen", "square", "billdesk", "instamojo", "juspay", "payu",
         "postgresql", "postgres", "mysql", "mongodb", "mongo", "firebase",
         "firestore", "supabase", "dynamodb", "redis", "sqlite", "mariadb",
         "cassandra", "couchdb", "neo4j",
