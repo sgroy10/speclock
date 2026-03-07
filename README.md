@@ -30,7 +30,7 @@ AI:     ⚠️  BLOCKED — violates lock "Never touch the auth system"
         Should I find another approach?
 ```
 
-**60 test suites. 100% detection. 0% false positives. Gemini Flash hybrid for universal domain coverage.**
+**557 tests. 98% pass rate. 0 false positives across 5 domains. Gemini Flash hybrid for universal domain coverage.**
 
 ---
 
@@ -109,7 +109,7 @@ Same config — add to `.cursor/mcp.json` or equivalent.
 |---|:---:|:---:|:---:|:---:|
 | Remembers context | Yes | Yes | Manual | **Yes** |
 | **Blocks the AI from breaking things** | No | No | No | **Yes** |
-| **Semantic conflict detection** | No | No | No | **100% detection, 0% FP** |
+| **Semantic conflict detection** | No | No | No | **98% detection, 0% FP** |
 | **Tamper-proof audit trail** | No | No | No | **HMAC-SHA256 chain** |
 | **Hard enforcement (AI cannot proceed)** | No | No | No | **Yes** |
 | **SOC 2 / HIPAA compliance exports** | No | No | No | **Yes** |
@@ -134,7 +134,7 @@ Not keyword matching — **real semantic analysis** with Gemini Flash hybrid for
 <tr><td>Dilution attacks</td><td>100%</td><td>Violation buried in multi-part request</td></tr>
 <tr><td>Compound sentences</td><td>100%</td><td>"Update UI and also drop users table"</td></tr>
 <tr><td>Synonym substitution</td><td>100%</td><td>"Sunset the API" = remove the API</td></tr>
-<tr><td>Payment brand names</td><td>100%</td><td>"Add Razorpay" vs "Never change payment gateway"</td></tr>
+<tr><td>Payment brand names (11 gateways)</td><td>100%</td><td>"Add Razorpay" / "Implement PayU" vs "Must use Stripe"</td></tr>
 <tr><td>Salary/payroll cross-vocab</td><td>100%</td><td>"Optimize salary" vs "Payroll records locked"</td></tr>
 <tr><td>Safety system bypass</td><td>100%</td><td>"Disable safety interlock" = bypass safety</td></tr>
 <tr><td>Unknown domains (via Gemini)</td><td>100%</td><td>Gaming, biotech, aerospace, music, legal</td></tr>
@@ -386,7 +386,7 @@ The AI opens the file and sees:
 ┌────────────▼──────────────────▼──────────────────┐
 │            SpecLock Core Engine                    │
 │                                                    │
-│  Semantic Engine ─── 55 synonym groups             │
+│  Semantic Engine ─── 65+ synonym groups            │
 │  HMAC Audit ──────── SHA-256 hash chain            │
 │  Enforcer ────────── advisory / hard block         │
 │  Auth + RBAC ─────── 4 roles, API keys             │
@@ -426,15 +426,18 @@ The AI opens the file and sees:
 
 ## Test Results
 
-| Suite | Tests | Pass Rate |
-|-------|------:|----------:|
-| Direct Mode (heuristic) | 17 | 100% |
-| Payment/Salary Domain | 18 | 100% |
-| Gemini Hybrid (8 domains) | 16 | 100% |
-| Proxy API Endpoint | 9 | 100% |
-| **Total** | **60** | **100%** |
+| Suite | Tests | Pass Rate | What it covers |
+|-------|------:|----------:|----------------|
+| Adversarial Conflict | 61 | 100% | Euphemisms, temporal evasion, compound sentences |
+| Phase 4 (Multi-domain) | 91 | 100% | Fintech, e-commerce, IoT, healthcare, SaaS |
+| John (Indie Dev Journey) | 86 | 100% | 8-session Bolt.new build with 5 locks |
+| Sam (Enterprise HIPAA) | 124 | 100% | HIPAA locks, PHI, encryption, RBAC |
+| Real-World Testers | 105 | 95% | 5 developers, 30+ locks, diverse domains |
+| Payment/Salary/PII | 35 | 100% | Cross-vocabulary: payroll, salary, compensation |
+| Claude Tester (G-Suite) | 55 | 95% | Independent AI tester, adversarial probing |
+| **Total** | **557** | **98%** | |
 
-Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, music, legal, payments, payroll. Zero false positives on UI/cosmetic actions.
+Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll. All 11 Indian payment gateways detected (Razorpay, PayU, Cashfree, PhonePe, Paytm, CCAvenue, BillDesk, Instamojo, Juspay, Stripe, PayPal). Zero false positives on UI/cosmetic actions.
 
 ---
 
@@ -472,4 +475,4 @@ Built by **[Sandeep Roy](https://github.com/sgroy10)**
 
 ---
 
-<p align="center"><i>v4.5.6 — 600+ tests, 31 MCP tools, 0 false positives, Gemini hybrid. Because remembering isn't enough.</i></p>
+<p align="center"><i>v4.5.6 — 557 tests, 98% pass rate, 31 MCP tools, Gemini hybrid. Because remembering isn't enough.</i></p>
