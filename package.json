@@ -2,7 +2,7 @@
 
   "name": "speclock",
 
-  "version": "4.5.6",
+  "version": "4.5.7",
 
   "description": "AI constraint engine — stops AI from breaking what you locked. Semantic detection, Gemini LLM hybrid, 31 MCP tools, HMAC audit chain, RBAC, encryption, SOC 2/HIPAA compliance. Works with Claude Code, Cursor, Bolt.new, Lovable.",
 
