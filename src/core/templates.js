@@ -1,4 +1,5 @@
 // SpecLock Constraint Templates — Pre-built lock packs for common frameworks
+// Developed by Sandeep Roy (https://github.com/sgroy10)
 
 export const TEMPLATES = {
   nextjs: {

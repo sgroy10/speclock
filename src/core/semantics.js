@@ -2,6 +2,7 @@
 // SpecLock Semantic Analysis Engine v3
 // Subject-aware conflict detection with scope matching.
 // Zero external dependencies — pure JavaScript.
+// Developed by Sandeep Roy (https://github.com/sgroy10)
 // ===================================================================
 
 // ===================================================================

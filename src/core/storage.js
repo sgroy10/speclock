@@ -1,3 +1,6 @@
+// SpecLock Storage — brain.json and events.log read/write with encryption support
+// Developed by Sandeep Roy (https://github.com/sgroy10)
+
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";

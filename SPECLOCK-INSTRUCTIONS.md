@@ -1,5 +1,7 @@
 # SpecLock Project Instructions — Copy-Paste Templates
 
+> Developed by **Sandeep Roy** ([github.com/sgroy10](https://github.com/sgroy10))
+
 These are **project-level instructions** that you paste into your AI coding platform's settings. They force the AI to use SpecLock on every action — turning it from a passive notepad into an active guardrail.
 
 ---

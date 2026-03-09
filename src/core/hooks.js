@@ -1,4 +1,5 @@
 // SpecLock Git Hook Management
+// Developed by Sandeep Roy (https://github.com/sgroy10)
 
 import fs from "fs";
 import path from "path";

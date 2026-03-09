@@ -1,3 +1,6 @@
+// SpecLock Git Integration — Checkpoints, diffs, repo status
+// Developed by Sandeep Roy (https://github.com/sgroy10)
+
 import fs from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
