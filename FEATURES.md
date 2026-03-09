@@ -1,4 +1,4 @@
-# SpecLock v4.5.7 — Complete Feature Guide
+# SpecLock v5.0.0 — Complete Feature Guide
 
 **AI Constraint Engine** — The only tool that gives AI coding assistants persistent memory AND active constraint enforcement across sessions.
 
@@ -52,7 +52,7 @@ SpecLock works everywhere because it has three ways to connect:
 ### Mode 1: MCP Remote (Lovable, bolt.diy, Base44)
 ```
 Platform connects to SpecLock's hosted MCP server via URL.
-No installation needed. 31 tools available automatically.
+No installation needed. 39 tools available automatically.
 
 URL: https://speclock-mcp-production.up.railway.app/mcp
 ```
@@ -68,7 +68,7 @@ URL: https://speclock-mcp-production.up.railway.app/mcp
   }
 }
 ```
-The AI tool runs the MCP server locally. 31 tools available via MCP protocol. Claude Code follows server instructions automatically — zero config.
+The AI tool runs the MCP server locally. 39 tools available via MCP protocol. Claude Code follows server instructions automatically — zero config.
 
 ### Mode 3: npm File-Based (Bolt.new, Aider, any platform with npm)
 ```bash
@@ -84,7 +84,7 @@ This is the breakthrough — SpecLock works on platforms that don't support MCP 
 
 Not keyword matching — **real semantic analysis** with Gemini Flash LLM hybrid for universal domain coverage.
 
-**557 tests across 7 suites. 98% accuracy. 0 false positives across 5 domains (fintech, e-commerce, IoT, healthcare, SaaS).**
+**940 tests across 13 suites. 99.4% accuracy. 0 false positives across 15 domains (fintech, e-commerce, IoT, healthcare, SaaS, robotics, autonomous systems, and more).**
 
 The engine includes:
 - **65+ synonym groups** — Maps across destructive, constructive, modification, security, medical, financial, IoT, payments, and DevOps domains
@@ -117,7 +117,7 @@ Result:  CONFLICT (HIGH — 100%) — PostgreSQL and MongoDB are both databases
 
 ---
 
-## 31 MCP Tools
+## 39 MCP Tools
 
 ### Memory Management (8 tools)
 | Tool | Purpose |
@@ -333,12 +333,12 @@ npx speclock watch                          # File watcher
 └──────────────┬──────────────────┬────────────────────┘
                │                  │
      MCP Protocol          File-Based (npm)
-    (31 tool calls)      (reads SPECLOCK.md +
+    (39 tool calls)      (reads SPECLOCK.md +
                         .speclock/context/latest.md,
                          runs CLI commands)
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
-│              SpecLock Core Engine v4.5.7               │
+│              SpecLock Core Engine v5.0.0               │
 │  Semantic Engine | Enforcer | Policy | Audit | Git    │
 │  Gemini LLM Hybrid | HMAC Chain | RBAC | Encryption  │
 └──────────────────────┬───────────────────────────────┘
@@ -354,18 +354,26 @@ npx speclock watch                          # File watcher
 
 ---
 
-## Test Results (v4.5.7)
+## Test Results (v5.0.0)
 
 | Suite | Tests | Pass Rate | Domain |
-|-------|-------|-----------|--------|
-| Adversarial Conflict | 61 | 100% | Euphemisms, jargon, evasion |
-| Payment & Brand Detection | 18 | 100% | 11 payment gateways |
-| Real-World Testers | 111 | 95% | Multi-domain scenarios |
-| Enforcement & Audit | 44 | 100% | Hard mode, HMAC chain |
-| Compliance Export | 12 | 100% | SOC 2, HIPAA, CSV |
-| Question Framing | 15 | 100% | "Should we X?" detection |
-| Cross-Lock Precision | 296 | 100% | Multi-lock false positive prevention |
-| **Total** | **557** | **98%** | **5 domains** |
+|-------|------:|----------:|--------|
+| Adversarial Conflict | 61 | 100% | Euphemisms, temporal evasion, compound sentences |
+| Typed Constraints | 61 | 100% | Numerical, range, state, temporal |
+| Phase 4 (Multi-domain) | 91 | 100% | Fintech, e-commerce, IoT, healthcare, SaaS |
+| John (Indie Dev Journey) | 86 | 100% | 8-session Bolt.new build |
+| Sam (Enterprise HIPAA) | 124 | 100% | HIPAA locks, PHI, encryption, RBAC |
+| Auth & Crypto | 114 | 100% | API keys, RBAC, AES-256 |
+| Audit Chain | 35 | 100% | HMAC-SHA256 chain integrity |
+| Enforcement | 40 | 100% | Hard/advisory mode, overrides |
+| Compliance Export | 50 | 100% | SOC 2, HIPAA, CSV |
+| REST API v2 | 28 | 100% | Typed constraint endpoints, SSE |
+| Spec Compiler | 24 | 100% | NL→constraints parsing |
+| Code Graph | 33 | 100% | Import parsing, blast radius |
+| Python SDK | 62 | 100% | pip install, constraint checking |
+| ROS2 Guardian | 26 | 100% | Robot safety enforcement |
+| Real-World Testers | 105 | 95% | Multi-domain scenarios |
+| **Total** | **940** | **99.4%** | **13 suites, 15 domains** |
 
 ---
 
@@ -379,4 +387,4 @@ npx speclock watch                          # File watcher
 
 ---
 
-*SpecLock v4.5.7 — AI Constraint Engine with Semantic Conflict Detection, Gemini LLM Hybrid, 31 MCP Tools, HMAC Audit Chain, Hard Enforcement, Git Pre-Commit Hooks, SOC 2/HIPAA Compliance, AES-256-GCM Encryption, RBAC, Policy-as-Code. 557 tests, 98% accuracy, 0 false positives. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*
+*SpecLock v5.0.0 — AI Constraint Engine with Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2 Integration, REST API v2, Semantic Conflict Detection, Gemini LLM Hybrid, 39 MCP Tools, HMAC Audit Chain, Hard Enforcement, SOC 2/HIPAA Compliance, AES-256-GCM Encryption, RBAC, Policy-as-Code. 940 tests, 99.4% accuracy, 0 false positives. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*

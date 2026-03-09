@@ -1,5 +1,5 @@
 # SpecLock Launch Posts — Ready to Copy-Paste
-## By Sandeep Roy | February-March 2026 | v1.7.0
+## By Sandeep Roy | February-March 2026 | v5.0.0
 
 ---
 
@@ -15,7 +15,7 @@ Three hours in, context compacted. The next prompt from the client said "make it
 
 Without any guardrails, Claude would have happily destroyed everything I set up.
 
-So I built **SpecLock** — an MCP server with 22 tools that enforces non-negotiable constraints across sessions.
+So I built **SpecLock** — an MCP server with 39 tools that enforces non-negotiable constraints across sessions.
 
 **Here's what happened in my live test:**
 
@@ -39,7 +39,7 @@ The key difference from CLAUDE.md or .cursorrules: those are passive text files.
 **Links:**
 - npm: `npm install -g speclock`
 - GitHub: github.com/sgroy10/speclock
-- Smithery: smithery.ai/servers/sgroy10/speclock (22 tools, works with Claude Code, Cursor, Windsurf, Cline, Codex)
+- Smithery: smithery.ai/servers/sgroy10/speclock (39 tools, works with Claude Code, Cursor, Windsurf, Cline, Codex)
 
 Free, open-source, fully offline. No cloud, no API keys, no accounts.
 
@@ -73,7 +73,7 @@ The secret sauce is **semantic conflict detection** — it doesn't just match ke
 }
 ```
 
-22 tools across 5 categories: Memory, Tracking, Protection, Git, Intelligence.
+39 tools across 5 categories: Memory, Tracking, Protection, Git, Intelligence.
 
 - npm: `npm install -g speclock`
 - Smithery: smithery.ai/servers/sgroy10/speclock
@@ -114,7 +114,7 @@ Technical details: Semantic conflict detection uses synonym expansion (15 synony
 Live tested on a real client project — 4 constraint violations attempted, 4 caught, 0 damage.
 
 - GitHub: github.com/sgroy10/speclock
-- npm: speclock (v1.7.0 — with constraint templates, violation reports, pre-commit hooks)
+- npm: speclock (v5.0.0 — with constraint templates, violation reports, pre-commit hooks)
 - Works with: Claude Code, Cursor, Windsurf, Cline, Codex, Bolt.new, Lovable
 
 Happy to discuss the approach. What do you think — is active constraint enforcement the missing layer?
@@ -133,7 +133,7 @@ Hi HN, I'm Sandeep. Solo developer from India.
 
 The problem: AI coding agents (Claude Code, Cursor, etc.) lose context when sessions compact. Existing solutions (CLAUDE.md, Mem0, Memory Bank) remember facts but can't enforce constraints. Your AI remembers your database schema — then generates the raw SQL query you explicitly banned.
 
-SpecLock is an MCP server with 22 tools that:
+SpecLock is an MCP server with 39 tools that:
 
 - **Locks** non-negotiable constraints ("SpecLocks") that cannot be violated
 - **Detects** semantic conflicts using synonym matching + negation analysis
@@ -194,7 +194,7 @@ SpecLock caught every violation:
 **Tweet 4:**
 How it works:
 
-SpecLock is an MCP server with 22 tools.
+SpecLock is an MCP server with 39 tools.
 
 Unlike CLAUDE.md (passive text) or Mem0 (memory store), SpecLock actively enforces constraints using:
 
@@ -275,7 +275,7 @@ That's the gap. That's what I built SpecLock to fill.
 
 ### How SpecLock Works
 
-SpecLock is an MCP server with 22 tools organized in 6 categories:
+SpecLock is an MCP server with 39 tools organized in 6 categories:
 
 **1. Memory** — goal, decisions, notes, session tracking
 **2. Tracking** — append-only event log, change tracking
@@ -338,7 +338,7 @@ Hi Product Hunt! I'm Sandeep, a solo developer who got tired of Claude Code forg
 
 The problem: AI coding agents lose context when sessions compact. Existing solutions (CLAUDE.md, memory tools) remember facts but cannot ENFORCE constraints. Your AI remembers your database schema — then generates the raw SQL query you explicitly banned.
 
-SpecLock is an MCP server with 22 tools that:
+SpecLock is an MCP server with 39 tools that:
 - Locks non-negotiable constraints ("SpecLocks")
 - Detects semantic conflicts (synonym + negation analysis)
 - Tracks decisions across sessions with an append-only event log
@@ -367,7 +367,7 @@ Hey everyone! I built an MCP server that solves the #1 pain point I keep seeing 
 
 You know the drill: you spend 30 minutes explaining your architecture, constraints, and design decisions to the AI. Next session? Gone. You're re-explaining everything from scratch and burning credits.
 
-**SpecLock** is an MCP server (22 tools) that acts as a **persistent brain** for your Lovable projects:
+**SpecLock** is an MCP server (39 tools) that acts as a **persistent brain** for your Lovable projects:
 
 - **Set locks** — non-negotiable constraints like "never change the auth flow" or "all API routes must be protected"
 - **Track decisions** — every architectural choice is logged and survives session resets
@@ -415,7 +415,7 @@ Settings → Connectors → New MCP server
 URL: https://speclock-mcp-production.up.railway.app/mcp
 Auth: None
 
-That's it. 22 tools. Zero config. [2/5]
+That's it. 39 tools. Zero config. [2/5]
 
 **Tweet 3:**
 What it does:
@@ -475,7 +475,7 @@ The popular workaround is creating a `docs/` folder with `memory.md`, `architect
 
 ### SpecLock: The Automated, Enforced Version
 
-SpecLock is an MCP server with 22 tools (including constraint templates, violation reports, and pre-commit hooks) that connects to Lovable as a custom connector. It does three things the manual approach can't:
+SpecLock is an MCP server with 39 tools (including constraint templates, violation reports, and pre-commit hooks) that connects to Lovable as a custom connector. It does three things the manual approach can't:
 
 1. **Persistent memory** — goals, decisions, constraints, and session history are stored in a structured `brain.json` that survives any session reset
 2. **Active enforcement** — when someone tries to violate a locked constraint, SpecLock flags the conflict using semantic analysis (synonym matching, negation detection, confidence scoring)
@@ -582,7 +582,7 @@ Built by [Sandeep Roy](https://github.com/sgroy10).
 - [x] GitHub Pages enabled at sgroy10.github.io/speclock — DONE
 - [x] Railway HTTP deployment live at speclock-mcp-production.up.railway.app — DONE
 - [x] Smithery listing at smithery.ai/servers/sgroy10/speclock — DONE
-- [x] npm published at v1.7.0 — DONE
+- [x] npm published at v5.0.0 — DONE
 
 ---
 
