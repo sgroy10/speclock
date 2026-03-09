@@ -770,7 +770,7 @@ app.get("/health", (req, res) => {
     status: "healthy",
     version: VERSION,
     uptime: Math.floor((Date.now() - START_TIME) / 1000),
-    tools: 28,
+    tools: 31,
     auditChain: auditStatus,
     authEnabled: isAuthEnabled(PROJECT_ROOT),
     rateLimit: { limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS },
