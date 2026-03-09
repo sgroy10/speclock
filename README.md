@@ -15,6 +15,8 @@
   <a href="https://sgroy10.github.io/speclock/">Website</a> · <a href="https://www.npmjs.com/package/speclock">npm</a> · <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> · <a href="https://github.com/sgroy10/speclock">GitHub</a>
 </p>
 
+<p align="center"><strong>Developed by <a href="https://github.com/sgroy10">Sandeep Roy</a></strong> · Free &amp; Open Source (MIT License)</p>
+
 ---
 
 ```
