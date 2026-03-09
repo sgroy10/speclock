@@ -1,4 +1,4 @@
-# SpecLock v5.0.0 — Complete Feature Guide
+# SpecLock v5.2.0 — Complete Feature Guide
 
 **AI Constraint Engine** — The only tool that gives AI coding assistants persistent memory AND active constraint enforcement across sessions.
 
@@ -186,6 +186,68 @@ Result:  CONFLICT (HIGH — 100%) — PostgreSQL and MongoDB are both databases
 | `speclock_guard_file` | Add SPECLOCK-GUARD header to lock specific files |
 | `speclock_auto_guard` | Auto-guard files related to lock keywords |
 
+### Typed Constraints (4 tools)
+| Tool | Purpose |
+|------|---------|
+| `speclock_add_typed_lock` | Add typed constraint (numerical/range/state/temporal) |
+| `speclock_check_typed` | Check proposed values against typed constraints |
+| `speclock_list_typed_locks` | List all typed constraints with current thresholds |
+| `speclock_update_threshold` | Update typed lock thresholds dynamically |
+
+### Spec Compiler & Code Graph (4 tools)
+| Tool | Purpose |
+|------|---------|
+| `speclock_compile_spec` | Compile natural language (PRDs, READMEs, docs) into structured constraints via Gemini Flash |
+| `speclock_build_graph` | Build/refresh code dependency graph from imports (JS/TS/Python) |
+| `speclock_blast_radius` | Calculate blast radius — transitive dependents, impact %, depth |
+| `speclock_map_locks` | Map active locks to actual code files via the dependency graph |
+
+### Patch Gateway & AI Patch Firewall (3 tools)
+| Tool | Purpose |
+|------|---------|
+| `speclock_review_patch` | ALLOW/WARN/BLOCK verdict — combines semantic conflict + lock-file mapping + blast radius |
+| `speclock_review_patch_diff` | Diff-native review — parses actual diffs for interface breaks, protected symbols, dependency drift, schema changes, API impact |
+| `speclock_parse_diff` | Parse unified diff into structured changes — imports, exports, symbols, routes, schema detection |
+
+---
+
+## Patch Gateway (v5.1)
+
+One API call to gate every change:
+
+```
+Input:  { description: "Add social login", files: ["src/auth/login.js"] }
+Output: { verdict: "BLOCK", riskScore: 85, reasons: [...], blastRadius: {...} }
+```
+
+Combines: semantic conflict detection + lock-to-file mapping (via Code Graph) + blast radius analysis + typed constraint awareness → single ALLOW/WARN/BLOCK verdict with risk score (0-100).
+
+## AI Patch Firewall (v5.2)
+
+Reviews actual diffs — catches things intent review misses:
+
+**Signal detection (10 scored dimensions):**
+| Signal | Max Score | What it detects |
+|--------|-----------|-----------------|
+| Semantic Conflict | 20 | NL match against active locks |
+| Lock-File Overlap | 20 | Changed files in locked zones |
+| Blast Radius | 15 | High transitive impact |
+| Interface Break | 15 | Removed/changed exports |
+| Protected Symbol Edit | 15 | Modifications in locked zones |
+| Dependency Drift | 8 | Critical package add/remove |
+| Schema Change | 12 | Destructive migration/schema edits |
+| Public API Impact | 15 | Route changes/removals |
+| Typed Constraint | 10 | Relevant typed constraints |
+| LLM Conflict | 10 | Gemini-enhanced detection |
+
+**Hard escalation rules (auto-BLOCK regardless of score):**
+- Protected symbol removed/renamed in locked zone
+- Destructive schema/migration change
+- Public API route removed
+- Two or more critical reasons with confidence > 90%
+
+**Unified review:** Intent (35%) + Diff (65%) → takes the stronger verdict. Falls back to intent-only when no diff available.
+
 ---
 
 ## 7 Layers of Enforcement
@@ -333,12 +395,12 @@ npx speclock watch                          # File watcher
 └──────────────┬──────────────────┬────────────────────┘
                │                  │
      MCP Protocol          File-Based (npm)
-    (39 tool calls)      (reads SPECLOCK.md +
+    (42 tool calls)      (reads SPECLOCK.md +
                         .speclock/context/latest.md,
                          runs CLI commands)
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
-│              SpecLock Core Engine v5.0.0               │
+│              SpecLock Core Engine v5.2.0               │
 │  Semantic Engine | Enforcer | Policy | Audit | Git    │
 │  Gemini LLM Hybrid | HMAC Chain | RBAC | Encryption  │
 └──────────────────────┬───────────────────────────────┘
@@ -354,7 +416,7 @@ npx speclock watch                          # File watcher
 
 ---
 
-## Test Results (v5.0.0)
+## Test Results (v5.2.0)
 
 | Suite | Tests | Pass Rate | Domain |
 |-------|------:|----------:|--------|
@@ -373,7 +435,9 @@ npx speclock watch                          # File watcher
 | Python SDK | 62 | 100% | pip install, constraint checking |
 | ROS2 Guardian | 26 | 100% | Robot safety enforcement |
 | Real-World Testers | 105 | 95% | Multi-domain scenarios |
-| **Total** | **940** | **99.4%** | **15 suites, 15 domains** |
+| Patch Gateway | 57 | 100% | Intent review, blast radius, lock mapping |
+| Diff Review | 76 | 100% | Diff parsing, signal scoring, hard escalation |
+| **Total** | **1073** | **99.4%** | **15 suites, 15 domains** |
 
 ---
 
@@ -387,4 +451,4 @@ npx speclock watch                          # File watcher
 
 ---
 
-*SpecLock v5.0.0 — AI Constraint Engine with Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2 Integration, REST API v2, Semantic Conflict Detection, Gemini LLM Hybrid, 42 MCP Tools, HMAC Audit Chain, Hard Enforcement, SOC 2/HIPAA Compliance, AES-256-GCM Encryption, RBAC, Policy-as-Code. 1073 tests, 99.4% accuracy, 0 false positives. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*
+*SpecLock v5.2.0 — AI Constraint Engine with Patch Gateway, AI Patch Firewall, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2 Integration, REST API v2, Semantic Conflict Detection, Gemini LLM Hybrid, 42 MCP Tools, HMAC Audit Chain, Hard Enforcement, SOC 2/HIPAA Compliance, AES-256-GCM Encryption, RBAC, Policy-as-Code. 1073 tests, 99.4% accuracy, 0 false positives. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*

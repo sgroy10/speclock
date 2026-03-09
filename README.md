@@ -305,25 +305,118 @@ pip install speclock-sdk
 ```
 
 ```python
-from speclock import ConstraintChecker
-checker = ConstraintChecker(constraints)
-result = checker.check({"metric": "speed_mps", "value": 3.5})
+from speclock import SpecLock
+
+sl = SpecLock(project_root=".")
+
+# Check text constraints (semantic conflict detection)
+result = sl.check_text("Switch database to MongoDB")
+# → { has_conflict: True, conflicting_locks: [...] }
+
+# Check typed constraints (numerical/range/state/temporal)
+result = sl.check_typed(metric="speed_mps", value=3.5)
 # → violation: speed exceeds 2.0 m/s limit
+
+# Combined check (text + typed in one call)
+result = sl.check(action="Increase speed", speed_mps=3.5)
 ```
 
-**ROS2 Guardian Node:** Real-time constraint enforcement for robots. Subscribes to sensor topics, checks constraints at configurable rate, publishes violations, triggers emergency stop.
+Uses the same `.speclock/brain.json` as the Node.js MCP server — constraints stay in sync across all environments.
+
+**ROS2 Guardian Node:** Real-time constraint enforcement for robots and autonomous systems.
+
+```yaml
+# config/constraints.yaml
+constraints:
+  - type: range
+    metric: joint_position_rad
+    min: -3.14
+    max: 3.14
+  - type: numerical
+    metric: velocity_mps
+    operator: "<="
+    value: 2.0
+  - type: state
+    metric: system_mode
+    forbidden:
+      - from: emergency_stop
+        to: autonomous
+```
+
+- Subscribes to `/joint_states`, `/cmd_vel`, `/speclock/state_transition`
+- Publishes violations to `/speclock/violations`
+- Triggers emergency stop via `/speclock/emergency_stop`
+- Checks constraints on every incoming ROS2 message at configurable rate
 
 ---
 
-## REST API v2 (v5.0)
+## Patch Gateway (v5.1)
 
-Real-time constraint checking for autonomous systems:
+One API call gates every change. Takes a description + file list, returns ALLOW/WARN/BLOCK:
+
+```
+speclock_review_patch({
+  description: "Add social login to auth page",
+  files: ["src/auth/login.js"]
+})
+
+→ { verdict: "BLOCK", riskScore: 85,
+    reasons: [{ type: "semantic_conflict", lock: "Never modify auth" }],
+    blastRadius: { impactPercent: 28.3 },
+    summary: "BLOCKED. 1 constraint conflict. 12 files affected." }
+```
+
+Combines semantic conflict detection + lock-to-file mapping + blast radius + typed constraint awareness into a single risk score (0-100).
+
+---
+
+## AI Patch Firewall (v5.2)
+
+Reviews actual diffs, not just descriptions. Catches things intent review misses:
+
+```
+POST /api/v2/gateway/review-diff
+{
+  "description": "Remove password column",
+  "diff": "diff --git a/migrations/001.sql ..."
+}
+
+→ { verdict: "BLOCK",
+    reviewMode: "unified",
+    intentVerdict: "ALLOW",     ← description alone looks safe
+    diffVerdict: "BLOCK",       ← diff reveals destructive schema change
+    signals: {
+      schemaChange: { score: 12, isDestructive: true },
+      interfaceBreak: { score: 10 },
+      protectedSymbolEdit: { score: 8 },
+      dependencyDrift: { score: 5 },
+      publicApiImpact: { score: 0 }
+    },
+    recommendation: { action: "require_approval" } }
+```
+
+**Signal detection:** Interface breaks (removed/changed exports), protected symbol edits in locked zones, dependency drift (critical package add/remove), schema/migration destructive changes, public API route changes.
+
+**Hard escalation rules:** Auto-BLOCK on destructive schema changes, removed API routes, protected symbol edits, or multiple critical findings — regardless of score.
+
+**Unified review:** Merges intent (35%) + diff (65%), takes the stronger verdict. Falls back to intent-only when no diff is available.
+
+---
+
+## REST API v2
+
+Real-time constraint checking, patch review, and autonomous systems:
 
 ```bash
-# Single check
-POST /api/v2/check-typed    { metric, value, entity }
+# Patch Gateway (v5.1)
+POST /api/v2/gateway/review        { description, files, useLLM }
 
-# Batch check (up to 100)
+# AI Patch Firewall (v5.2)
+POST /api/v2/gateway/review-diff   { description, files, diff, options }
+POST /api/v2/gateway/parse-diff    { diff }
+
+# Typed constraint checking
+POST /api/v2/check-typed    { metric, value, entity }
 POST /api/v2/check-batch    { checks: [...] }
 
 # SSE streaming (real-time violations)
@@ -335,6 +428,7 @@ POST /api/v2/compiler/compile  { text, autoApply }
 # Code Graph
 GET  /api/v2/graph/blast-radius?file=src/core/memory.js
 GET  /api/v2/graph/lock-map
+POST /api/v2/graph/build
 ```
 
 ---
@@ -433,6 +527,17 @@ GET  /api/v2/graph/lock-map
 | `speclock_build_graph` | Build/refresh code dependency graph |
 | `speclock_blast_radius` | Calculate blast radius of file changes |
 | `speclock_map_locks` | Map locks to actual code files |
+
+</details>
+
+<details>
+<summary><b>Patch Gateway & AI Patch Firewall</b> — change review, diff analysis (v5.1/v5.2)</summary>
+
+| Tool | What it does |
+|------|-------------|
+| `speclock_review_patch` | ALLOW/WARN/BLOCK verdict for proposed changes |
+| `speclock_review_patch_diff` | Diff-native review with signal scoring + unified verdict |
+| `speclock_parse_diff` | Parse unified diff into structured changes (debug/inspect) |
 
 </details>
 
@@ -611,4 +716,4 @@ Built by **[Sandeep Roy](https://github.com/sgroy10)**
 
 ---
 
-<p align="center"><i>v5.0.0 — 1073 tests, 99.4% pass rate, 42 MCP tools, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2, REST API v2. Because remembering isn't enough.</i></p>
+<p align="center"><i>v5.2.0 — 1073 tests, 99.4% pass rate, 42 MCP tools, Patch Gateway, AI Patch Firewall, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2, REST API v2. Because remembering isn't enough.</i></p>
