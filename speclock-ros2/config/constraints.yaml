@@ -1,0 +1,127 @@
+# SpecLock ROS2 — Robot Safety Constraints
+#
+# This file defines constraints enforced by the Guardian node in real-time.
+# Load with: ros2 launch speclock_ros2 speclock_launch.py constraints_file:=/path/to/this.yaml
+#
+# Constraint types:
+#   numerical — single threshold with operator (<=, >=, ==, !=, <, >)
+#   range     — min/max bounds
+#   state     — forbidden state transitions
+#   temporal  — timing constraints (min/max interval)
+#   text      — free-text semantic constraint (checked by AI engine)
+#
+# Developed by Sandeep Roy (https://github.com/sgroy10)
+
+constraints:
+  # === Joint Position Limits ===
+  - type: range
+    description: "Shoulder joint must stay within safe range"
+    metric: joint_position_shoulder
+    min: -3.14
+    max: 3.14
+    unit: radians
+    tags: [safety, joint, shoulder]
+
+  - type: range
+    description: "Elbow joint position limits"
+    metric: joint_position_elbow
+    min: -2.35
+    max: 2.35
+    unit: radians
+    tags: [safety, joint, elbow]
+
+  - type: range
+    description: "Wrist joint position limits"
+    metric: joint_position_wrist
+    min: -1.57
+    max: 1.57
+    unit: radians
+    tags: [safety, joint, wrist]
+
+  # === Velocity Limits ===
+  - type: numerical
+    description: "Linear velocity must not exceed 1.0 m/s"
+    metric: linear_velocity_x
+    operator: "<="
+    threshold: 1.0
+    unit: m/s
+    tags: [safety, velocity]
+
+  - type: numerical
+    description: "Angular velocity must not exceed 1.5 rad/s"
+    metric: angular_velocity_z
+    operator: "<="
+    threshold: 1.5
+    unit: rad/s
+    tags: [safety, velocity, rotation]
+
+  # === Joint Velocity Limits ===
+  - type: numerical
+    description: "Joint velocity must not exceed 2.0 rad/s"
+    metric: joint_velocity_shoulder
+    operator: "<="
+    threshold: 2.0
+    unit: rad/s
+    tags: [safety, joint, velocity]
+
+  - type: numerical
+    description: "Joint effort must not exceed 50 Nm"
+    metric: joint_effort_shoulder
+    operator: "<="
+    threshold: 50.0
+    unit: Nm
+    tags: [safety, joint, effort]
+
+  # === State Machine Constraints ===
+  - type: state
+    description: "Robot arm cannot go from EMERGENCY to RUNNING without passing through IDLE"
+    entity: robot_arm
+    forbidden_transitions:
+      - from: EMERGENCY
+        to: RUNNING
+    tags: [safety, state, critical]
+
+  - type: state
+    description: "Robot cannot transition from any state to SHUTDOWN while holding an object"
+    entity: gripper
+    forbidden_transitions:
+      - from: HOLDING
+        to: SHUTDOWN
+    tags: [safety, state, gripper]
+
+  - type: state
+    description: "Autonomous mode requires explicit human approval"
+    entity: navigation
+    forbidden_transitions:
+      - from: MANUAL
+        to: AUTONOMOUS
+    requires_approval: true
+    tags: [safety, autonomy, approval]
+
+  # === Temporal Constraints ===
+  - type: temporal
+    description: "E-stop must activate within 100ms of trigger"
+    metric: estop_response
+    max_interval: 0.1
+    unit: seconds
+    tags: [safety, timing, critical]
+
+  - type: temporal
+    description: "Heartbeat must arrive at least every 500ms"
+    metric: heartbeat
+    max_interval: 0.5
+    unit: seconds
+    tags: [safety, timing, heartbeat]
+
+  # === Text Constraints (AI-checked) ===
+  - type: text
+    text: "Never operate the robot arm above 80% of rated torque in collaborative mode"
+    tags: [safety, collaborative]
+
+  - type: text
+    text: "All sensor data must be logged before any autonomous movement begins"
+    tags: [audit, autonomous]
+
+  - type: text
+    text: "Emergency stop must always be available regardless of operating mode"
+    tags: [safety, critical, estop]
