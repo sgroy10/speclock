@@ -881,7 +881,7 @@ app.get("/health", (req, res) => {
     status: "healthy",
     version: VERSION,
     uptime: Math.floor((Date.now() - START_TIME) / 1000),
-    tools: 35,
+    tools: 39,
     auditChain: auditStatus,
     authEnabled: isAuthEnabled(PROJECT_ROOT),
     rateLimit: { limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS },
@@ -895,8 +895,8 @@ app.get("/", (req, res) => {
     name: "speclock",
     version: VERSION,
     author: AUTHOR,
-    description: "AI Constraint Engine for autonomous systems governance. Typed constraints (numerical, range, state, temporal) + REST API v2 with batch checking & SSE streaming. Python SDK + ROS2 integration. Policy-as-Code, OAuth/OIDC SSO, admin dashboard, telemetry, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 35 MCP tools.",
-    tools: 35,
+    description: "AI Constraint Engine for autonomous systems governance. Spec Compiler (NL→constraints), Code Graph (blast radius, lock-to-file mapping), Typed constraints (numerical, range, state, temporal), REST API v2 with batch checking & SSE streaming. Python SDK + ROS2 integration. Policy-as-Code, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 39 MCP tools. 940 tests, 99.4% accuracy.",
+    tools: 39,
     mcp_endpoint: "/mcp",
     health_endpoint: "/health",
     npm: "https://www.npmjs.com/package/speclock",
@@ -910,7 +910,7 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
   res.json({
     name: "SpecLock",
     version: VERSION,
-    description: "AI Constraint Engine for autonomous systems governance. Typed constraints + REST API v2 with batch checking & SSE streaming. Python SDK (pip install speclock) + ROS2 Guardian Node. Hybrid heuristic + Gemini LLM. Policy-as-Code, OAuth/OIDC SSO, admin dashboard, telemetry, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 35 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
+    description: "AI Constraint Engine for autonomous systems governance. Spec Compiler (NL→constraints via Gemini Flash), Code Graph (dependency parsing, blast radius, lock-to-file mapping), Typed constraints (numerical, range, state, temporal), REST API v2, Python SDK + ROS2 Guardian Node. Hybrid heuristic + Gemini LLM. Policy-as-Code, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 39 MCP tools. 940 tests, 99.4% accuracy. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
     author: {
       name: "Sandeep Roy",
       url: "https://github.com/sgroy10",
@@ -919,7 +919,7 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
     homepage: "https://sgroy10.github.io/speclock/",
     license: "MIT",
     capabilities: {
-      tools: 35,
+      tools: 39,
       categories: [
         "Memory Management",
         "Change Tracking",
