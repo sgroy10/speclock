@@ -2,7 +2,7 @@
 
   "name": "speclock",
 
-  "version": "5.0.0",
+  "version": "5.0.2",
 
   "description": "AI Constraint Engine for autonomous systems governance. Spec Compiler (NL→constraints), Code Graph (blast radius, lock-to-file mapping), Typed constraints (numerical, range, state, temporal), REST API v2, Python SDK, ROS2 integration. 39 MCP tools, Gemini LLM hybrid, HMAC audit chain, RBAC, encryption, SOC 2/HIPAA compliance.",
 
@@ -12,130 +12,91 @@
 
   "bin": {
 
-  
-  "speclock": "./bin/speclock.js"
+    "speclock": "./bin/speclock.js"
 
   },
 
   "scripts": {
 
-  
-  "start": "node src/mcp/server.js",
+    "start": "node src/mcp/server.js",
 
-  
-  "serve": "node src/mcp/server.js",
+    "serve": "node src/mcp/server.js",
 
-  
-  "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
 
   },
 
   "keywords": [
 
-  
-  "mcp",
+    "mcp",
 
-  
-  "mcp-server",
+    "mcp-server",
 
-  
-  "ai",
+    "ai",
 
-  
-  "ai-memory",
+    "ai-memory",
 
-  
-  "ai-continuity",
+    "ai-continuity",
 
-  
-  "context",
+    "context",
 
-  
-  "memory",
+    "memory",
 
-  
-  "claude",
+    "claude",
 
-  
-  "claude-code",
+    "claude-code",
 
-  
-  "cursor",
+    "cursor",
 
-  
-  "codex",
+    "codex",
 
-  
-  "windsurf",
+    "windsurf",
 
-  
-  "cline",
+    "cline",
 
-  
-  "speclock",
+    "speclock",
 
-  
-  "ai-amnesia",
+    "ai-amnesia",
 
-  
-  "model-context-protocol",
+    "model-context-protocol",
 
-  
-  "drift-detection",
+    "drift-detection",
 
-  
-  "constraint-enforcement",
+    "constraint-enforcement",
 
-  
-  "enterprise",
+    "enterprise",
 
-  
-  "soc2",
+    "soc2",
 
-  
-  "hipaa",
+    "hipaa",
 
-  
-  "compliance",
+    "compliance",
 
-  
-  "audit-trail",
+    "audit-trail",
 
-  
-  "hmac",
+    "hmac",
 
-  
-  "encryption",
+    "encryption",
 
-  
-  "aes-256",
+    "aes-256",
 
-  
-  "api-key",
+    "api-key",
 
-  
-  "authentication",
+    "authentication",
 
-  
-  "rbac",
+    "rbac",
 
-  
-  "policy-as-code",
+    "policy-as-code",
 
-  
-  "sso",
+    "sso",
 
-  
-  "oauth",
+    "oauth",
 
-  
-  "oidc",
+    "oidc",
 
-  
-  "dashboard",
+    "dashboard",
 
-  
-  "telemetry"
+    "telemetry"
 
   ],
 
@@ -147,104 +108,79 @@
 
   "bugs": {
 
-  
-  "url": "https://github.com/sgroy10/speclock/issues"
+    "url": "https://github.com/sgroy10/speclock/issues"
 
   },
 
   "repository": {
 
-  
-  "type": "git",
+    "type": "git",
 
-  
-  "url": "git+https://github.com/sgroy10/speclock.git"
+    "url": "git+https://github.com/sgroy10/speclock.git"
 
   },
 
   "engines": {
 
-  
-  "node": ">=18"
+    "node": ">=18"
 
   },
 
   "dependencies": {
 
-  
-  "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
 
-  
-  "chokidar": "^3.6.0",
+    "chokidar": "^3.6.0",
 
-  
-  "zod": "^3.25.0"
+    "zod": "^3.25.0"
 
   },
 
   "files": [
 
-  
-  "bin/",
+    "bin/",
 
-  
-  "src/",
+    "src/",
 
-  
-  "src/dashboard/",
+    "src/dashboard/",
 
-  
-  "README.md",
+    "README.md",
 
-  
-  "SPECLOCK-INSTRUCTIONS.md",
+    "SPECLOCK-INSTRUCTIONS.md",
 
-  
-  "LICENSE"
+    "LICENSE"
 
   ],
 
   "devDependencies": {
 
-  
-  "esbuild": "^0.27.3",
+    "esbuild": "^0.27.3",
 
-  
-  "jest": "^30.2.0"
+    "jest": "^30.2.0"
 
   },
 
   "speclock": {
 
-  
-  "active": true,
+    "active": true,
 
-  
-  "message": "STOP — This project has SpecLock constraints. Read SPECLOCK.md and .speclock/context/latest.md BEFORE making ANY changes. Run 'npx speclock check' before ALL code changes. If a lock below is violated, STOP and ask user to unlock.",
+    "message": "STOP — This project has SpecLock constraints. Read SPECLOCK.md and .speclock/context/latest.md BEFORE making ANY changes. Run 'npx speclock check' before ALL code changes. If a lock below is violated, STOP and ask user to unlock.",
 
-  
-  "locks": [
+    "locks": [
 
-  
-  
-  "Game balance configuration must not be changed",
+      "Game balance configuration must not be changed",
 
-  
-  
-  "Patient records must never be deleted",
+      "Patient records must never be deleted",
 
-  
-  
-  "No breaking changes to public API"
+      "No breaking changes to public API"
 
-  
-  ],
+    ],
 
-  
-  "context": ".speclock/context/latest.md",
+    "context": ".speclock/context/latest.md",
 
-  
-  "rules": "SPECLOCK.md"
+    "rules": "SPECLOCK.md"
 
   }
+
 }
+
