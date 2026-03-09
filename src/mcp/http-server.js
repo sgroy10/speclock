@@ -40,6 +40,10 @@ import {
   updateTypedLockThreshold,
   checkAllTypedConstraints,
   getEnforcementConfig,
+  CONSTRAINT_TYPES,
+  OPERATORS,
+  checkTypedConstraint,
+  formatTypedLockText,
 } from "../core/engine.js";
 import { generateContext, generateContextPack } from "../core/context.js";
 import {
@@ -95,7 +99,7 @@ import { fileURLToPath } from "url";
 import _path from "path";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "4.5.7";
+const VERSION = "5.0.0";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 
@@ -883,7 +887,7 @@ app.get("/", (req, res) => {
     name: "speclock",
     version: VERSION,
     author: AUTHOR,
-    description: "AI Constraint Engine with Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 31 MCP tools. Enterprise platform.",
+    description: "AI Constraint Engine for autonomous systems governance. Typed constraints (numerical, range, state, temporal) + REST API v2 with batch checking & SSE streaming. Python SDK + ROS2 integration. Policy-as-Code, OAuth/OIDC SSO, admin dashboard, telemetry, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 35 MCP tools.",
     tools: 35,
     mcp_endpoint: "/mcp",
     health_endpoint: "/health",
@@ -898,7 +902,7 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
   res.json({
     name: "SpecLock",
     version: VERSION,
-    description: "AI Constraint Engine — memory + enforcement for AI coding tools. Hybrid heuristic + Gemini LLM for universal domain coverage. Policy-as-Code DSL, OAuth/OIDC SSO, admin dashboard, telemetry, API key auth, RBAC, AES-256-GCM encryption, hard enforcement, semantic pre-commit, HMAC audit chain, SOC 2/HIPAA compliance. 31 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
+    description: "AI Constraint Engine for autonomous systems governance. Typed constraints + REST API v2 with batch checking & SSE streaming. Python SDK (pip install speclock) + ROS2 Guardian Node. Hybrid heuristic + Gemini LLM. Policy-as-Code, OAuth/OIDC SSO, admin dashboard, telemetry, RBAC, AES-256-GCM encryption, hard enforcement, HMAC audit chain, SOC 2/HIPAA compliance. 35 MCP tools + CLI. Works with Claude Code, Cursor, Windsurf, Cline, Bolt.new, Lovable.",
     author: {
       name: "Sandeep Roy",
       url: "https://github.com/sgroy10",
@@ -919,6 +923,11 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
         "Hard Enforcement",
         "Policy-as-Code",
         "Telemetry",
+        "Typed Constraints",
+        "REST API v2",
+        "Real-Time Streaming",
+        "Robotics / ROS2",
+        "Python SDK",
       ],
     },
     keywords: [
@@ -926,6 +935,8 @@ app.get("/.well-known/mcp/server-card.json", (req, res) => {
       "sso", "oauth", "rbac", "encryption", "audit", "compliance",
       "soc2", "hipaa", "dashboard", "telemetry", "claude-code",
       "cursor", "bolt-new", "lovable", "enterprise",
+      "robotics", "ros2", "autonomous-systems", "iot", "typed-constraints",
+      "real-time", "sse", "batch-api", "python-sdk", "safety",
     ],
   });
 });
@@ -1022,6 +1033,371 @@ app.post("/policy", async (req, res) => {
 });
 
 // ========================================
+// REST API v2 — Real-Time Constraint Checking (v5.0)
+// For robotics, IoT, autonomous systems, trading platforms.
+// Sub-millisecond local checks, batch operations, SSE streaming.
+// Developed by Sandeep Roy (https://github.com/sgroy10)
+// ========================================
+
+// --- v2: Check a single typed constraint ---
+app.post("/api/v2/check-typed", (req, res) => {
+  setCorsHeaders(res);
+  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ error: "Rate limit exceeded." });
+  }
+
+  const start = performance.now();
+  const { metric, entity, value, from_state, to_state } = req.body || {};
+
+  if (!metric && !entity) {
+    return res.status(400).json({ error: "Required: metric (string) or entity (string)" });
+  }
+
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const locks = brain?.specLock?.items || [];
+
+    const proposed = {};
+    if (metric) proposed.metric = metric;
+    if (entity) proposed.entity = entity;
+    if (value !== undefined) proposed.value = value;
+    if (from_state) proposed.from = from_state;
+    if (to_state) proposed.to = to_state;
+
+    const result = checkAllTypedConstraints(locks, proposed);
+    const elapsed = performance.now() - start;
+
+    return res.json({
+      ...result,
+      response_time_ms: Number(elapsed.toFixed(3)),
+      api_version: "v2",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --- v2: Batch check multiple values at once ---
+// Single HTTP call for all sensor readings in a tick.
+// Body: { checks: [{ metric, value }, { entity, from_state, to_state }, ...] }
+app.post("/api/v2/check-batch", (req, res) => {
+  setCorsHeaders(res);
+  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ error: "Rate limit exceeded." });
+  }
+
+  const start = performance.now();
+  const { checks } = req.body || {};
+
+  if (!Array.isArray(checks) || checks.length === 0) {
+    return res.status(400).json({ error: "Required: checks (non-empty array)" });
+  }
+  if (checks.length > 100) {
+    return res.status(400).json({ error: "Too many checks (max 100 per batch)" });
+  }
+
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const locks = brain?.specLock?.items || [];
+
+    const results = [];
+    let totalViolations = 0;
+    let criticalCount = 0;
+
+    for (const check of checks) {
+      const proposed = {};
+      if (check.metric) proposed.metric = check.metric;
+      if (check.entity) proposed.entity = check.entity;
+      if (check.value !== undefined) proposed.value = check.value;
+      if (check.from_state) proposed.from = check.from_state;
+      if (check.to_state) proposed.to = check.to_state;
+
+      const result = checkAllTypedConstraints(locks, proposed);
+      if (result.hasConflict) {
+        totalViolations++;
+        const topConfidence = result.conflictingLocks?.[0]?.confidence || 0;
+        if (topConfidence >= 90) criticalCount++;
+      }
+
+      results.push({
+        input: check,
+        ...result,
+      });
+    }
+
+    const elapsed = performance.now() - start;
+
+    return res.json({
+      batch_size: checks.length,
+      total_violations: totalViolations,
+      critical_violations: criticalCount,
+      emergency_stop: criticalCount > 0,
+      results,
+      response_time_ms: Number(elapsed.toFixed(3)),
+      avg_check_ms: Number((elapsed / checks.length).toFixed(3)),
+      api_version: "v2",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --- v2: Add typed constraint via REST ---
+app.post("/api/v2/constraints", (req, res) => {
+  setCorsHeaders(res);
+  const auth = authenticateRequest(req);
+  if (auth.authEnabled && (!auth.valid || !checkPermission(auth.role, "speclock_add_lock"))) {
+    return res.status(auth.valid ? 403 : 401).json({ error: "Write permission required." });
+  }
+
+  const { constraint_type, description, tags, ...kwargs } = req.body || {};
+
+  if (!CONSTRAINT_TYPES.includes(constraint_type)) {
+    return res.status(400).json({
+      error: `Invalid constraint_type. Must be one of: ${CONSTRAINT_TYPES.join(", ")}`,
+    });
+  }
+
+  try {
+    ensureInit(PROJECT_ROOT);
+    const lockId = addTypedLock(PROJECT_ROOT, { constraintType: constraint_type, ...kwargs }, tags || [], "user", description);
+    return res.json({ success: true, lock_id: lockId, constraint_type });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// --- v2: List typed constraints ---
+app.get("/api/v2/constraints", (req, res) => {
+  setCorsHeaders(res);
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const locks = (brain?.specLock?.items || []).filter(
+      (l) => l.active !== false && CONSTRAINT_TYPES.includes(l.constraintType)
+    );
+
+    const byType = {};
+    for (const ct of CONSTRAINT_TYPES) byType[ct] = 0;
+    for (const l of locks) byType[l.constraintType]++;
+
+    return res.json({
+      total: locks.length,
+      by_type: byType,
+      constraints: locks.map((l) => ({
+        id: l.id,
+        type: l.constraintType,
+        metric: l.metric,
+        entity: l.entity,
+        text: l.text || formatTypedLockText(l),
+        tags: l.tags || [],
+        created: l.createdAt,
+      })),
+      api_version: "v2",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --- v2: Update constraint threshold ---
+app.put("/api/v2/constraints/:lockId", (req, res) => {
+  setCorsHeaders(res);
+  const auth = authenticateRequest(req);
+  if (auth.authEnabled && (!auth.valid || !checkPermission(auth.role, "speclock_add_lock"))) {
+    return res.status(auth.valid ? 403 : 401).json({ error: "Write permission required." });
+  }
+
+  const { lockId } = req.params;
+  const updates = req.body || {};
+
+  try {
+    ensureInit(PROJECT_ROOT);
+    const result = updateTypedLockThreshold(PROJECT_ROOT, lockId, updates);
+    return res.json({ success: true, ...result });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// --- v2: Delete constraint ---
+app.delete("/api/v2/constraints/:lockId", (req, res) => {
+  setCorsHeaders(res);
+  const auth = authenticateRequest(req);
+  if (auth.authEnabled && (!auth.valid || !checkPermission(auth.role, "speclock_add_lock"))) {
+    return res.status(auth.valid ? 403 : 401).json({ error: "Write permission required." });
+  }
+
+  const { lockId } = req.params;
+  try {
+    ensureInit(PROJECT_ROOT);
+    removeLock(PROJECT_ROOT, lockId);
+    return res.json({ success: true, removed: lockId });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// --- v2: SSE Stream for real-time constraint status ---
+// Clients connect once and receive constraint violation events in real-time.
+// Usage: const evtSource = new EventSource("/api/v2/stream");
+const sseClients = new Set();
+
+app.get("/api/v2/stream", (req, res) => {
+  setCorsHeaders(res);
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  // Send initial status
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const locks = (brain?.specLock?.items || []).filter(
+      (l) => l.active !== false && CONSTRAINT_TYPES.includes(l.constraintType)
+    );
+    const initData = {
+      type: "connected",
+      typed_constraints: locks.length,
+      total_locks: (brain?.specLock?.items || []).filter((l) => l.active !== false).length,
+      timestamp: new Date().toISOString(),
+    };
+    res.write(`event: status\ndata: ${JSON.stringify(initData)}\n\n`);
+  } catch {
+    res.write(`event: status\ndata: ${JSON.stringify({ type: "connected", typed_constraints: 0 })}\n\n`);
+  }
+
+  // Register client
+  const client = { res, id: Date.now() };
+  sseClients.add(client);
+
+  // Keep alive every 15 seconds
+  const keepAlive = setInterval(() => {
+    res.write(`:keepalive ${new Date().toISOString()}\n\n`);
+  }, 15_000);
+
+  req.on("close", () => {
+    sseClients.delete(client);
+    clearInterval(keepAlive);
+  });
+});
+
+// --- v2: Push a check and broadcast violations via SSE ---
+// POST /api/v2/stream/check — check constraints AND push violations to all SSE clients
+app.post("/api/v2/stream/check", (req, res) => {
+  setCorsHeaders(res);
+  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ error: "Rate limit exceeded." });
+  }
+
+  const start = performance.now();
+  const { checks } = req.body || {};
+
+  // Accept single check or batch
+  const checkList = Array.isArray(checks) ? checks : [req.body];
+
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const locks = brain?.specLock?.items || [];
+    const violations = [];
+
+    for (const check of checkList) {
+      const proposed = {};
+      if (check.metric) proposed.metric = check.metric;
+      if (check.entity) proposed.entity = check.entity;
+      if (check.value !== undefined) proposed.value = check.value;
+      if (check.from_state) proposed.from = check.from_state;
+      if (check.to_state) proposed.to = check.to_state;
+
+      const result = checkAllTypedConstraints(locks, proposed);
+      if (result.hasConflict) {
+        const violation = {
+          type: "violation",
+          input: check,
+          conflicts: result.conflictingLocks,
+          analysis: result.analysis,
+          timestamp: new Date().toISOString(),
+        };
+        violations.push(violation);
+
+        // Broadcast to all SSE clients
+        for (const client of sseClients) {
+          try {
+            client.res.write(`event: violation\ndata: ${JSON.stringify(violation)}\n\n`);
+          } catch {
+            sseClients.delete(client);
+          }
+        }
+      }
+    }
+
+    const elapsed = performance.now() - start;
+    return res.json({
+      checked: checkList.length,
+      violations: violations.length,
+      emergency_stop: violations.some(
+        (v) => v.conflicts?.some((c) => c.confidence >= 90)
+      ),
+      details: violations,
+      sse_clients: sseClients.size,
+      response_time_ms: Number(elapsed.toFixed(3)),
+      api_version: "v2",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --- v2: Real-time system status ---
+app.get("/api/v2/status", (req, res) => {
+  setCorsHeaders(res);
+  try {
+    ensureInit(PROJECT_ROOT);
+    const brain = readBrain(PROJECT_ROOT);
+    const allLocks = (brain?.specLock?.items || []).filter((l) => l.active !== false);
+    const typedLocks = allLocks.filter((l) => CONSTRAINT_TYPES.includes(l.constraintType));
+    const textLocks = allLocks.filter((l) => !l.constraintType);
+
+    const byType = {};
+    for (const ct of CONSTRAINT_TYPES) byType[ct] = 0;
+    for (const l of typedLocks) byType[l.constraintType]++;
+
+    // Unique metrics and entities being monitored
+    const metrics = [...new Set(typedLocks.filter((l) => l.metric).map((l) => l.metric))];
+    const entities = [...new Set(typedLocks.filter((l) => l.entity).map((l) => l.entity))];
+
+    return res.json({
+      status: "active",
+      version: VERSION,
+      uptime: Math.floor((Date.now() - START_TIME) / 1000),
+      constraints: {
+        typed: typedLocks.length,
+        text: textLocks.length,
+        total: allLocks.length,
+        by_type: byType,
+      },
+      monitoring: {
+        metrics,
+        entities,
+        sse_clients: sseClients.size,
+      },
+      violations: (brain?.state?.violations || []).length,
+      goal: brain?.goal?.text || "",
+      api_version: "v2",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================================
 // SSO ENDPOINTS (v3.5)
 // ========================================
 
@@ -1061,5 +1437,7 @@ app.post("/auth/sso/logout", (req, res) => {
 const PORT = parseInt(process.env.PORT || "3000", 10);
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`SpecLock MCP HTTP Server v${VERSION} running on port ${PORT} — Developed by ${AUTHOR}`);
-  console.log(`  Dashboard: http://localhost:${PORT}/dashboard`);
+  console.log(`  Dashboard:    http://localhost:${PORT}/dashboard`);
+  console.log(`  REST API v2:  http://localhost:${PORT}/api/v2/status`);
+  console.log(`  SSE Stream:   http://localhost:${PORT}/api/v2/stream`);
 });
