@@ -118,9 +118,10 @@ export const SYNONYM_GROUPS = [
   ["financial records", "financial data", "accounting records",
    "ledger", "general ledger", "accounts"],
   ["trade", "trades", "executed trade", "trade record", "order",
-   "position", "portfolio"],
+   "position"],
+  ["portfolio", "holdings", "investment portfolio"],
   ["salary", "salaries", "payroll", "wages", "compensation",
-   "remuneration", "stipend"],
+   "remuneration", "stipend", "earnings", "ytd"],
   ["payment gateway", "payment provider", "payment processor",
    "payment service", "payment platform"],
   ["razorpay", "stripe", "paypal", "phonepe", "paytm", "ccavenue",
@@ -130,8 +131,9 @@ export const SYNONYM_GROUPS = [
   // --- IoT / firmware ---
   ["firmware", "firmware update", "ota", "over the air",
    "flash", "rom", "bios", "bootloader", "embedded software"],
-  ["device", "iot", "sensor", "actuator", "controller",
+  ["device", "iot", "controller",
    "microcontroller", "mcu", "plc", "edge device"],
+  ["sensor", "actuator", "probe", "detector"],
   ["signed", "unsigned", "verified", "unverified",
    "trusted", "untrusted", "certified", "uncertified"],
 
@@ -234,7 +236,7 @@ export const EUPHEMISM_MAP = {
   "thin out":       ["delete", "remove", "reduce"],
 
   // Modification euphemisms
-  "streamline":     ["remove", "simplify", "modify", "reduce"],
+  "streamline":     ["remove", "simplify", "modify", "reduce", "weaken", "bypass", "disable"],
   "optimize":       ["modify", "change", "remove", "reduce"],
   "modernize":      ["replace", "rewrite", "change"],
   "revamp":         ["replace", "rewrite", "change"],
@@ -446,6 +448,9 @@ export const CONCEPT_MAP = {
                         "accounting", "payment"],
   "wages":             ["salary", "payroll", "compensation", "financial records"],
   "compensation":      ["salary", "payroll", "wages", "financial records"],
+  "earnings":          ["salary", "payroll", "compensation", "income", "wages",
+                        "financial records"],
+  "ytd":               ["year to date", "payroll", "earnings", "salary"],
 
   // Payment providers (brand names → payment gateway concept + cross-references)
   "razorpay":          ["payment gateway", "payment processing", "payment",
@@ -737,18 +742,44 @@ export const CONCEPT_MAP = {
   "inspection timestamps": ["safety records", "maintenance dates", "compliance dates"],
 
   // Gaming / virtual economy
-  "virtual currency":  ["in-game currency", "game tokens", "game economy"],
+  "virtual currency":  ["in-game currency", "game tokens", "game economy",
+                        "currency distribution"],
+  "currency distribution": ["virtual currency", "game economy", "in-game currency",
+                        "game tokens"],
+  "game economy":      ["virtual currency", "in-game currency", "currency",
+                        "currency distribution", "virtual economy"],
+  "virtual economy":   ["virtual currency", "in-game currency", "game economy",
+                        "currency distribution", "game tokens"],
   "player data":       ["user data", "gamer data", "player records", "pii"],
   "player ips":        ["ip addresses", "pii", "player data", "network data"],
-  "cheat detection":   ["anti-cheat", "cheat prevention", "security", "game integrity"],
+  "cheat detection":   ["anti-cheat", "cheat prevention", "security",
+                        "game integrity", "anti-cheat system"],
+  "anti-cheat":        ["cheat detection", "cheat prevention", "game integrity",
+                        "anti-cheat system"],
 
   // Real estate / tenant screening
-  "background check":  ["tenant screening", "verification", "due diligence"],
+  "background check":  ["tenant screening", "verification", "due diligence",
+                        "screening"],
   "tenant screening":  ["background check", "credit check", "verification"],
+
+  // Insurance / claims
+  "denied claims":     ["claim decisions", "claims processing", "claim status"],
+  "claim decisions":   ["denied claims", "claims processing", "claim approvals"],
+  "claims processing": ["denied claims", "claim decisions", "claims pipeline"],
+
+  // Government / benefits
+  "denied applications": ["application decisions", "application processing",
+                        "benefits decisions"],
 
   // Telecom / billing
   "call records":      ["cdr", "call data", "telecom records", "billing records"],
   "subscriber data":   ["customer data", "user data", "telecom records"],
+  "roaming":           ["telecom", "billing", "subscriber", "mobile charges",
+                        "roaming charges"],
+  "roaming charges":   ["billing", "telecom billing", "subscriber charges",
+                        "mobile charges"],
+  "location data":     ["subscriber data", "tracking data", "geolocation",
+                        "user location", "pii"],
 
   // Frontend frameworks (alternatives = change framework conflict)
   "react":             ["frontend framework", "ui framework", "vue", "angular",
@@ -1810,6 +1841,12 @@ export function scoreConflict({ actionText, lockText }) {
     [/\bmake\s+\w+\s+visible\b/i, "expose", "make ... visible"],
     [/\bmake\s+\w+\s+accessible\b/i, "expose", "make ... accessible"],
     [/\bmake\s+\w+\s+(?:data\s+)?public\b/i, "expose", "make ... public"],
+    // "streamline X detection/verification/authentication/checks" patterns
+    [/\bstreamline\s+\w+\s+detection\b/i, "weaken", "streamline ... detection"],
+    [/\bstreamline\s+\w+\s+detection\b/i, "disable", "streamline ... detection"],
+    [/\bstreamline\s+\w+\s+verification\b/i, "bypass", "streamline ... verification"],
+    [/\bstreamline\s+\w+\s+authentication\b/i, "weaken", "streamline ... authentication"],
+    [/\bstreamline\s+\w+\s+(?:check|checks)\b/i, "bypass", "streamline ... checks"],
   ];
   for (const [pattern, meaning, label] of SPLIT_PHRASE_PATTERNS) {
     if (pattern.test(actionText) && lockExpanded.expanded.includes(meaning)) {
@@ -2234,6 +2271,12 @@ export function scoreConflict({ actionText, lockText }) {
       intentAligned = true;
       reasons.push("intent alignment: optimizing queries/performance is non-destructive — does not modify locked schema/system");
     }
+
+    // Pattern 5: Adding database indexes (performance optimization, not schema modification)
+    if (!intentAligned && !_compoundDestructive && /\b(?:add|create)\s+(?:an?\s+)?index\b/i.test(_actionLowerSafe)) {
+      intentAligned = true;
+      reasons.push("intent alignment: adding a database index is a performance optimization — does not modify locked schema");
+    }
   }
 
   // Check 3c: Working WITH locked technology (not replacing it)
@@ -2391,7 +2434,12 @@ export function scoreConflict({ actionText, lockText }) {
       "placeholder", "logo", "banner", "hero", "avatar",
       "sidebar", "navigation", "menu", "breadcrumb", "footer",
     ]);
-    if (!intentAligned && !hasStrongVocabMatch) {
+    // Guard: structural verbs (redesign, overhaul, rewrite) targeting a locked component
+    // are NOT cosmetic — "Redesign the checkout page with a new layout" is a real change
+    // to the checkout flow, even though "layout" is a cosmetic word.
+    const _structuralVerbs = /\b(?:redesign|overhaul|restructure|rebuild|rewrite|rearchitect|revamp)\b/i;
+    const _hasStructuralVerbWithOverlap = _structuralVerbs.test(actionText) && directOverlap.length >= 1;
+    if (!intentAligned && !hasStrongVocabMatch && !_hasStructuralVerbWithOverlap) {
       const actionLower = actionText.toLowerCase();
       const actionWords = actionLower.split(/\s+/).map(w => w.replace(/[^a-z]/g, ""));
       const hasUISubject = actionWords.some(w => UI_COSMETIC_WORDS.has(w));
