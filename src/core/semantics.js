@@ -91,7 +91,7 @@ export const SYNONYM_GROUPS = [
    "private key", "access key", "api secret", "api token",
    "credentials", "credential"],
   ["frontend", "frontend code", "client-side", "client side",
-   "browser", "react state", "ui component"],
+   "browser", "react state", "ui component", "ui"],
 
   // --- Dependencies ---
   ["dependency", "package", "library", "module", "import", "require",
@@ -239,6 +239,7 @@ export const EUPHEMISM_MAP = {
   "streamline":     ["remove", "simplify", "modify", "reduce", "weaken", "bypass", "disable"],
   "optimize":       ["modify", "change", "remove", "reduce"],
   "modernize":      ["replace", "rewrite", "change"],
+  "reorganize":     ["modify", "change", "tamper", "alter"],
   "revamp":         ["replace", "rewrite", "change"],
   "overhaul":       ["replace", "rewrite", "change", "modify"],
   "refresh":        ["replace", "update", "change"],
@@ -771,6 +772,11 @@ export const CONCEPT_MAP = {
   "denied applications": ["application decisions", "application processing",
                         "benefits decisions"],
 
+  // Privacy / data protection
+  "privacy":           ["confidential", "pii", "personal data", "data protection",
+                        "restricted access"],
+  "confidential":      ["privacy", "private", "restricted", "pii", "data protection"],
+
   // Telecom / billing
   "call records":      ["cdr", "call data", "telecom records", "billing records"],
   "subscriber data":   ["customer data", "user data", "telecom records"],
@@ -782,12 +788,12 @@ export const CONCEPT_MAP = {
                         "user location", "pii"],
 
   // Frontend frameworks (alternatives = change framework conflict)
-  "react":             ["frontend framework", "ui framework", "vue", "angular",
-                        "svelte", "sveltekit", "next.js", "nextjs"],
-  "vue":               ["frontend framework", "ui framework", "react", "angular",
-                        "svelte", "sveltekit", "nuxt"],
-  "vue 3":             ["frontend framework", "ui framework", "react", "angular",
-                        "svelte", "sveltekit", "nuxt", "vue"],
+  "react":             ["frontend framework", "ui framework", "frontend", "ui",
+                        "vue", "angular", "svelte", "sveltekit", "next.js", "nextjs"],
+  "vue":               ["frontend framework", "ui framework", "frontend", "ui",
+                        "react", "angular", "svelte", "sveltekit", "nuxt"],
+  "vue 3":             ["frontend framework", "ui framework", "frontend", "ui",
+                        "react", "angular", "svelte", "sveltekit", "nuxt", "vue"],
   "vue.js":            ["frontend framework", "ui framework", "react", "angular",
                         "svelte", "sveltekit", "nuxt", "vue"],
   "svelte":            ["frontend framework", "ui framework", "react", "vue",
@@ -806,6 +812,11 @@ export const CONCEPT_MAP = {
                         "ui framework", "next.js", "nuxt"],
   "ui framework":      ["frontend framework", "react", "vue", "angular",
                         "svelte", "sveltekit"],
+  "tech stack":        ["frontend framework", "backend framework", "react", "vue",
+                        "angular", "svelte", "express", "django", "technology stack"],
+  "technology stack":  ["tech stack", "frontend framework", "backend framework"],
+  "application framework": ["frontend framework", "backend framework", "react",
+                        "vue", "angular", "express", "django"],
 
   // Backend frameworks (alternatives = change backend conflict)
   "express":           ["backend framework", "fastify", "koa", "hapi", "nestjs"],
@@ -1044,6 +1055,15 @@ export function tokenize(text) {
   for (const w of [...rawWords]) {
     if (w.includes('/')) {
       for (const part of w.split('/')) {
+        if (part.length >= 2 && !rawWords.includes(part)) rawWords.push(part);
+      }
+    }
+  }
+
+  // Split hyphenated tokens — "react-based" also adds "react", "based"
+  for (const w of [...rawWords]) {
+    if (w.includes('-')) {
+      for (const part of w.split('-')) {
         if (part.length >= 2 && !rawWords.includes(part)) rawWords.push(part);
       }
     }
@@ -2442,7 +2462,10 @@ export function scoreConflict({ actionText, lockText }) {
     if (!intentAligned && !hasStrongVocabMatch && !_hasStructuralVerbWithOverlap) {
       const actionLower = actionText.toLowerCase();
       const actionWords = actionLower.split(/\s+/).map(w => w.replace(/[^a-z]/g, ""));
-      const hasUISubject = actionWords.some(w => UI_COSMETIC_WORDS.has(w));
+      // Guard: "background" in "background check/screening/process" is NOT cosmetic CSS
+      const _hasNonCosmeticBackground = /\bbackground\s+(?:check|screening|investigation|process|task|job|worker|service)\b/i.test(actionLower);
+      const hasUISubject = actionWords.some(w =>
+        UI_COSMETIC_WORDS.has(w) && !(w === "background" && _hasNonCosmeticBackground));
       if (hasUISubject) {
         intentAligned = true;
         reasons.push(
