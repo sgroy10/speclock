@@ -426,6 +426,11 @@ export function syncRules(root, options = {}) {
     };
   }
 
+  // Treat "all" as sync-everything
+  if (options.format === "all") {
+    delete options.format;
+  }
+
   const formats = options.format
     ? { [options.format]: FORMATS[options.format] }
     : { ...FORMATS };
