@@ -516,7 +516,7 @@
             SpecLock
         </div>
         <div class="nav-links">
-            <a href="#whats-new" style="color: var(--accent); font-weight: 600;">v5.2 NEW</a>
+            <a href="#whats-new-v54" style="color: var(--accent); font-weight: 600;">v5.4 NEW</a>
             <a href="#bolt">Bolt.new</a>
             <a href="#demo">Demo</a>
             <a href="#compare">Compare</a>
@@ -636,6 +636,71 @@
         <div class="bolt-cta">
             <strong>Locked things? Blocked. Unlocked things? Work normally.</strong> One prompt to install: "Install speclock and set up project memory"
         </div>
+    </section>
+
+    <!-- WHAT'S NEW IN v5.4 — PROJECT HEALTH DASHBOARD -->
+    <section class="section-wrap" id="whats-new-v54" style="background: linear-gradient(135deg, #ecfdf5 0%, #6ee7b7 30%, #10b981 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 100%; padding-left: calc((100% - 1000px) / 2 + 24px); padding-right: calc((100% - 1000px) / 2 + 24px);">
+        <div class="section-label" style="color: #065f46;">v5.4 &mdash; NEW</div>
+        <h2 style="color: #1a1d23;">Project Health Dashboard &mdash; Three Numbers That Tell Your Story</h2>
+        <p class="subtitle" style="color: #065f46;">Only SpecLock knows what was <em>intended</em> vs what was <em>done</em>. Drift Score, Lock Coverage, Lock Strengthener &mdash; metrics no other tool can provide. Plus: Universal Rules Sync, Incident Replay, 10 safety templates. 49 MCP tools. 929 tests.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 32px;">
+            <!-- Drift Score -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">Drift Score (0-100)</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">How much has your AI deviated from your architecture? Analyzes violations, overrides, reverts, lock churn, goal changes, and session gaps. The only real-time integrity metric for AI-built projects.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre; line-height: 1.5;">$ speclock drift
+Drift Score: 12/100 (A) &mdash; healthy
+Trend: stable | 6 signals analyzed
+Badge: ![drift](https://img.shields.io/badge/drift-12-green)</code>
+            </div>
+
+            <!-- Lock Coverage -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">Lock Coverage Audit</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">Scans your codebase for high-risk patterns &mdash; auth, payments, database, secrets, API routes, security &mdash; and tells you what has no lock. Auto-suggests the missing constraints.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre; line-height: 1.5;">$ speclock coverage
+Lock Coverage: 83% (A)
+[COVERED]  auth, secrets, API
+[EXPOSED]  payments &mdash; 1 file at risk
+Suggested: speclock lock "Never modify payments"</code>
+            </div>
+
+            <!-- Lock Strengthener -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">Lock Strengthener</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">Grades each lock&rsquo;s specificity and detection power. Catches vague locks, missing enforcement verbs, ambiguous scope. Suggests stronger versions that block more violations.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre; line-height: 1.5;">$ speclock strengthen
+[WEAK  ] 30/100  "dont break things"
+  &rarr; "Never modify, refactor, or delete..."
+[STRONG] 90/100  "Never expose API keys"</code>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+            <!-- Universal Rules Sync -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">Universal Rules Sync</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">One command syncs constraints to <strong>Cursor, Claude Code, Copilot, Windsurf, Gemini, Aider, AGENTS.md</strong>. Stop maintaining 3 separate rules files.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem;">$ speclock sync --all &rarr; 7 files synced</code>
+            </div>
+
+            <!-- Incident Replay -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">Incident Replay</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">Flight recorder for AI sessions. See exactly what your agent tried and what SpecLock caught. ALLOW / WARN / BLOCK for every action.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem;">$ speclock replay &rarr; session activity log</code>
+            </div>
+
+            <!-- Safety Templates -->
+            <div style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 24px; border: 1px solid rgba(0,0,0,0.08);">
+                <h3 style="margin: 0 0 10px; font-size: 1.1rem; color: #1a1d23;">10 Safety Templates</h3>
+                <p style="color: #065f46; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px;">Pre-built lock packs: <strong>safe-defaults</strong> (vibe coding seatbelt), <strong>hipaa</strong> (healthcare), <strong>api-stability</strong>, <strong>solo-founder</strong>, Next.js, React, Express, Supabase, Stripe, security.</p>
+                <code style="display: block; background: #1a1d23; color: #4ade80; padding: 12px; border-radius: 8px; font-size: 0.8rem;">$ speclock template apply safe-defaults</code>
+            </div>
+        </div>
+
+        <p style="margin-top: 24px; text-align: center; color: #065f46; font-size: 0.88rem; font-weight: 600;">v5.4 is live on <a href="https://www.npmjs.com/package/speclock" target="_blank" style="color: #065f46; text-decoration: underline;">npm</a> and <a href="https://github.com/sgroy10/speclock" target="_blank" style="color: #065f46; text-decoration: underline;">GitHub</a>. Update with: <code style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.82rem;">npx speclock@latest</code></p>
     </section>
 
     <!-- WHAT'S NEW IN v5.2 — AI PATCH FIREWALL -->
@@ -1745,7 +1810,7 @@ npx speclock setup --goal "My app" --template nextjs
     </section>
 
     <footer>
-        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.4.0 &mdash; AI Constraint Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.4.1 &mdash; AI Constraint Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
     </footer>
 
     <script>
