@@ -8,7 +8,7 @@
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock.svg?style=flat-square&color=4F46E5" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock.svg?style=flat-square&color=22C55E" alt="npm downloads" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License" /></a>
-  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-42_tools-green.svg?style=flat-square" alt="MCP 46 tools" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-42_tools-green.svg?style=flat-square" alt="MCP 49 tools" /></a>
 </p>
 
 <p align="center">
@@ -202,6 +202,73 @@ speclock template apply api-stability   # 6 locks — API contract protection
 5. Logging disablement
 
 One command. Instant protection. `npx speclock setup --template safe-defaults`
+
+---
+
+## Drift Score (v5.4)
+
+How much has your AI-built project drifted from your original intent? Only SpecLock can answer this — because only SpecLock knows what was *intended* vs what was *done*.
+
+```bash
+$ speclock drift
+
+Drift Score: 23/100 (B) — minor drift
+Trend: improving | Period: 30 days | Active locks: 8
+
+Signal Breakdown:
+  Violations:      6/30  (4 violations in 12 checks)
+  Overrides:       5/20  (1 override)
+  Reverts:         3/15  (1 revert detected)
+  Lock churn:      0/15  (0 removed, 3 added)
+  Goal stability:  0/10  (1 goal change)
+  Session gaps:    9/10  (3/5 unsummarized)
+
+README badge: ![Drift Score](https://img.shields.io/badge/drift_score-23%2F100-brightgreen.svg)
+```
+
+Put the badge in your README. Show the world your AI respects your architecture.
+
+---
+
+## Lock Coverage Audit (v5.4)
+
+SpecLock scans your codebase and tells you what's **unprotected**:
+
+```bash
+$ speclock coverage
+
+Lock Coverage: 60% (B) — partially protected
+
+  [COVERED] CRITICAL authentication   2 file(s)
+  [EXPOSED] CRITICAL payments         1 file(s)
+  [COVERED] CRITICAL secrets          0 file(s)
+  [COVERED] HIGH     api-routes       2 file(s)
+
+Suggested Locks (ready to apply):
+  1. [CRITICAL] payments (1 file at risk)
+     speclock lock "Never modify payment processing or billing without permission"
+```
+
+Like a security scanner, but for AI constraint gaps. Solo founders building fast don't know what they haven't protected — SpecLock tells them.
+
+---
+
+## Lock Strengthener (v5.4)
+
+Your locks might be too vague. SpecLock grades each one and suggests improvements:
+
+```bash
+$ speclock strengthen
+
+Lock Strength: 72/100 (B) — 3 strong, 1 weak
+
+[WEAK  ] 45/100 (D)  "don't touch auth"
+          Issue: Too vague — short locks miss edge cases
+          Issue: No specific scope
+          Suggested: "Never modify, refactor, or delete auth..."
+
+[STRONG] 90/100 (A)  "Never expose API keys in client-side code, logs, or error messages"
+```
 
 ---
 
@@ -514,7 +581,7 @@ POST /api/v2/graph/build
 
 ---
 
-## 46 MCP Tools
+## 49 MCP Tools
 
 <details>
 <summary><b>Memory</b> — goal, locks, decisions, notes, deploy facts</summary>
@@ -631,6 +698,9 @@ POST /api/v2/graph/build
 | `speclock_list_sync_formats` | List all available sync formats |
 | `speclock_replay` | Replay a session's activity — what AI tried and what was caught |
 | `speclock_list_sessions` | List available sessions for replay |
+| `speclock_drift_score` | 0-100 project integrity metric — how much AI deviated from intent |
+| `speclock_coverage` | Lock Coverage Audit — find unprotected code areas |
+| `speclock_strengthen` | Grade locks and suggest stronger versions |
 
 </details>
 
@@ -679,6 +749,12 @@ speclock replay                                # Replay last session
 speclock replay --list                         # List sessions
 speclock replay --session <id>                 # Replay specific session
 
+# Project Health
+speclock drift                                 # Drift Score (0-100)
+speclock drift --days 7                        # Last 7 days only
+speclock coverage                              # Lock Coverage Audit
+speclock strengthen                            # Grade and improve locks
+
 # Auth
 speclock auth create-key --role developer
 speclock auth rotate-key <keyId>
@@ -721,7 +797,7 @@ The AI opens the file and sees:
 │     AI Tool (Claude Code, Cursor, Bolt.new...)    │
 └────────────┬──────────────────┬──────────────────┘
              │                  │
-   MCP Protocol (46 tools)    npm File-Based
+   MCP Protocol (49 tools)    npm File-Based
              │              (SPECLOCK.md + CLI)
              │                  │
 ┌────────────▼──────────────────▼──────────────────┐
@@ -791,7 +867,7 @@ The AI opens the file and sees:
 | PII/Export Detection | 8 | 100% | SSN, email export, data access violations |
 | **Total** | **929** | **100%** | **18 suites, 15+ domains** |
 
-**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.3.0. Zero false positives. Zero missed violations. 15.7ms per check.
+**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.4.0. Zero false positives. Zero missed violations. 15.7ms per check.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
@@ -829,11 +905,11 @@ Issues and PRs welcome on [GitHub](https://github.com/sgroy10/speclock).
 
 **SpecLock** is created and maintained by **[Sandeep Roy](https://github.com/sgroy10)**.
 
-Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that enforces project rules across AI coding sessions. All 46 MCP tools, the semantic conflict detection engine, enterprise security features (SOC 2, HIPAA, RBAC, encryption), and the pre-publish test gate were designed and built by Sandeep Roy.
+Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that enforces project rules across AI coding sessions. All 49 MCP tools, the semantic conflict detection engine, enterprise security features (SOC 2, HIPAA, RBAC, encryption), and the pre-publish test gate were designed and built by Sandeep Roy.
 
 - GitHub: [@sgroy10](https://github.com/sgroy10)
 - npm: [speclock](https://www.npmjs.com/package/speclock)
 
 ---
 
-<p align="center"><i>SpecLock v5.3.0 — Developed by Sandeep Roy — 929 tests, 100% pass rate, 46 MCP tools, Universal Rules Sync, Incident Replay, AI Patch Firewall, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2, REST API v2. Because remembering isn't enough.</i></p>
+<p align="center"><i>SpecLock v5.4.0 — Developed by Sandeep Roy — 929 tests, 100% pass rate, 49 MCP tools, Universal Rules Sync, Incident Replay, AI Patch Firewall, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2, REST API v2. Because remembering isn't enough.</i></p>

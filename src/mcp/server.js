@@ -67,6 +67,9 @@ import {
 import { generateContext, generateContextPack } from "../core/context.js";
 import { syncRules, getSyncFormats } from "../core/rules-sync.js";
 import { getReplay, listSessions, formatReplay } from "../core/replay.js";
+import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
+import { computeCoverage, formatCoverage } from "../core/coverage.js";
+import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
 import {
   readBrain,
   readEvents,
@@ -122,7 +125,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "5.3.1";
+const VERSION = "5.4.0";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(
@@ -1999,7 +2002,45 @@ server.tool(
   }
 );
 
-// Tool 39: speclock_list_sync_formats
+// Tool 39: speclock_drift_score
+server.tool(
+  "speclock_drift_score",
+  "Compute a 0-100 Drift Score measuring how much the project has drifted from the founder's original intent. Analyzes violations, overrides, reverts, lock churn, goal stability, and session gaps. Returns score, grade, trend, signal breakdown, and per-session impact. Only SpecLock can compute this because only SpecLock knows what was INTENDED vs what was DONE.",
+  {
+    days: z.number().optional().default(30).describe("Look back N days (default: 30)"),
+  },
+  async ({ days }) => {
+    const result = computeDriftScore(PROJECT_ROOT, { days });
+    const formatted = formatDriftScore(result);
+    return { content: [{ type: "text", text: `## Drift Score\n\n\`\`\`\n${formatted}\n\`\`\`` }] };
+  }
+);
+
+// Tool 40: speclock_coverage
+server.tool(
+  "speclock_coverage",
+  "Lock Coverage Audit — scans the codebase for high-risk patterns (auth, payments, database, secrets, API routes, security, error handling, logging) and identifies areas with no lock protecting them. Auto-suggests the missing locks you need. Like a security scanner but for AI constraint gaps.",
+  {},
+  async () => {
+    const result = computeCoverage(PROJECT_ROOT);
+    const formatted = formatCoverage(result);
+    return { content: [{ type: "text", text: `## Lock Coverage Audit\n\n\`\`\`\n${formatted}\n\`\`\`` }] };
+  }
+);
+
+// Tool 41: speclock_strengthen
+server.tool(
+  "speclock_strengthen",
+  "Lock Strengthener — grades each lock's specificity, scope, and detection power (0-100). Identifies weak locks and suggests stronger versions that catch more violations. Checks for: vagueness, missing enforcement verbs, no scope, no consequence, ambiguous language, missing euphemism guards.",
+  {},
+  async () => {
+    const result = analyzeLockStrength(PROJECT_ROOT);
+    const formatted = formatStrength(result);
+    return { content: [{ type: "text", text: `## Lock Strength Analysis\n\n\`\`\`\n${formatted}\n\`\`\`` }] };
+  }
+);
+
+// Tool 42: speclock_list_sync_formats
 server.tool(
   "speclock_list_sync_formats",
   "List all available AI tool formats that SpecLock can sync constraints to. Shows format key, tool name, output file path, and description.",

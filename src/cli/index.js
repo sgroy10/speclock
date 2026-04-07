@@ -64,6 +64,9 @@ import {
 } from "../core/sso.js";
 import { syncRules, getSyncFormats } from "../core/rules-sync.js";
 import { getReplay, listSessions, formatReplay } from "../core/replay.js";
+import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
+import { computeCoverage, formatCoverage } from "../core/coverage.js";
+import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
 
 // --- Argument parsing ---
 
@@ -119,7 +122,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.3.1 — AI Constraint Engine (Universal Rules Sync + Spec Compiler + Code Graph + Typed Constraints + Python SDK + ROS2 + REST API v2 + Gemini LLM + Policy-as-Code + Auth + RBAC + Encryption)
+SpecLock v5.4.0 — AI Constraint Engine (Universal Rules Sync + Spec Compiler + Code Graph + Typed Constraints + Python SDK + ROS2 + REST API v2 + Gemini LLM + Policy-as-Code + Auth + RBAC + Encryption)
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -157,6 +160,9 @@ Commands:
   sync --preview <format>         Preview without writing files
   replay [--session <id>]         Replay session activity — what AI tried & what was caught
   replay --list                   List available sessions for replay
+  drift [--days 30]               Drift Score — how much has AI deviated from intent (0-100)
+  coverage                        Lock Coverage Audit — find unprotected code areas
+  strengthen                      Lock Strengthener — grade locks and suggest improvements
   watch                           Start file watcher (live dashboard)
   serve [--project <path>]        Start MCP stdio server
   status                          Show project brain summary
@@ -1111,6 +1117,38 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
     }
     console.error("Usage: speclock encrypt [status]");
     process.exit(1);
+  }
+
+  // --- DRIFT (new: drift score) ---
+  if (cmd === "drift") {
+    const flags = parseFlags(args);
+    const days = flags.days ? parseInt(flags.days, 10) : 30;
+    const result = computeDriftScore(root, { days });
+
+    console.log(`\nSpecLock Drift Score`);
+    console.log("=".repeat(60));
+    console.log(formatDriftScore(result));
+    return;
+  }
+
+  // --- COVERAGE (new: lock coverage audit) ---
+  if (cmd === "coverage") {
+    const result = computeCoverage(root);
+
+    console.log(`\nSpecLock Lock Coverage Audit`);
+    console.log("=".repeat(60));
+    console.log(formatCoverage(result));
+    return;
+  }
+
+  // --- STRENGTHEN (new: lock strengthener) ---
+  if (cmd === "strengthen") {
+    const result = analyzeLockStrength(root);
+
+    console.log(`\nSpecLock Lock Strengthener`);
+    console.log("=".repeat(60));
+    console.log(formatStrength(result));
+    return;
   }
 
   // --- REPLAY (new: incident replay) ---
