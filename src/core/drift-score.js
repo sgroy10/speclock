@@ -39,17 +39,21 @@ export function computeDriftScore(root, options = {}) {
 
   // --- Signal 1: Violation Rate (0-30 points) ---
   // How often did the AI hit constraints?
-  const violations = recentEvents.filter(
+  // Violations are stored in brain.state.violations by the conflict checker
+  const allViolations = brain.state.violations || [];
+  const violations = allViolations.filter((v) => v.at >= cutoff);
+  // Also count from events for backward compatibility
+  const eventViolations = recentEvents.filter(
     (e) => e.type === "conflict_blocked" || e.type === "conflict_warned" ||
            (e.summary && (e.summary.includes("CONFLICT") || e.summary.includes("BLOCK")))
   );
-  const checks = recentEvents.filter(
-    (e) => e.type === "conflict_checked" || e.type === "conflict_blocked" ||
-           e.type === "conflict_warned"
-  );
-  const violationRate = checks.length > 0
-    ? (violations.length / checks.length) * 100
-    : 0;
+  const totalViolations = Math.max(violations.length, eventViolations.length);
+  // Estimate total checks: violations + safe checks (from events)
+  const safeChecks = recentEvents.filter(
+    (e) => e.type === "conflict_checked"
+  ).length;
+  const totalChecks = totalViolations + safeChecks || 1;
+  const violationRate = (totalViolations / totalChecks) * 100;
   // 0% violations = 0 drift, 50%+ = 30 drift
   const violationScore = Math.min(30, Math.round(violationRate * 0.6));
 
@@ -105,10 +109,16 @@ export function computeDriftScore(root, options = {}) {
     const sessionEvents = recentEvents.filter(
       (e) => e.at >= s.startedAt && (s.endedAt ? e.at <= s.endedAt : true)
     );
-    const sessionViolations = sessionEvents.filter(
+    // Check both brain.state.violations and events for this session window
+    const brainViolationsInSession = allViolations.filter(
+      (v) => v.at >= s.startedAt && (s.endedAt ? v.at <= s.endedAt : true)
+    );
+    const eventViolationsInSession = sessionEvents.filter(
       (e) => e.type === "conflict_blocked" || e.type === "conflict_warned" ||
              (e.summary && e.summary.includes("CONFLICT"))
     );
+    const sessionViolations = brainViolationsInSession.length > eventViolationsInSession.length
+      ? brainViolationsInSession : eventViolationsInSession;
     const sessionOverrides = sessionEvents.filter(
       (e) => e.type === "override_applied"
     );
@@ -128,12 +138,10 @@ export function computeDriftScore(root, options = {}) {
   const midpoint = new Date(Date.now() - (days / 2) * 86400000).toISOString();
   const firstHalf = recentEvents.filter((e) => e.at < midpoint);
   const secondHalf = recentEvents.filter((e) => e.at >= midpoint);
-  const firstViolations = firstHalf.filter(
-    (e) => e.type === "conflict_blocked" || e.type === "conflict_warned"
-  ).length;
-  const secondViolations = secondHalf.filter(
-    (e) => e.type === "conflict_blocked" || e.type === "conflict_warned"
-  ).length;
+  const firstViolations = allViolations.filter((v) => v.at >= cutoff && v.at < midpoint).length
+    + firstHalf.filter((e) => e.type === "conflict_blocked" || e.type === "conflict_warned").length;
+  const secondViolations = allViolations.filter((v) => v.at >= midpoint).length
+    + secondHalf.filter((e) => e.type === "conflict_blocked" || e.type === "conflict_warned").length;
 
   let trend;
   if (firstViolations === 0 && secondViolations === 0) trend = "stable";
@@ -148,7 +156,7 @@ export function computeDriftScore(root, options = {}) {
     trend,
     period: `${days} days`,
     signals: {
-      violations: { score: violationScore, max: 30, count: violations.length, total: checks.length },
+      violations: { score: violationScore, max: 30, count: totalViolations, total: totalChecks },
       overrides: { score: overrideScore, max: 20, count: overrides.length },
       reverts: { score: revertScore, max: 15, count: reverts.length },
       lockChurn: { score: churnScore, max: 15, removed: locksRemoved.length, added: locksAdded.length },
