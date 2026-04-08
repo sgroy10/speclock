@@ -9,7 +9,7 @@
 import { readBrain, readEvents } from "./storage.js";
 import { verifyAuditChain } from "./audit.js";
 
-const VERSION = "5.5.1";
+const VERSION = "5.5.2";
 
 // PHI-related keywords for HIPAA filtering
 const PHI_KEYWORDS = [

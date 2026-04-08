@@ -2153,6 +2153,50 @@ export function scoreConflict({ actionText, lockText }) {
     }
   }
 
+  // Check 0b: MUST-mandate inversion
+  // "MUST validate all user input" + "skip input validation" → conflict
+  // When a lock says MUST/ALWAYS + <verb>, and the action uses a negation verb
+  // (skip, remove, disable, bypass, omit, drop, eliminate, stop) targeting the same concept,
+  // that's a violation of the mandate.
+  {
+    const mandateMatch = lockText.match(/^\s*(?:must|always)\s+(\w+(?:\s+\w+){0,3})/i);
+    if (mandateMatch && !prohibitedVerb) {
+      const mandatedPhrase = mandateMatch[1].toLowerCase();
+      const mandatedWords = mandatedPhrase.split(/\s+/).filter(w => !STOPWORDS.has(w) && w.length > 2);
+      const actionLower = actionText.toLowerCase();
+      const NEGATION_VERBS = /\b(skip|skipping|remove|removing|disable|disabling|bypass|bypassing|omit|omitting|drop|dropping|eliminate|eliminating|stop|stopping|avoid|avoiding|delete|deleting|no|without)\b/;
+
+      if (NEGATION_VERBS.test(actionLower)) {
+        // Check if the action targets the same concept as the mandated verb
+        // Stem matching: "validate" ↔ "validation" share root "validat" (5+ chars)
+        const actionWords = actionLower.split(/\s+/).map(w => w.replace(/[^a-z]/g, "")).filter(w => w.length > 2);
+        let conceptOverlap = 0;
+        for (const mw of mandatedWords) {
+          for (const aw of actionWords) {
+            if (aw === mw) { conceptOverlap++; break; }
+            // Share a common root of 5+ chars: validate↔validation (validat)
+            const minLen = Math.min(aw.length, mw.length);
+            if (minLen >= 5) {
+              const root = Math.min(minLen, Math.max(5, minLen - 2));
+              if (aw.substring(0, root) === mw.substring(0, root)) {
+                conceptOverlap++;
+                break;
+              }
+            }
+          }
+        }
+        if (conceptOverlap >= 1) {
+          const bonus = conceptOverlap >= 2 ? 45 : 25;
+          score += bonus;
+          actionPerformsProhibitedOp = true;
+          reasons.push(
+            `mandate violation: action negates MUST-requirement ` +
+            `"${mandatedPhrase}" (${conceptOverlap} concept overlap)`);
+        }
+      }
+    }
+  }
+
   // Check 1: Direct opposite verbs (e.g., "enable" vs "disable")
   if (lockIsProhibitive && prohibitedVerb && actionPrimaryVerb) {
     if (checkOpposites(actionPrimaryVerb, prohibitedVerb)) {

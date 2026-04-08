@@ -633,6 +633,35 @@ test("always-pattern", "ALWAYS use X allows refactoring X (no false positive)", 
 });
 
 // ============================================================
+// BUG FIX: MUST PATTERN ENFORCEMENT (v5.5.2)
+// ============================================================
+
+test("must-pattern", "MUST validate catches 'skip input validation'", () => {
+  const result = scoreConflict({ actionText: "skip input validation", lockText: "MUST validate all user input" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("must-pattern", "MUST validate catches 'remove input validation from forms'", () => {
+  const result = scoreConflict({ actionText: "remove input validation from forms", lockText: "MUST validate all user input" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("must-pattern", "MUST validate catches 'disable input validation'", () => {
+  const result = scoreConflict({ actionText: "disable input validation", lockText: "MUST validate all user input" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("must-pattern", "MUST validate allows 'add input validation' (no false positive)", () => {
+  const result = scoreConflict({ actionText: "add input validation to the login form", lockText: "MUST validate all user input" });
+  assert(result.confidence < 60, `Expected < 60% (safe), got ${result.confidence}%`);
+});
+
+test("must-pattern", "MUST validate allows 'test the input validation' (no false positive)", () => {
+  const result = scoreConflict({ actionText: "test the input validation", lockText: "MUST validate all user input" });
+  assert(result.confidence < 60, `Expected < 60% (safe), got ${result.confidence}%`);
+});
+
+// ============================================================
 // RESULTS
 // ============================================================
 
