@@ -25,7 +25,7 @@
 
 ---
 
-> **New in v5.4:** `speclock drift` — the only tool that measures how much your AI has drifted from your architecture. `speclock coverage` — find what's unprotected. `speclock strengthen` — grade your locks. Three numbers that tell your project's whole story.
+> **New in v5.5:** `npx speclock protect` — zero-config Guardian Mode. Reads your existing `.cursorrules`, `CLAUDE.md`, `AGENTS.md`, extracts enforceable constraints, installs a pre-commit hook. One command. Your rules are now enforced, not just suggested. Also: ALWAYS/MUST pattern enforcement catches "switch from TypeScript to JavaScript" and "skip input validation."
 
 ---
 
