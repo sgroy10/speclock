@@ -8,7 +8,7 @@
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock.svg?style=flat-square&color=4F46E5" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock.svg?style=flat-square&color=22C55E" alt="npm downloads" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License" /></a>
-  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-49_tools-green.svg?style=flat-square" alt="MCP 49 tools" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-51_tools-green.svg?style=flat-square" alt="MCP 51 tools" /></a>
 </p>
 
 <p align="center">
@@ -42,8 +42,8 @@ AI:     ⚠️  BLOCKED — violates lock "Never touch the auth system"
         Should I find another approach?
 ```
 
-**100/100 on Claude's independent test suite. 929 tests across 18 suites. 0 false positives. 15.7ms per check.**
-**Gemini Flash hybrid, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2 integration.**
+**100/100 on Claude's independent test suite. 976 tests across 19 suites. 0 false positives. 15.7ms per check.**
+**Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Drift Score, Spec Compiler, Code Graph.**
 
 ---
 
@@ -54,6 +54,14 @@ npx speclock setup --goal "Build my app"
 ```
 
 That's it. One command. Works everywhere — Bolt.new, Claude Code, Cursor, Lovable, Windsurf, Cline, Aider.
+
+### Already have `.cursorrules`, `CLAUDE.md`, or `AGENTS.md`?
+
+```bash
+npx speclock protect
+```
+
+Zero flags. Reads your existing rule files, extracts enforceable constraints, installs a pre-commit hook, and syncs rules to every AI tool. **Your rules are now enforced, not just suggested.**
 
 ## The Problem
 
@@ -591,7 +599,7 @@ POST /api/v2/graph/build
 
 ---
 
-## 49 MCP Tools
+## 51 MCP Tools
 
 <details>
 <summary><b>Memory</b> — goal, locks, decisions, notes, deploy facts</summary>
@@ -807,7 +815,7 @@ The AI opens the file and sees:
 │     AI Tool (Claude Code, Cursor, Bolt.new...)    │
 └────────────┬──────────────────┬──────────────────┘
              │                  │
-   MCP Protocol (49 tools)    npm File-Based
+   MCP Protocol (51 tools)    npm File-Based
              │              (SPECLOCK.md + CLI)
              │                  │
 ┌────────────▼──────────────────▼──────────────────┐
@@ -875,9 +883,10 @@ The AI opens the file and sees:
 | Question Framing | 9 | 100% | "What if we..." and "How hard would it be..." |
 | REST API v2 | 9 | 100% | Typed constraint endpoints, SSE |
 | PII/Export Detection | 8 | 100% | SSN, email export, data access violations |
-| **Total** | **929** | **100%** | **18 suites, 15+ domains** |
+| Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
+| **Total** | **976** | **100%** | **19 suites, 15+ domains** |
 
-**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.4.0. Zero false positives. Zero missed violations. 15.7ms per check.
+**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.5.0. Zero false positives. Zero missed violations. 15.7ms per check.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
@@ -915,11 +924,11 @@ Issues and PRs welcome on [GitHub](https://github.com/sgroy10/speclock).
 
 **SpecLock** is created and maintained by **[Sandeep Roy](https://github.com/sgroy10)**.
 
-Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that enforces project rules across AI coding sessions. All 49 MCP tools, the semantic conflict detection engine, enterprise security features (SOC 2, HIPAA, RBAC, encryption), and the pre-publish test gate were designed and built by Sandeep Roy.
+Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that enforces project rules across AI coding sessions. All 51 MCP tools, the semantic conflict detection engine, enterprise security features (SOC 2, HIPAA, RBAC, encryption), and the pre-publish test gate were designed and built by Sandeep Roy.
 
 - GitHub: [@sgroy10](https://github.com/sgroy10)
 - npm: [speclock](https://www.npmjs.com/package/speclock)
 
 ---
 
-<p align="center"><i>SpecLock v5.4.0 — Developed by Sandeep Roy — 929 tests, 100% pass rate, 49 MCP tools, Universal Rules Sync, Incident Replay, AI Patch Firewall, Spec Compiler, Code Graph, Typed Constraints, Python SDK, ROS2, REST API v2. Because remembering isn't enough.</i></p>
+<p align="center"><i>SpecLock v5.5.0 — Your AI has rules. SpecLock makes them unbreakable. 976 tests, 100% pass rate, 51 MCP tools, Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Drift Score. Developed by Sandeep Roy.</i></p>

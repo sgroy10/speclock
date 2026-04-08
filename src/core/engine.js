@@ -73,6 +73,14 @@ export {
   semanticAudit,
 } from "./pre-commit-semantic.js";
 
+// --- Guardian (v5.5) ---
+export {
+  discoverRuleFiles,
+  extractConstraints,
+  protect,
+  formatProtectReport,
+} from "./guardian.js";
+
 // --- File Watcher ---
 // watchRepo stays here because it uses multiple modules
 

@@ -451,7 +451,11 @@ export function syncRules(root, options = {}) {
   const synced = [];
   const errors = [];
 
+  // Skip formats whose output files are in the exclude list (used by guardian to avoid overwriting source files)
+  const excludeFiles = options.excludeFiles instanceof Set ? options.excludeFiles : new Set();
+
   for (const [key, fmt] of Object.entries(formats)) {
+    if (excludeFiles.has(fmt.file)) continue;
     try {
       const content = fmt.generate(brain);
       const filePath = path.join(root, fmt.file);

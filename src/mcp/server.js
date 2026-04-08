@@ -70,6 +70,7 @@ import { getReplay, listSessions, formatReplay } from "../core/replay.js";
 import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
+import { discoverRuleFiles, protect, formatProtectReport } from "../core/guardian.js";
 import {
   readBrain,
   readEvents,
@@ -125,7 +126,7 @@ const PROJECT_ROOT =
   args.project || process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
 
 // --- MCP Server ---
-const VERSION = "5.4.1";
+const VERSION = "5.5.0";
 const AUTHOR = "Sandeep Roy";
 
 const server = new McpServer(
@@ -2061,6 +2062,46 @@ server.tool(
     lines.push(``);
     lines.push(`Use \`speclock_sync_rules\` with a specific format or "all" to sync.`);
 
+    return { content: [{ type: "text", text: lines.join("\n") }] };
+  }
+);
+
+// Tool 43: speclock_protect
+server.tool(
+  "speclock_protect",
+  "Zero-config Guardian Mode — Reads existing AI rule files (.cursorrules, CLAUDE.md, AGENTS.md, copilot-instructions.md, etc.), auto-extracts enforceable constraints, installs pre-commit hook, and syncs rules to all AI tools. One command, no flags. Makes your AI rules unbreakable.",
+  {
+    skipHook: { type: "boolean", description: "Skip pre-commit hook installation", default: false },
+    skipSync: { type: "boolean", description: "Skip syncing rules to all formats", default: false },
+  },
+  async ({ skipHook, skipSync }) => {
+    const report = protect(PROJECT_ROOT, { skipHook, skipSync });
+    const formatted = formatProtectReport(report);
+    return { content: [{ type: "text", text: formatted }] };
+  }
+);
+
+// Tool 44: speclock_discover_rules
+server.tool(
+  "speclock_discover_rules",
+  "Discover all AI rule files in the project (.cursorrules, CLAUDE.md, AGENTS.md, copilot-instructions.md, .windsurfrules, GEMINI.md, .aider.conf.yml). Shows which tools have rules configured and their sizes. Use this to see what rules exist before running speclock_protect.",
+  {},
+  async () => {
+    const files = discoverRuleFiles(PROJECT_ROOT);
+    if (files.length === 0) {
+      return { content: [{ type: "text", text: "No AI rule files found in this project. Create a .cursorrules, CLAUDE.md, or AGENTS.md file first." }] };
+    }
+    const lines = [
+      `## AI Rule Files Found`,
+      ``,
+      `| File | Tool | Lines | Size |`,
+      `|------|------|-------|------|`,
+    ];
+    for (const f of files) {
+      lines.push(`| \`${f.file}\` | ${f.tool} | ${f.lines} | ${f.size} bytes |`);
+    }
+    lines.push(``);
+    lines.push(`Run \`speclock_protect\` to extract constraints and make them enforceable.`);
     return { content: [{ type: "text", text: lines.join("\n") }] };
   }
 );

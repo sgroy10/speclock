@@ -35,6 +35,9 @@ const SUITES = [
   { file: "phase4.test.js",                 name: "Phase 4 (Full Stack)",  expected: 91 },
   { file: "auth-crypto.test.js",            name: "Auth & Crypto",         expected: 114 },
 
+  // Guardian (47 tests)
+  { file: "guardian.test.js",               name: "Guardian (Protect)",    expected: 47 },
+
   // Journey tests (2 tests)
   { file: "john-vibecoder-journey.test.js", name: "John (Vibe Coder)",     expected: null },
   { file: "sam-enterprise-journey.test.js", name: "Sam (Enterprise)",      expected: null },

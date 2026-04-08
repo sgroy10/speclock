@@ -67,6 +67,7 @@ import { getReplay, listSessions, formatReplay } from "../core/replay.js";
 import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
+import { protect, formatProtectReport } from "../core/guardian.js";
 
 // --- Argument parsing ---
 
@@ -122,7 +123,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.4.1 — AI Constraint Engine (Universal Rules Sync + Spec Compiler + Code Graph + Typed Constraints + Python SDK + ROS2 + REST API v2 + Gemini LLM + Policy-as-Code + Auth + RBAC + Encryption)
+SpecLock v5.5.0 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -133,6 +134,7 @@ Commands:
   goal <text>                     Set or update the project goal
   lock <text> [--tags a,b]        Add a non-negotiable constraint
   lock remove <id>                Remove a lock by ID
+  protect                         Zero-config: read rule files, extract locks, enforce
   guard <file> [--lock "text"]    Inject lock warning into a file
   unguard <file>                  Remove lock warning from a file
   decide <text> [--tags a,b]      Record a decision
@@ -540,6 +542,21 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
       console.log(`Unguarded: ${filePath}`);
     } else {
       console.error(result.error);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // --- PROTECT (zero-config guardian mode) ---
+  if (cmd === "protect") {
+    const flags = parseFlags(args);
+    const opts = {
+      skipHook: flags["no-hook"] === true,
+      skipSync: flags["no-sync"] === true,
+    };
+    const report = protect(root, opts);
+    console.log(formatProtectReport(report));
+    if (report.errors.length > 0 && report.discovered.length === 0) {
       process.exit(1);
     }
     return;

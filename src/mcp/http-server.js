@@ -113,7 +113,7 @@ import { fileURLToPath } from "url";
 import _path from "path";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "5.4.1";
+const VERSION = "5.5.0";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
 
@@ -887,7 +887,7 @@ app.get("/health", (req, res) => {
     status: "healthy",
     version: VERSION,
     uptime: Math.floor((Date.now() - START_TIME) / 1000),
-    tools: 42,
+    tools: 51,
     auditChain: auditStatus,
     authEnabled: isAuthEnabled(PROJECT_ROOT),
     rateLimit: { limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS },
@@ -901,8 +901,8 @@ app.get("/", (req, res) => {
     name: "speclock",
     version: VERSION,
     author: AUTHOR,
-    description: "AI Constraint Engine — Universal Rules Sync + AI Patch Firewall. Syncs constraints to Cursor, Claude Code, Copilot, Windsurf, Gemini, Aider, AGENTS.md. Patch Gateway (ALLOW/WARN/BLOCK verdicts), diff-native review (interface breaks, protected symbols, dependency drift, schema changes, API impact). Spec Compiler (NL→constraints), Code Graph (blast radius, lock-to-file mapping), Typed constraints, REST API v2, Python SDK + ROS2 integration. Policy-as-Code, RBAC, AES-256-GCM encryption, HMAC audit chain, SOC 2/HIPAA compliance. 49 MCP tools. 929 tests, 100% accuracy.",
-    tools: 49,
+    description: "Stop AI from breaking code you told it not to touch. Enforces .cursorrules, CLAUDE.md, and AGENTS.md — not just suggests. Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Spec Compiler, Code Graph, Drift Score, HMAC audit chain, SOC 2/HIPAA compliance. 51 MCP tools. 976 tests.",
+    tools: 51,
     mcp_endpoint: "/mcp",
     health_endpoint: "/health",
     npm: "https://www.npmjs.com/package/speclock",
