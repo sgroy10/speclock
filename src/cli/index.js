@@ -123,7 +123,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.5.0 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.5.1 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]

@@ -15,6 +15,7 @@ import {
 } from "../src/core/guardian.js";
 import { ensureInit } from "../src/core/memory.js";
 import { readBrain } from "../src/core/storage.js";
+import { scoreConflict } from "../src/core/semantics.js";
 
 let passed = 0;
 let failed = 0;
@@ -536,6 +537,99 @@ You are working on a production e-commerce platform.
 `;
   const result = extractConstraints(content, "AGENTS.md");
   assert(result.locks.length >= 4, `Expected >= 4 locks, got ${result.locks.length}`);
+});
+
+// ============================================================
+// BUG FIX: IDEMPOTENCY CASCADE (v5.5.1)
+// ============================================================
+
+test("idempotency", "skips SpecLock-generated sync files on second run", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    fs.writeFileSync(path.join(dir, ".cursorrules"), "NEVER delete data\nALWAYS use TypeScript");
+    const r1 = protect(dir, { skipHook: true });
+    assertEqual(r1.added.locks, 2);
+    // Run 2: should NOT add locks from sync output files
+    const r2 = protect(dir, { skipHook: true });
+    assertEqual(r2.added.locks, 0, `Second run should add 0 locks, got ${r2.added.locks}`);
+    assertEqual(r2.added.skipped, 2);
+  } finally { cleanup(dir); }
+});
+
+test("idempotency", "stable lock count across 3 runs", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    fs.writeFileSync(path.join(dir, ".cursorrules"), "NEVER delete the DB\nMUST validate input\nDo not touch auth");
+    fs.writeFileSync(path.join(dir, "CLAUDE.md"), "# Rules\n- NEVER expose secrets");
+    const r1 = protect(dir, { skipHook: true });
+    const count1 = r1.added.locks;
+    const r2 = protect(dir, { skipHook: true });
+    assertEqual(r2.added.locks, 0, "Run 2 added locks when it shouldn't");
+    const r3 = protect(dir, { skipHook: true });
+    assertEqual(r3.added.locks, 0, "Run 3 added locks when it shouldn't");
+  } finally { cleanup(dir); }
+});
+
+test("idempotency", "skips files with SpecLock sync header", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    // Create a file that looks like SpecLock sync output
+    fs.writeFileSync(path.join(dir, "AGENTS.md"), "# AGENTS.md\n\n> Auto-synced from SpecLock. Run `speclock sync` to update.\n\n## Constraints\n- NEVER violate: some rule");
+    const found = discoverRuleFiles(dir);
+    assertEqual(found.length, 0, "Should skip SpecLock-generated AGENTS.md");
+  } finally { cleanup(dir); }
+});
+
+test("idempotency", "skips files with (SpecLock) in title", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    fs.writeFileSync(path.join(dir, "GEMINI.md"), "# GEMINI.md — Project Constraints (SpecLock)\n\n> Auto-synced. Run `speclock sync --format gemini` to update.");
+    const found = discoverRuleFiles(dir);
+    assertEqual(found.length, 0, "Should skip SpecLock-generated GEMINI.md");
+  } finally { cleanup(dir); }
+});
+
+test("idempotency", "does NOT skip user-written AGENTS.md", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    fs.writeFileSync(path.join(dir, "AGENTS.md"), "# AGENTS.md\n\nNEVER modify the checkout flow\nMUST preserve API contracts");
+    const found = discoverRuleFiles(dir);
+    assertEqual(found.length, 1, "Should include user-written AGENTS.md");
+  } finally { cleanup(dir); }
+});
+
+// ============================================================
+// BUG FIX: ALWAYS PATTERN ENFORCEMENT (v5.5.1)
+// ============================================================
+
+test("always-pattern", "ALWAYS use X catches 'switch from X to Y'", () => {
+  const result = scoreConflict({ actionText: "switch from TypeScript to JavaScript", lockText: "ALWAYS use TypeScript" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("always-pattern", "ALWAYS use X catches 'stop using X'", () => {
+  const result = scoreConflict({ actionText: "stop using TypeScript", lockText: "ALWAYS use TypeScript" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("always-pattern", "ALWAYS use X catches 'convert to Y'", () => {
+  const result = scoreConflict({ actionText: "convert to JavaScript", lockText: "ALWAYS use TypeScript" });
+  assert(result.confidence >= 60, `Expected >= 60% conflict, got ${result.confidence}%`);
+});
+
+test("always-pattern", "ALWAYS use X allows working WITH X (no false positive)", () => {
+  const result = scoreConflict({ actionText: "add a new TypeScript file", lockText: "ALWAYS use TypeScript" });
+  assert(result.confidence < 60, `Expected < 60% (safe), got ${result.confidence}%`);
+});
+
+test("always-pattern", "ALWAYS use X allows refactoring X (no false positive)", () => {
+  const result = scoreConflict({ actionText: "refactor the TypeScript code", lockText: "ALWAYS use TypeScript" });
+  assert(result.confidence < 60, `Expected < 60% (safe), got ${result.confidence}%`);
 });
 
 // ============================================================

@@ -787,6 +787,17 @@ export const CONCEPT_MAP = {
   "location data":     ["subscriber data", "tracking data", "geolocation",
                         "user location", "pii"],
 
+  // Programming languages (alternatives = language switch conflict)
+  "typescript":        ["programming language", "typed language", "javascript",
+                        "language", "ts"],
+  "javascript":        ["programming language", "scripting language", "typescript",
+                        "language", "js"],
+  "python":            ["programming language", "scripting language", "language"],
+  "golang":            ["programming language", "language", "go"],
+  "rust":              ["programming language", "systems language", "language"],
+  "java":              ["programming language", "language", "kotlin"],
+  "kotlin":            ["programming language", "language", "java"],
+
   // Frontend frameworks (alternatives = change framework conflict)
   "react":             ["frontend framework", "ui framework", "frontend", "ui",
                         "vue", "angular", "svelte", "sveltekit", "next.js", "nextjs"],
@@ -1433,7 +1444,9 @@ function isProhibitiveLock(lockText) {
     || /\bno\s+\w/i.test(lockText)
     // Normalized lock patterns from lock-author.js rewriting
     || /\bis\s+frozen\b/i.test(lockText)
-    || /\bmust\s+(remain|be\s+preserved|stay|always)\b/i.test(lockText);
+    || /\bmust\s+(remain|be\s+preserved|stay|always)\b/i.test(lockText)
+    // "ALWAYS use X" is a preservation mandate — removing X violates it
+    || /^\s*always\b/i.test(lockText);
 }
 
 // ===================================================================
@@ -2227,7 +2240,7 @@ export function scoreConflict({ actionText, lockText }) {
   // "Test that Stripe is working" is COMPLIANT with "must always use Stripe"
   // "Debug the Stripe webhook" is COMPLIANT — it's verifying the preserved system
   {
-    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay/i.test(lockText);
+    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay|^\s*always\b/im.test(lockText);
 
     if (!intentAligned && lockIsPreservation) {
       const SAFE_FOR_PRESERVATION = new Set([
@@ -2339,7 +2352,7 @@ export function scoreConflict({ actionText, lockText }) {
   // But: "Update payment to use Razorpay" vs "Stripe lock" → introducing competitor → NOT safe
   // But: "Add Stripe key to frontend" → "add" not in WORKING_WITH_VERBS → NOT safe
   if (!intentAligned && actionPrimaryVerb) {
-    const lockIsPreservationOrFreeze = /must remain|must be preserved|must always|at all times|must stay|must never|must not|should never|do not replace|do not remove|do not switch|don't replace|don't remove|don't switch|don't|do not|never|uses .+ library/i.test(lockText);
+    const lockIsPreservationOrFreeze = /must remain|must be preserved|must always|at all times|must stay|must never|must not|should never|do not replace|do not remove|do not switch|don't replace|don't remove|don't switch|don't|do not|never|uses .+ library|^\s*always\b/im.test(lockText);
     if (lockIsPreservationOrFreeze) {
       // Extract specific brand/tech names from the lock text
       const lockWords = lockText.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z0-9]/g, "")).filter(w => w.length > 2);
@@ -2356,6 +2369,9 @@ export function scoreConflict({ actionText, lockText }) {
         "baileys", "twilio", "whatsapp",
         "auth0", "okta", "cognito", "keycloak",
         "react", "vue", "angular", "svelte", "nextjs", "nuxt",
+        "typescript", "javascript", "python", "golang", "rust", "java", "kotlin",
+        "tailwind", "bootstrap", "prisma", "drizzle", "sequelize",
+        "express", "fastapi", "django", "flask", "rails",
         "docker", "kubernetes", "terraform", "ansible",
         "aws", "gcp", "azure", "vercel", "netlify", "railway", "heroku",
       ]);
@@ -2406,7 +2422,7 @@ export function scoreConflict({ actionText, lockText }) {
       "build", "add", "create", "implement", "make", "design",
       "develop", "introduce",
     ]);
-    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay/i.test(lockText);
+    const lockIsPreservation = /must remain|must be preserved|must always|at all times|must stay|^\s*always\b/im.test(lockText);
     if (lockIsPreservation) {
       if (ENHANCEMENT_VERBS.has(actionPrimaryVerb)) {
         // Enhancement verbs always align with preservation locks
