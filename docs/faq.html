@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecLock FAQ — Frequently Asked Questions About AI Constraint Enforcement</title>
+    <meta name="description" content="Frequently asked questions about SpecLock, the AI Constraint Engine with 51 MCP tools and 991 tests. Learn about installation, CLAUDE.md enforcement, semantic detection, and more.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <!-- Open Graph -->
+    <meta property="og:title" content="SpecLock FAQ — AI Constraint Engine Questions Answered">
+    <meta property="og:description" content="Common questions about SpecLock: installation, CLAUDE.md enforcement, MCP tools, semantic detection, Cursor support, and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/faq.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SpecLock FAQ — AI Constraint Engine Questions Answered">
+    <meta name="twitter:description" content="Common questions about SpecLock: installation, CLAUDE.md enforcement, MCP tools, semantic detection, Cursor support, and more.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/faq.html">
+    <!-- FAQPage JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is SpecLock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock is an AI Constraint Engine that enforces your project rules — defined in CLAUDE.md, .cursorrules, and AGENTS.md — as unbreakable laws. It provides 51 MCP tools for semantic conflict detection, patch review, drift scoring, and pre-commit hooks, ensuring AI coding assistants respect your architectural decisions and constraints across every session."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does SpecLock enforce CLAUDE.md rules?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock reads your CLAUDE.md file and converts each rule into a trackable constraint (called a 'lock'). Before any AI-generated code change is applied, SpecLock's semantic detection engine checks for conflicts against these locks. If a proposed change would violate a CLAUDE.md rule, SpecLock blocks it and warns the developer with a clear explanation of which constraint would be broken."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does SpecLock work with Cursor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, SpecLock fully supports Cursor alongside Claude Code, Windsurf, Copilot, Cline, and other AI coding tools. SpecLock integrates via the MCP (Model Context Protocol) standard, which means it works with any editor or AI assistant that supports MCP servers. You can also use SpecLock's CLI and pre-commit hooks regardless of your editor."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I install SpecLock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Install SpecLock instantly with npm: run 'npx speclock protect' in your project directory. This sets up constraint enforcement, pre-commit hooks, and MCP integration in one command. No configuration files are needed — SpecLock automatically discovers your existing CLAUDE.md, .cursorrules, and AGENTS.md rules."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What's the difference between SpecLock and .cursorrules?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The .cursorrules file is a static text file that provides suggestions to Cursor's AI, but it has no enforcement mechanism — the AI can ignore or forget those rules at any time. SpecLock actively enforces constraints with semantic detection, pre-commit blocking, and conflict checking. Think of .cursorrules as guidelines and SpecLock as laws."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many MCP tools does SpecLock have?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock provides 51 MCP tools covering the full constraint enforcement lifecycle. These include tools for semantic auditing, patch review, drift detection, lock management, conflict checking, compliance reporting, blast radius analysis, and session continuity. Each tool is purpose-built to prevent AI coding assistants from violating your project's rules."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is SpecLock free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, SpecLock is completely free and open source under the MIT license. You can install it from npm, use all 51 MCP tools, and deploy it without any cost. The full source code is available on GitHub at github.com/sgroy10/speclock."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does SpecLock's semantic detection work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock's semantic detection engine goes beyond simple keyword matching. It analyzes the intent and meaning of code changes to detect when an AI is trying to violate a constraint, even through euphemisms or indirect modifications. For example, if a lock says 'never remove authentication,' SpecLock catches attempts to 'simplify the login flow' or 'refactor auth into a simpler pattern' that would effectively remove it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What coding tools does SpecLock support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock supports all major AI coding tools including Claude Code, Cursor, Windsurf, GitHub Copilot, Cline, and Bolt.new. It integrates through the MCP protocol standard, CLI commands, and pre-commit hooks, so it works in any development workflow regardless of which AI assistant or editor you use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I use SpecLock with Claude Code?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "To use SpecLock with Claude Code, add it as an MCP server in your Claude Code configuration. SpecLock will automatically load at the start of each session via the speclock_session_briefing tool, providing Claude with your project's constraints, decisions, and history. Claude Code then checks every proposed change against your locks before applying it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is npx speclock protect?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The command 'npx speclock protect' is the one-line setup command for SpecLock. Running it in your project directory initializes constraint enforcement, installs pre-commit hooks, discovers existing rules from CLAUDE.md and .cursorrules, and configures MCP integration. It requires zero configuration and gets SpecLock running in seconds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many tests does SpecLock have?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock has 991 tests covering every aspect of the constraint engine — from semantic detection and conflict checking to MCP tool behavior and CLI commands. This extensive test suite ensures reliability and prevents regressions, giving you confidence that SpecLock will correctly enforce your rules in production."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can SpecLock prevent AI from deleting files?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, SpecLock can prevent AI from deleting files. You can create locks that protect specific files, directories, or patterns. SpecLock's pre-commit hooks and patch review tools will block any commit that attempts to delete protected files, and the semantic detection engine catches indirect deletion attempts like moving critical code elsewhere and then removing the original."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the MCP Registry?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The MCP Registry (also known as Smithery) is a public directory of MCP servers that AI coding tools can connect to. SpecLock is listed on the MCP Registry at smithery.ai, making it easy to discover and install. The registry provides a standardized way for developers to find and integrate MCP-compatible tools like SpecLock into their workflow."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who created SpecLock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SpecLock was created by Sandeep Roy. It is an open-source project available on GitHub at github.com/sgroy10/speclock and published on npm as the 'speclock' package. Sandeep built SpecLock to solve the critical problem of AI coding assistants forgetting or ignoring project constraints between sessions."
+          }
+        }
+      ]
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #e53e3e;
+            --accent-light: #fee2e2;
+            --accent-glow: rgba(229, 62, 62, 0.12);
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo .lock-icon {
+            width: 30px; height: 30px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: white;
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-nav-cta {
+            background: #fff0f0; color: var(--accent); padding: 8px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.85rem; transition: all 0.2s; border: 1.5px solid var(--accent); cursor: pointer;
+        }
+        .btn-nav-cta:hover { background: var(--accent); color: white; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 140px 24px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+        }
+        .page-header .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--accent-light); border: 1px solid #fecaca;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--accent); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
+        }
+        .page-header h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900;
+            line-height: 1.1; letter-spacing: -1.5px; max-width: 700px;
+            margin: 0 auto 16px;
+        }
+        .page-header h1 .red { color: var(--accent); }
+        .page-header p {
+            font-size: 1.1rem; color: var(--text-dim); max-width: 600px;
+            margin: 0 auto; line-height: 1.7;
+        }
+
+        /* FAQ SECTION */
+        .faq-section {
+            max-width: 800px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+        .faq-item {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .faq-item:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .faq-question {
+            width: 100%;
+            background: var(--surface);
+            border: none;
+            padding: 20px 24px;
+            text-align: left;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: background 0.2s;
+        }
+        .faq-question:hover {
+            background: var(--surface-2);
+        }
+        .faq-question .arrow {
+            font-size: 1.2rem;
+            color: var(--accent);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+        .faq-item.open .faq-question .arrow {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+        }
+        .faq-answer-inner {
+            padding: 0 24px 20px;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        .faq-answer-inner strong { color: var(--text); }
+        .faq-answer-inner code {
+            background: var(--surface-2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* FOOTER CTA */
+        .footer-cta {
+            text-align: center; padding: 80px 24px;
+            background: var(--surface);
+        }
+        .footer-cta .section-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: 600;
+        }
+        .footer-cta h2 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+        .footer-cta p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 36px; }
+        .footer-cta .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--accent); color: white; padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 700;
+            font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-primary:hover { background: #c53030; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .btn-secondary {
+            background: white; color: var(--text); padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 600;
+            font-size: 0.95rem; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;
+        }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+        footer {
+            text-align: center; padding: 24px; font-size: 0.82rem; color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-dim); text-decoration: none; }
+        footer a:hover { color: var(--text); }
+
+        @media (max-width: 768px) {
+            nav { padding: 14px 16px; }
+            .nav-links { display: none; }
+            .page-header { padding: 110px 16px 40px; }
+            .faq-section { padding: 24px 16px 60px; }
+            .faq-question { padding: 16px; font-size: 0.95rem; }
+            .faq-answer-inner { padding: 0 16px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <div class="lock-icon">&#x1F512;</div>
+            SpecLock
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="faq.html" style="color: var(--accent); font-weight: 600;">FAQ</a>
+            <a href="vs.html">Compare</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-nav-cta">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="badge">FAQ</div>
+        <h1>Frequently Asked Questions About <span class="red">SpecLock</span></h1>
+        <p>Everything you need to know about the AI Constraint Engine with 51 MCP tools, 991 tests, and semantic enforcement for CLAUDE.md, .cursorrules, and AGENTS.md.</p>
+    </section>
+
+    <section class="faq-section">
+
+        <div class="faq-item open">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>What is SpecLock?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock is an <strong>AI Constraint Engine</strong> that enforces your project rules &mdash; defined in CLAUDE.md, .cursorrules, and AGENTS.md &mdash; as unbreakable laws. It provides <strong>51 MCP tools</strong> for semantic conflict detection, patch review, drift scoring, and pre-commit hooks. Unlike passive rule files, SpecLock actively blocks AI coding assistants from violating your architectural decisions and constraints across every session.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How does SpecLock enforce CLAUDE.md rules?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock reads your CLAUDE.md file and converts each rule into a trackable constraint called a "lock." Before any AI-generated code change is applied, SpecLock's semantic detection engine checks for conflicts against these locks. If a proposed change would violate a CLAUDE.md rule, SpecLock <strong>blocks it</strong> and warns the developer with a clear explanation of which constraint would be broken.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Does SpecLock work with Cursor?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    Yes, SpecLock fully supports <strong>Cursor</strong> alongside Claude Code, Windsurf, Copilot, Cline, and other AI coding tools. SpecLock integrates via the MCP (Model Context Protocol) standard, which means it works with any editor or AI assistant that supports MCP servers. You can also use SpecLock's CLI and pre-commit hooks regardless of your editor.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How do I install SpecLock?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    Install SpecLock instantly with npm: run <code>npx speclock protect</code> in your project directory. This sets up constraint enforcement, pre-commit hooks, and MCP integration in one command. No configuration files are needed &mdash; SpecLock automatically discovers your existing CLAUDE.md, .cursorrules, and AGENTS.md rules.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>What's the difference between SpecLock and .cursorrules?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    The <code>.cursorrules</code> file is a static text file that provides suggestions to Cursor's AI, but it has <strong>no enforcement mechanism</strong> &mdash; the AI can ignore or forget those rules at any time. SpecLock actively enforces constraints with semantic detection, pre-commit blocking, and conflict checking. Think of .cursorrules as guidelines and SpecLock as laws.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How many MCP tools does SpecLock have?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock provides <strong>51 MCP tools</strong> covering the full constraint enforcement lifecycle. These include tools for semantic auditing, patch review, drift detection, lock management, conflict checking, compliance reporting, blast radius analysis, and session continuity. Each tool is purpose-built to prevent AI coding assistants from violating your project's rules.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Is SpecLock free?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    Yes, SpecLock is <strong>completely free and open source</strong> under the MIT license. You can install it from npm, use all 51 MCP tools, and deploy it without any cost. The full source code is available on <a href="https://github.com/sgroy10/speclock" target="_blank" style="color: var(--accent);">GitHub</a>.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How does SpecLock's semantic detection work?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock's semantic detection engine goes beyond simple keyword matching. It analyzes the <strong>intent and meaning</strong> of code changes to detect when an AI is trying to violate a constraint, even through euphemisms or indirect modifications. For example, if a lock says "never remove authentication," SpecLock catches attempts to "simplify the login flow" or "refactor auth into a simpler pattern" that would effectively remove it.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>What coding tools does SpecLock support?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock supports all major AI coding tools including <strong>Claude Code, Cursor, Windsurf, GitHub Copilot, Cline, and Bolt.new</strong>. It integrates through the MCP protocol standard, CLI commands, and pre-commit hooks, so it works in any development workflow regardless of which AI assistant or editor you use.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How do I use SpecLock with Claude Code?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    To use SpecLock with Claude Code, add it as an MCP server in your Claude Code configuration. SpecLock will automatically load at the start of each session via the <code>speclock_session_briefing</code> tool, providing Claude with your project's constraints, decisions, and history. Claude Code then checks every proposed change against your locks before applying it.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>What is npx speclock protect?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    The command <code>npx speclock protect</code> is the one-line setup command for SpecLock. Running it in your project directory initializes constraint enforcement, installs pre-commit hooks, discovers existing rules from CLAUDE.md and .cursorrules, and configures MCP integration. It requires <strong>zero configuration</strong> and gets SpecLock running in seconds.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>How many tests does SpecLock have?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock has <strong>991 tests</strong> covering every aspect of the constraint engine &mdash; from semantic detection and conflict checking to MCP tool behavior and CLI commands. This extensive test suite ensures reliability and prevents regressions, giving you confidence that SpecLock will correctly enforce your rules in production.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Can SpecLock prevent AI from deleting files?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    Yes, SpecLock can prevent AI from deleting files. You can create locks that protect specific files, directories, or patterns. SpecLock's pre-commit hooks and patch review tools will <strong>block any commit</strong> that attempts to delete protected files, and the semantic detection engine catches indirect deletion attempts like moving critical code elsewhere and then removing the original.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>What is the MCP Registry?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    The MCP Registry (also known as <strong>Smithery</strong>) is a public directory of MCP servers that AI coding tools can connect to. SpecLock is listed on the MCP Registry at <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" style="color: var(--accent);">smithery.ai</a>, making it easy to discover and install. The registry provides a standardized way for developers to find and integrate MCP-compatible tools like SpecLock into their workflow.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Who created SpecLock?</span>
+                <span class="arrow">&#9662;</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-inner">
+                    SpecLock was created by <strong>Sandeep Roy</strong>. It is an open-source project available on <a href="https://github.com/sgroy10/speclock" target="_blank" style="color: var(--accent);">GitHub</a> and published on npm as the <code>speclock</code> package. Sandeep built SpecLock to solve the critical problem of AI coding assistants forgetting or ignoring project constraints between sessions.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="footer-cta">
+        <div class="section-label">Get Started</div>
+        <h2>Give your AI memory that enforces.</h2>
+        <p>Remembering isn't enough. SpecLock makes your AI respect boundaries. Free &amp; open source.</p>
+        <div class="cta-buttons">
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">Get SpecLock on Smithery</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">GitHub Repository</a>
+            <a href="https://www.npmjs.com/package/speclock" target="_blank" class="btn-secondary">npm Package</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.5.3 &mdash; AI Constraint Engine &middot; <a href="https://sgroy10.github.io/speclock/">Home</a> &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+    </footer>
+
+    <script>
+        function toggleFaq(btn) {
+            const item = btn.parentElement;
+            const wasOpen = item.classList.contains('open');
+            // Close all
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+            // Toggle clicked
+            if (!wasOpen) item.classList.add('open');
+        }
+    </script>
+
+</body>
+</html>

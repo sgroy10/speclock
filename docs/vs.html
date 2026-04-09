@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecLock vs .cursorrules vs ESLint vs Manual Code Review — AI Constraint Comparison</title>
+    <meta name="description" content="Compare SpecLock against .cursorrules, ESLint, and manual code review. See why SpecLock's semantic AI constraint enforcement with 51 MCP tools outperforms traditional approaches.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <!-- Open Graph -->
+    <meta property="og:title" content="SpecLock vs .cursorrules vs ESLint vs Manual Review — Comparison">
+    <meta property="og:description" content="Side-by-side comparison: SpecLock's semantic AI constraint enforcement vs .cursorrules, ESLint, and manual code review. 51 MCP tools, zero config, pre-commit blocking.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/vs.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SpecLock vs .cursorrules vs ESLint vs Manual Review">
+    <meta name="twitter:description" content="Side-by-side comparison: SpecLock's semantic AI constraint enforcement vs .cursorrules, ESLint, and manual code review.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/vs.html">
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "SpecLock vs .cursorrules vs ESLint vs Manual Code Review",
+      "description": "Detailed comparison of AI constraint enforcement approaches: SpecLock, .cursorrules, ESLint, and manual code review.",
+      "url": "https://sgroy10.github.io/speclock/vs.html",
+      "author": {
+        "@type": "Person",
+        "name": "Sandeep Roy",
+        "url": "https://github.com/sgroy10"
+      },
+      "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "SpecLock",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #e53e3e;
+            --accent-light: #fee2e2;
+            --accent-glow: rgba(229, 62, 62, 0.12);
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --yellow: #d97706;
+            --yellow-light: #fef3c7;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo .lock-icon {
+            width: 30px; height: 30px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: white;
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-nav-cta {
+            background: #fff0f0; color: var(--accent); padding: 8px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.85rem; transition: all 0.2s; border: 1.5px solid var(--accent); cursor: pointer;
+        }
+        .btn-nav-cta:hover { background: var(--accent); color: white; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 140px 24px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+        }
+        .page-header .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--blue-light); border: 1px solid #bfdbfe;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--blue); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
+        }
+        .page-header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
+            line-height: 1.1; letter-spacing: -1.5px; max-width: 800px;
+            margin: 0 auto 16px;
+        }
+        .page-header h1 .red { color: var(--accent); }
+        .page-header p {
+            font-size: 1.1rem; color: var(--text-dim); max-width: 650px;
+            margin: 0 auto; line-height: 1.7;
+        }
+
+        /* COMPARISON TABLE */
+        .compare-section {
+            max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+        .compare-table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        table {
+            width: 100%; border-collapse: collapse; min-width: 700px;
+        }
+        thead th {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        thead th:first-child {
+            text-align: left;
+            border-radius: 0;
+        }
+        thead th.speclock-col {
+            background: var(--accent);
+            color: white;
+            position: relative;
+        }
+        tbody td {
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background: var(--surface);
+        }
+        td.speclock-col {
+            background: rgba(229, 62, 62, 0.04);
+            font-weight: 600;
+        }
+        .check {
+            color: var(--green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .cross {
+            color: #d1d5db;
+            font-size: 1.1rem;
+        }
+        .partial {
+            color: var(--yellow);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* DETAIL CARDS */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 60px;
+        }
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: box-shadow 0.2s;
+        }
+        .detail-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .detail-card .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        .detail-card h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        .detail-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .detail-card .vs-tag {
+            display: inline-block;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 12px;
+        }
+
+        /* VERDICT */
+        .verdict-section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            text-align: center;
+        }
+        .verdict-box {
+            background: linear-gradient(135deg, var(--accent-light), #fff5f5);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 48px 36px;
+        }
+        .verdict-box h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        .verdict-box p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 550px;
+            margin: 0 auto 28px;
+        }
+        .verdict-box .cta-buttons {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        }
+
+        /* FOOTER CTA */
+        .footer-cta {
+            text-align: center; padding: 80px 24px;
+            background: var(--surface);
+        }
+        .footer-cta .section-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: 600;
+        }
+        .footer-cta h2 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+        .footer-cta p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 36px; }
+        .footer-cta .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--accent); color: white; padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 700;
+            font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-primary:hover { background: #c53030; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .btn-secondary {
+            background: white; color: var(--text); padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 600;
+            font-size: 0.95rem; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;
+        }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+        footer {
+            text-align: center; padding: 24px; font-size: 0.82rem; color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-dim); text-decoration: none; }
+        footer a:hover { color: var(--text); }
+
+        @media (max-width: 768px) {
+            nav { padding: 14px 16px; }
+            .nav-links { display: none; }
+            .page-header { padding: 110px 16px 40px; }
+            .compare-section { padding: 24px 16px 60px; }
+            .verdict-section { padding: 0 16px 60px; }
+            thead th, tbody td { padding: 10px 12px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <div class="lock-icon">&#x1F512;</div>
+            SpecLock
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="faq.html">FAQ</a>
+            <a href="vs.html" style="color: var(--accent); font-weight: 600;">Compare</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-nav-cta">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="badge">COMPARISON</div>
+        <h1><span class="red">SpecLock</span> vs Manual Review vs Linting vs .cursorrules</h1>
+        <p>Not all constraint enforcement is equal. See how SpecLock's semantic AI enforcement compares to traditional approaches for keeping AI coding assistants in line.</p>
+    </section>
+
+    <section class="compare-section">
+
+        <div class="compare-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th class="speclock-col">SpecLock</th>
+                        <th>.cursorrules</th>
+                        <th>ESLint</th>
+                        <th>Manual Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Semantic understanding of intent</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Catches euphemisms &amp; indirect violations</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Sometimes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Pre-commit enforcement</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>MCP integration</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span> <span style="font-size:0.8rem; color:var(--accent);">51 tools</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Zero configuration setup</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Cross-session memory</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Manual notes</span></td>
+                    </tr>
+                    <tr>
+                        <td>Drift detection &amp; scoring</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Manual diff</span></td>
+                    </tr>
+                    <tr>
+                        <td>Blast radius analysis</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Requires expertise</span></td>
+                    </tr>
+                    <tr>
+                        <td>Patch review before apply</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Architectural constraint locks</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Suggestions only</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Tribal knowledge</span></td>
+                    </tr>
+                    <tr>
+                        <td>File deletion protection</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">If caught in review</span></td>
+                    </tr>
+                    <tr>
+                        <td>Works with multiple AI tools</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span> <span style="font-size:0.8rem; color:var(--accent);">6+ tools</span></td>
+                        <td><span class="partial">Cursor only</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Compliance reporting</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                        <td><span class="partial">Lint reports</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Scales without human effort</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Passive only</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Free &amp; open source</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Time cost</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DETAIL CARDS -->
+        <div class="details-grid">
+
+            <div class="detail-card">
+                <div class="vs-tag">vs .cursorrules</div>
+                <h3>Rules Without Teeth</h3>
+                <p>.cursorrules provides static text suggestions to Cursor's AI, but has zero enforcement. The AI can ignore, forget, or misinterpret rules freely. SpecLock converts those same rules into enforceable locks with semantic conflict detection that blocks violations before they reach your codebase.</p>
+            </div>
+
+            <div class="detail-card">
+                <div class="vs-tag">vs ESLint</div>
+                <h3>Syntax vs. Semantics</h3>
+                <p>ESLint catches syntax issues and coding style violations, but it cannot understand architectural intent. It won't catch an AI "refactoring" your authentication system into oblivion. SpecLock operates at the semantic level, understanding what code changes <em>mean</em> relative to your constraints &mdash; not just how they're formatted.</p>
+            </div>
+
+            <div class="detail-card">
+                <div class="vs-tag">vs Manual Review</div>
+                <h3>Doesn't Scale, Always Late</h3>
+                <p>Manual code review catches many issues but happens after the code is written &mdash; wasting time if a constraint was violated. It also doesn't scale: reviewers get fatigued and miss subtle violations. SpecLock catches violations in real-time, before the code is even committed, and never gets tired.</p>
+            </div>
+
+            <div class="detail-card">
+                <div class="vs-tag">SPECLOCK ADVANTAGE</div>
+                <h3>51 MCP Tools, 991 Tests</h3>
+                <p>No other tool offers semantic constraint enforcement with 51 purpose-built MCP tools, pre-commit hooks, drift scoring, blast radius analysis, and session continuity &mdash; all in a single <code style="background:var(--surface-2); padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:0.82rem;">npx speclock protect</code> command. Backed by 991 tests.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- VERDICT -->
+    <section class="verdict-section">
+        <div class="verdict-box">
+            <h2>The Verdict</h2>
+            <p>Other tools tell AI what to do. <strong>SpecLock makes sure it listens.</strong> It's the only tool that combines semantic understanding, pre-commit enforcement, MCP integration, and cross-session memory into one zero-config package.</p>
+            <div class="cta-buttons">
+                <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">Get SpecLock on Smithery</a>
+                <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="footer-cta">
+        <div class="section-label">Get Started</div>
+        <h2>Give your AI memory that enforces.</h2>
+        <p>Remembering isn't enough. SpecLock makes your AI respect boundaries. Free &amp; open source.</p>
+        <div class="cta-buttons">
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">Get SpecLock on Smithery</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">GitHub Repository</a>
+            <a href="https://www.npmjs.com/package/speclock" target="_blank" class="btn-secondary">npm Package</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.5.3 &mdash; AI Constraint Engine &middot; <a href="https://sgroy10.github.io/speclock/">Home</a> &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+    </footer>
+
+</body>
+</html>
