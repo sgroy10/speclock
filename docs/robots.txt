@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sgroy10.github.io/speclock/sitemap.xml
