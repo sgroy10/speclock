@@ -1,0 +1,10 @@
+{
+  "name": "speclock",
+  "description": "AI Constraint Engine — enforces CLAUDE.md, .cursorrules, and AGENTS.md rules as laws. 51 MCP tools.",
+  "mcpServers": {
+    "speclock": {
+      "command": "npx",
+      "args": ["-y", "speclock", "serve"]
+    }
+  }
+}
