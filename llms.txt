@@ -1,0 +1,67 @@
+# SpecLock
+
+> AI Constraint Engine that enforces CLAUDE.md, .cursorrules, and AGENTS.md rules as laws. Your AI remembers your rules — SpecLock makes it obey them.
+
+SpecLock is the only tool that stops AI coding assistants from breaking things you told them not to touch. It provides semantic conflict detection, hard enforcement, tamper-proof audit trails, and universal rules sync across all major AI coding tools.
+
+- **Version:** 5.5.3
+- **Author:** Sandeep Roy
+- **License:** MIT
+- **npm:** [speclock](https://www.npmjs.com/package/speclock)
+- **GitHub:** [sgroy10/speclock](https://github.com/sgroy10/speclock)
+- **Official MCP Registry:** io.github.sgroy10/speclock
+- **Website:** [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/)
+- **Smithery:** [sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
+- **Tests:** 991 tests across 19 suites, 0 false positives
+- **MCP Tools:** 51
+
+## Key Features
+
+- Semantic conflict detection (100/100 score, 0% false positives)
+- Patch Gateway and AI Patch Firewall for change review
+- Guardian Mode: zero-config enforcement from existing rule files
+- Drift Score: 0-100 metric measuring how much AI deviated from intent
+- Lock Coverage Audit: find unprotected code areas
+- Lock Strengthener: grade and improve constraint quality
+- Universal Rules Sync to Cursor, Claude Code, Windsurf, Copilot, Gemini, Aider, AGENTS.md
+- Pre-commit hooks for CI/CD integration
+- Spec Compiler: natural language to structured constraints
+- Code Graph: dependency analysis and blast radius calculation
+- Typed Constraints: numerical, range, state, temporal
+- Hard enforcement mode with configurable thresholds
+- HMAC-SHA256 tamper-proof audit chain
+- AES-256-GCM encryption at rest
+- RBAC with 4 roles and API key auth
+- Policy-as-Code DSL (YAML rules)
+- SOC 2 / HIPAA compliance exports
+- Incident Replay: session flight recorder
+- Safety Templates: safe-defaults, solo-founder, hipaa, api-stability
+- Python SDK and ROS2 Guardian Node
+- REST API v2 with SSE streaming
+
+## Works With
+
+- Claude Code (via MCP)
+- Cursor (via MCP)
+- Windsurf (via MCP)
+- GitHub Copilot (via rules sync)
+- Gemini (via rules sync)
+- Aider (via rules sync)
+- Cline (via MCP)
+- Bolt.new (via npm)
+- Lovable (via hosted MCP endpoint)
+
+## Install
+
+```
+npx speclock setup --goal "Build my app"
+npx speclock protect
+```
+
+## Links
+
+- [Documentation](https://sgroy10.github.io/speclock/)
+- [npm Package](https://www.npmjs.com/package/speclock)
+- [GitHub Repository](https://github.com/sgroy10/speclock)
+- [Smithery Registry](https://smithery.ai/servers/sgroy10/speclock)
+- [Full Details](/llms-full.txt)
