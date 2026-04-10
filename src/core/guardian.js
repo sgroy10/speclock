@@ -460,6 +460,11 @@ export function formatProtectReport(report) {
     lines.push("  Next: edit CLAUDE.md to add project-specific rules, then run:");
     lines.push('    speclock check "your action here"');
   }
+
+  // Adoption nudge: invite users to add a README badge after a successful protect.
+  lines.push("");
+  lines.push('  ✓ Tip: Add a "Protected by SpecLock" badge to your README:');
+  lines.push("    speclock badge");
   lines.push("");
 
   return lines.join("\n");

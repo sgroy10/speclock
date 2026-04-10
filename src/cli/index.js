@@ -283,6 +283,67 @@ export function initFromRulePack(root, framework) {
   };
 }
 
+// --- Badges (speclock badge) ---
+
+/**
+ * All "Protected by SpecLock" README badge variants.
+ * Each variant is { name, markdown } — pure data so tests can assert on it
+ * without capturing stdout.
+ */
+export const BADGE_VARIANTS = [
+  {
+    name: "Standard",
+    markdown:
+      "[![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock)](https://github.com/sgroy10/speclock)",
+  },
+  {
+    name: "Flat-square",
+    markdown:
+      "[![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&logo=lock)](https://github.com/sgroy10/speclock)",
+  },
+  {
+    name: "For the badge",
+    markdown:
+      "[![Protected by SpecLock](https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&logo=lock&logoColor=white)](https://github.com/sgroy10/speclock)",
+  },
+  {
+    name: "Dynamic version",
+    markdown:
+      "[![SpecLock](https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock)](https://www.npmjs.com/package/speclock)",
+  },
+  {
+    name: "Tests passing",
+    markdown:
+      "[![Tests](https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success)](https://github.com/sgroy10/speclock)",
+  },
+  {
+    name: "Downloads",
+    markdown:
+      "[![Downloads](https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C)](https://www.npmjs.com/package/speclock)",
+  },
+];
+
+/**
+ * Render the full badge gallery as a plain string (no console I/O) so tests
+ * can assert against it.
+ */
+export function formatBadges() {
+  const lines = [];
+  lines.push("");
+  lines.push("SpecLock Badges");
+  lines.push("=".repeat(50));
+  lines.push("");
+  for (const v of BADGE_VARIANTS) {
+    lines.push(`${v.name}:`);
+    lines.push(v.markdown);
+    lines.push("");
+  }
+  lines.push("Add to your README.md to show your support.");
+  lines.push("Browse all variants: https://sgroy10.github.io/speclock/badge.html");
+  lines.push("");
+  return lines.join("\n");
+}
+
 // --- Help text ---
 
 function printHelp() {
@@ -343,6 +404,8 @@ Commands:
   status                          Show project brain summary
   stats                           Show YOUR usage dashboard from local telemetry log
   doctor                          Diagnostic health check (install, git, rules, MCP)
+  badge                           Print "Protected by SpecLock" README badges
+                                  (copy-paste Markdown for all 6 variants)
 
 Options:
   --tags <a,b,c>                  Comma-separated tags
@@ -2125,6 +2188,12 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
         console.log("\nTip: Add these files to git so your AI tools read them automatically.");
       }
     }
+    return;
+  }
+
+  // --- BADGE: print README badge variants ---
+  if (cmd === "badge" || cmd === "badges") {
+    console.log(formatBadges());
     return;
   }
 

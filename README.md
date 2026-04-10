@@ -18,6 +18,20 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock" alt="Protected by SpecLock" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&logo=lock" alt="Protected by SpecLock" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&logo=lock&logoColor=white" alt="Protected by SpecLock" /></a>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests" /></a>
+  <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads" /></a>
+</p>
+
+<p align="center"><sub>Browse all badge variants at <a href="https://sgroy10.github.io/speclock/badge.html">sgroy10.github.io/speclock/badge.html</a> &middot; or run <code>speclock badge</code> in your terminal.</sub></p>
+
+<p align="center">
   <a href="https://sgroy10.github.io/speclock/">Website</a> · <a href="https://www.npmjs.com/package/speclock">npm</a> · <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> · <a href="https://github.com/sgroy10/speclock">GitHub</a>
 </p>
 
@@ -837,6 +851,20 @@ result = sl.check(action="Increase speed", speed_mps=3.5)
 ```
 
 Uses the same `.speclock/brain.json` as the Node.js MCP server. ROS2 Guardian Node subscribes to `/joint_states`, `/cmd_vel`, `/speclock/state_transition`; publishes violations to `/speclock/violations`; triggers emergency stop via `/speclock/emergency_stop`.
+
+---
+
+## Show your support
+
+If SpecLock saves your project from a 3am incident, add this badge to your README:
+
+```markdown
+[![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock)](https://github.com/sgroy10/speclock)
+```
+
+Or run `speclock badge` in your terminal to see all variants. Full gallery: **[sgroy10.github.io/speclock/badge.html](https://sgroy10.github.io/speclock/badge.html)** · Full docs: **[BADGES.md](./BADGES.md)**.
+
+Every adoption helps another developer discover SpecLock and stop their AI from wrecking their project. Thank you.
 
 ---
 

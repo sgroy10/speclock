@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected by SpecLock — Add a Badge to Your README</title>
+    <meta name="description" content="Show the world your AI coding tools respect your rules. Copy-paste Markdown, HTML, and reStructuredText badges for your SpecLock-protected project.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Protected by SpecLock — Add a Badge to Your README">
+    <meta property="og:description" content="Show the world your AI coding tools respect your rules. Copy-paste badge code for any README.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/badge.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Protected by SpecLock — Add a Badge to Your README">
+    <meta name="twitter:description" content="Show the world your AI coding tools respect your rules. Copy-paste badge code for any README.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/badge.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #e53e3e;
+            --accent-light: #fee2e2;
+            --orange: #FF6B2C;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo .lock-icon {
+            width: 30px; height: 30px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: white;
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-nav-cta {
+            background: #fff0f0; color: var(--accent); padding: 8px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.85rem; transition: all 0.2s; border: 1.5px solid var(--accent); cursor: pointer;
+        }
+        .btn-nav-cta:hover { background: var(--accent); color: white; }
+
+        .page-header {
+            padding: 140px 24px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+        }
+        .page-header .tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff0e6; border: 1px solid #ffd3b5;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--orange); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
+        }
+        .page-header h1 {
+            font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 900;
+            line-height: 1.1; letter-spacing: -1.5px; max-width: 780px;
+            margin: 0 auto 16px;
+        }
+        .page-header h1 .orange { color: var(--orange); }
+        .page-header p {
+            font-size: 1.15rem; color: var(--text-dim); max-width: 640px;
+            margin: 0 auto; line-height: 1.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .intro-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px 32px;
+            margin-bottom: 48px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .intro-box .emoji {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .intro-box h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .intro-box p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .variant {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .variant h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .variant .subtitle {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin-bottom: 20px;
+        }
+
+        .preview-box {
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .preview-box img {
+            max-height: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0;
+        }
+        .tab {
+            padding: 10px 18px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid transparent;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+        .tab:hover { color: var(--text); }
+        .tab.active {
+            color: var(--orange);
+            border-bottom-color: var(--orange);
+        }
+
+        .code-wrapper {
+            position: relative;
+            margin-top: 0;
+        }
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 0 0 10px 10px;
+            padding: 20px 60px 20px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            display: none;
+        }
+        .code-block.active { display: block; }
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.18);
+        }
+        .copy-btn.copied {
+            background: #16a34a;
+            border-color: #16a34a;
+            color: white;
+        }
+
+        .where {
+            margin-top: 18px;
+            padding: 14px 18px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #7c2d12;
+        }
+        .where strong { color: #9a3412; }
+
+        .showcase {
+            background: linear-gradient(135deg, #fff 0%, var(--surface) 100%);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 36px;
+            margin: 48px 0;
+            text-align: center;
+        }
+        .showcase h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .showcase p {
+            color: var(--text-dim);
+            margin-bottom: 22px;
+        }
+        .showcase .all-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        footer {
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            background: var(--surface);
+        }
+        footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 640px) {
+            nav { padding: 14px 20px; }
+            .nav-links { gap: 14px; }
+            .nav-links a:not(.btn-nav-cta) { display: none; }
+            .page-header { padding: 110px 20px 40px; }
+            .variant { padding: 22px; }
+            .intro-box { flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <div class="lock-icon">&#x1F512;</div>
+            SpecLock
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="faq.html">FAQ</a>
+            <a href="vs.html">Compare</a>
+            <a href="badge.html" style="color: var(--orange); font-weight: 700;">Badges</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-nav-cta">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="tag">README BADGES</div>
+        <h1>Protected by <span class="orange">SpecLock</span> &mdash; Add a Badge to Your README</h1>
+        <p>Show the world your AI coding tools respect your rules.</p>
+    </section>
+
+    <div class="container">
+
+        <div class="intro-box">
+            <div class="emoji">&#x1F512;</div>
+            <div>
+                <h2>Wear the shield with pride</h2>
+                <p>Every SpecLock-protected project ships with unbreakable AI constraints. Add a badge to your README so visitors know your codebase can&#39;t be wrecked by a rogue prompt. Pick a style below, click copy, paste it at the top of your README.md.</p>
+            </div>
+        </div>
+
+        <!-- VARIANT 1 -->
+        <div class="variant">
+            <h2>1. Standard Shield</h2>
+            <p class="subtitle">The classic. Flat style, orange brand color, lock icon.</p>
+            <div class="preview-box">
+                <a href="https://github.com/sgroy10/speclock" target="_blank">
+                    <img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock" alt="Protected by SpecLock">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v1-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v1-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v1-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v1-md">[![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock)](https://github.com/sgroy10/speclock)</pre>
+                <pre class="code-block" id="v1-html">&lt;a href="https://github.com/sgroy10/speclock"&gt;&lt;img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&amp;logo=lock" alt="Protected by SpecLock"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v1-rst">.. image:: https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&amp;logo=lock
+   :target: https://github.com/sgroy10/speclock
+   :alt: Protected by SpecLock</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Top of your README.md, right under the title.</div>
+        </div>
+
+        <!-- VARIANT 2 -->
+        <div class="variant">
+            <h2>2. Flat Square</h2>
+            <p class="subtitle">Sharper corners. Pairs well with other flat-square shields.</p>
+            <div class="preview-box">
+                <a href="https://github.com/sgroy10/speclock" target="_blank">
+                    <img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&logo=lock" alt="Protected by SpecLock">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v2-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v2-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v2-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v2-md">[![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&logo=lock)](https://github.com/sgroy10/speclock)</pre>
+                <pre class="code-block" id="v2-html">&lt;a href="https://github.com/sgroy10/speclock"&gt;&lt;img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&amp;logo=lock" alt="Protected by SpecLock"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v2-rst">.. image:: https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&amp;logo=lock
+   :target: https://github.com/sgroy10/speclock
+   :alt: Protected by SpecLock</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Alongside your other flat-square shields (npm, license, downloads).</div>
+        </div>
+
+        <!-- VARIANT 3 -->
+        <div class="variant">
+            <h2>3. For the Badge</h2>
+            <p class="subtitle">Big and bold. Impossible to miss.</p>
+            <div class="preview-box">
+                <a href="https://github.com/sgroy10/speclock" target="_blank">
+                    <img src="https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&logo=lock&logoColor=white" alt="Protected by SpecLock">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v3-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v3-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v3-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v3-md">[![Protected by SpecLock](https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&logo=lock&logoColor=white)](https://github.com/sgroy10/speclock)</pre>
+                <pre class="code-block" id="v3-html">&lt;a href="https://github.com/sgroy10/speclock"&gt;&lt;img src="https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&amp;logo=lock&amp;logoColor=white" alt="Protected by SpecLock"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v3-rst">.. image:: https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&amp;logo=lock&amp;logoColor=white
+   :target: https://github.com/sgroy10/speclock
+   :alt: Protected by SpecLock</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Hero section of a landing page README, or as the centerpiece under your project name.</div>
+        </div>
+
+        <!-- VARIANT 4 -->
+        <div class="variant">
+            <h2>4. Dynamic Version</h2>
+            <p class="subtitle">Auto-updates with the latest SpecLock version on npm.</p>
+            <div class="preview-box">
+                <a href="https://www.npmjs.com/package/speclock" target="_blank">
+                    <img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v4-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v4-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v4-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v4-md">[![SpecLock](https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock)](https://www.npmjs.com/package/speclock)</pre>
+                <pre class="code-block" id="v4-html">&lt;a href="https://www.npmjs.com/package/speclock"&gt;&lt;img src="https://img.shields.io/npm/v/speclock?label=SpecLock&amp;color=FF6B2C&amp;logo=lock" alt="SpecLock"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v4-rst">.. image:: https://img.shields.io/npm/v/speclock?label=SpecLock&amp;color=FF6B2C&amp;logo=lock
+   :target: https://www.npmjs.com/package/speclock
+   :alt: SpecLock</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Next to your other npm version shields. Signals you track SpecLock releases.</div>
+        </div>
+
+        <!-- VARIANT 5 -->
+        <div class="variant">
+            <h2>5. Tests Passing</h2>
+            <p class="subtitle">Advertise the SpecLock test gate your project benefits from.</p>
+            <div class="preview-box">
+                <a href="https://github.com/sgroy10/speclock" target="_blank">
+                    <img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v5-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v5-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v5-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v5-md">[![Tests](https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success)](https://github.com/sgroy10/speclock)</pre>
+                <pre class="code-block" id="v5-html">&lt;a href="https://github.com/sgroy10/speclock"&gt;&lt;img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v5-rst">.. image:: https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success
+   :target: https://github.com/sgroy10/speclock
+   :alt: Tests</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Build-status row alongside your own CI badges.</div>
+        </div>
+
+        <!-- VARIANT 6 -->
+        <div class="variant">
+            <h2>6. Downloads</h2>
+            <p class="subtitle">Show SpecLock&#39;s monthly install count &mdash; proof of ecosystem trust.</p>
+            <div class="preview-box">
+                <a href="https://www.npmjs.com/package/speclock" target="_blank">
+                    <img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads">
+                </a>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(this, 'v6-md')">Markdown</button>
+                <button class="tab" onclick="switchTab(this, 'v6-html')">HTML</button>
+                <button class="tab" onclick="switchTab(this, 'v6-rst')">reStructuredText</button>
+            </div>
+            <div class="code-wrapper">
+                <pre class="code-block active" id="v6-md">[![Downloads](https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C)](https://www.npmjs.com/package/speclock)</pre>
+                <pre class="code-block" id="v6-html">&lt;a href="https://www.npmjs.com/package/speclock"&gt;&lt;img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&amp;color=FF6B2C" alt="Downloads"&gt;&lt;/a&gt;</pre>
+                <pre class="code-block" id="v6-rst">.. image:: https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&amp;color=FF6B2C
+   :target: https://www.npmjs.com/package/speclock
+   :alt: Downloads</pre>
+                <button class="copy-btn" onclick="copyActive(this)">Copy</button>
+            </div>
+            <div class="where"><strong>Where to put it:</strong> Social-proof row near the top of your README.</div>
+        </div>
+
+        <div class="showcase">
+            <h2>Stack &#39;em all</h2>
+            <p>Go wild. Paste every badge &mdash; they line up nicely.</p>
+            <div class="all-badges">
+                <img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock" alt="Protected by SpecLock">
+                <img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock version">
+                <img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests">
+                <img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads">
+            </div>
+        </div>
+
+        <div class="variant">
+            <h2>From the CLI</h2>
+            <p class="subtitle">Already installed SpecLock? Run this after <span class="mono">speclock protect</span>:</p>
+            <div class="code-wrapper">
+                <pre class="code-block active">speclock badge</pre>
+            </div>
+            <div class="where">Prints every variant to your terminal so you can copy the one you like.</div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>
+            <strong>SpecLock</strong> &mdash; Your AI has rules. SpecLock makes them unbreakable.<br>
+            Developed by <a href="https://github.com/sgroy10">Sandeep Roy</a> &middot;
+            <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot;
+            <a href="https://www.npmjs.com/package/speclock">npm</a> &middot;
+            <a href="index.html">Home</a>
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(btn, codeId) {
+            const variant = btn.closest('.variant');
+            variant.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            variant.querySelectorAll('.code-block').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(codeId).classList.add('active');
+        }
+
+        function copyActive(btn) {
+            const wrapper = btn.closest('.code-wrapper');
+            const active = wrapper.querySelector('.code-block.active');
+            const text = active.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.classList.remove('copied');
+                }, 1600);
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch(e) {}
+                document.body.removeChild(ta);
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+            });
+        }
+    </script>
+</body>
+</html>
