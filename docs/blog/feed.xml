@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>SpecLock Blog</title>
+    <link>https://sgroy10.github.io/speclock/blog/</link>
+    <atom:link href="https://sgroy10.github.io/speclock/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Articles on AI coding safety, CLAUDE.md enforcement, .cursorrules compliance, MCP constraint engines, and vibe coding guardrails. By the SpecLock team.</description>
+    <language>en-us</language>
+    <managingEditor>sandeep@speclock.dev (Sandeep Roy)</managingEditor>
+    <webMaster>sandeep@speclock.dev (Sandeep Roy)</webMaster>
+    <lastBuildDate>Thu, 09 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <generator>SpecLock static feed</generator>
+
+    <item>
+      <title>I Ran Claude Code on 50 Repos For a Month — Here's Every Time It Ignored CLAUDE.md</title>
+      <link>https://sgroy10.github.io/speclock/blog/50-repos-claude-md-violations.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/50-repos-claude-md-violations.html</guid>
+      <pubDate>Fri, 10 Apr 2026 08:00:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[Data from 50 real repositories: every time Claude Code, Cursor, and Copilot silently violated CLAUDE.md rules. The 7 drift patterns, real numbers, and a 30-second fix.]]></description>
+      <category>AI Coding Safety</category>
+      <category>CLAUDE.md</category>
+    </item>
+
+    <item>
+      <title>SpecLock: The MCP Constraint Engine for AI-Safe Development</title>
+      <link>https://sgroy10.github.io/speclock/blog/mcp-constraint-engine.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/mcp-constraint-engine.html</guid>
+      <pubDate>Thu, 09 Apr 2026 12:14:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[SpecLock is an MCP constraint engine with 51 tools for AI code safety. Technical deep-dive: semantic conflict detection, drift scoring, patch review, and compliance enforcement via MCP server.]]></description>
+      <category>MCP</category>
+      <category>AI Coding Safety</category>
+    </item>
+
+    <item>
+      <title>Vibe Coding Is Great Until Your AI Deletes Your Database</title>
+      <link>https://sgroy10.github.io/speclock/blog/vibe-coding-safety.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/vibe-coding-safety.html</guid>
+      <pubDate>Thu, 09 Apr 2026 12:16:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[Vibe coding is fast and fun until your AI tool drops a table, rewrites your auth, or deletes your tests. Real examples of vibe coding disasters and how to add safety constraints with SpecLock.]]></description>
+      <category>Vibe Coding</category>
+      <category>AI Coding Safety</category>
+    </item>
+
+    <item>
+      <title>How to Stop AI Coding Tools From Breaking Your Codebase</title>
+      <link>https://sgroy10.github.io/speclock/blog/ai-coding-safety.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/ai-coding-safety.html</guid>
+      <pubDate>Thu, 09 Apr 2026 12:12:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[AI coding tools are powerful but reckless. Learn how to prevent AI from breaking code with constraints, linting, and semantic enforcement. Compare manual review, linting, and SpecLock.]]></description>
+      <category>AI Coding Safety</category>
+    </item>
+
+    <item>
+      <title>How to Actually Enforce .cursorrules in Cursor</title>
+      <link>https://sgroy10.github.io/speclock/blog/cursorrules-enforcement.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/cursorrules-enforcement.html</guid>
+      <pubDate>Thu, 09 Apr 2026 12:10:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[.cursorrules not working? Cursor ignores your rules because there's no enforcement layer. Learn how to enforce .cursorrules with SpecLock's semantic constraint engine.]]></description>
+      <category>.cursorrules</category>
+      <category>Cursor</category>
+    </item>
+
+    <item>
+      <title>Why CLAUDE.md Doesn't Work — How to Enforce CLAUDE.md Rules</title>
+      <link>https://sgroy10.github.io/speclock/blog/claude-md-not-working.html</link>
+      <guid isPermaLink="true">https://sgroy10.github.io/speclock/blog/claude-md-not-working.html</guid>
+      <pubDate>Thu, 09 Apr 2026 12:09:00 +0000</pubDate>
+      <dc:creator>Sandeep Roy</dc:creator>
+      <description><![CDATA[CLAUDE.md not working? Claude Code ignores your rules because CLAUDE.md is a suggestion, not a contract. Learn how to enforce CLAUDE.md with SpecLock's semantic constraint engine.]]></description>
+      <category>CLAUDE.md</category>
+      <category>Claude Code</category>
+    </item>
+  </channel>
+</rss>
