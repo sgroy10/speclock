@@ -16,6 +16,7 @@ import { analyzeConflict } from "./semantics.js";
 import { getEnforcementConfig } from "./enforcer.js";
 
 const GUARD_TAG = "SPECLOCK-GUARD";
+const SPECLOCK_AUTOGEN_MARKER = "SpecLock";
 const MAX_LINES_PER_FILE = 500;
 const BINARY_EXTENSIONS = new Set([
   "png", "jpg", "jpeg", "gif", "bmp", "ico", "svg", "webp",
@@ -26,6 +27,98 @@ const BINARY_EXTENSIONS = new Set([
   "woff", "woff2", "ttf", "eot", "otf",
   "lock", "map",
 ]);
+
+// Files / dirs that SpecLock itself auto-creates during `protect` or that
+// are just noise for semantic analysis. These are ALWAYS skipped from the
+// diff-level semantic audit because matching against them produces nothing
+// but false positives (e.g. rules files describe the same concepts the
+// locks describe, so they always "conflict" with themselves).
+const ALWAYS_SKIP_EXACT = new Set([
+  ".cursor/rules/speclock.mdc",
+  ".windsurf/rules/speclock.md",
+  ".aider.conf.yml",
+  ".mcp.json",
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "Cargo.lock",
+  "poetry.lock",
+  "Gemfile.lock",
+  "composer.lock",
+]);
+
+// Directory prefixes that are always skipped.
+const ALWAYS_SKIP_DIR_PREFIXES = [
+  ".speclock/",
+  "node_modules/",
+  "dist/",
+  "build/",
+  ".next/",
+  ".nuxt/",
+  "__pycache__/",
+  ".venv/",
+  "venv/",
+  ".cache/",
+  "coverage/",
+  ".turbo/",
+];
+
+// Files that are skipped ONLY if their content carries the SpecLock
+// auto-generated marker (so hand-written AGENTS.md etc. still get audited).
+// CLAUDE.md is included because `speclock protect` seeds it with the active
+// locks — on the initial commit after protect, the file literally IS the
+// locks, so every semantic check would produce a false positive.
+const CONDITIONAL_SKIP_IF_AUTOGEN = new Set([
+  "AGENTS.md",
+  "GEMINI.md",
+  "CLAUDE.md",
+  ".github/copilot-instructions.md",
+]);
+
+/**
+ * Normalize a path to forward slashes for comparison.
+ */
+function normalizePath(p) {
+  return (p || "").replace(/\\/g, "/");
+}
+
+/**
+ * Decide whether a file should be skipped by the semantic pre-commit audit.
+ * This is the single source of truth for "is this a SpecLock internal file
+ * or generated noise we should not audit".
+ *
+ * @param {string} file - repo-relative path
+ * @param {string} root - repo root (to check content of conditional files)
+ * @returns {boolean} true if the file should be skipped
+ */
+export function shouldSkipForSemanticAudit(file, root) {
+  const norm = normalizePath(file);
+
+  // 1. Binary extensions
+  const ext = path.extname(norm).slice(1).toLowerCase();
+  if (BINARY_EXTENSIONS.has(ext)) return true;
+
+  // 2. Exact path matches (lockfiles, auto-generated rules files, .mcp.json)
+  if (ALWAYS_SKIP_EXACT.has(norm)) return true;
+
+  // 3. Directory prefix matches
+  for (const prefix of ALWAYS_SKIP_DIR_PREFIXES) {
+    if (norm === prefix.slice(0, -1) || norm.startsWith(prefix)) return true;
+  }
+
+  // 4. Conditionally-skipped files (only if they carry the auto-gen marker)
+  if (CONDITIONAL_SKIP_IF_AUTOGEN.has(norm)) {
+    try {
+      const fullPath = path.join(root, file);
+      if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        if (content.includes(SPECLOCK_AUTOGEN_MARKER)) return true;
+      }
+    } catch { /* ignore read errors */ }
+  }
+
+  return false;
+}
 
 /**
  * Parse a unified diff into per-file change blocks.
@@ -191,8 +284,14 @@ export function semanticAudit(root) {
     };
   }
 
-  // Parse diff into per-file changes
-  const fileChanges = parseDiff(diff);
+  // Parse diff into per-file changes, then drop SpecLock-internal / generated
+  // files so we don't flood the user with false positives from files that
+  // SpecLock itself creates or manages.
+  const allFileChanges = parseDiff(diff);
+  const fileChanges = allFileChanges.filter(
+    (fc) => !shouldSkipForSemanticAudit(fc.file, root)
+  );
+  const skippedCount = allFileChanges.length - fileChanges.length;
   const violations = [];
 
   for (const fc of fileChanges) {
@@ -276,6 +375,7 @@ export function semanticAudit(root) {
     blocked,
     violations: uniqueViolations,
     filesChecked: fileChanges.length,
+    filesSkipped: skippedCount,
     activeLocks: activeLocks.length,
     mode: config.mode,
     threshold: config.blockThreshold,

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getStagedDiff, parseDiff } from "../core/pre-commit-semantic.js";
+import { getStagedDiff, parseDiff, shouldSkipForSemanticAudit } from "../core/pre-commit-semantic.js";
 import {
   ensureInit,
   setGoal,
@@ -286,7 +286,7 @@ export function initFromRulePack(root, framework) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.5.5 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.5.6 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -1243,6 +1243,10 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
   // --- AUDIT-SEMANTIC (v2.5) ---
   if (cmd === "audit-semantic") {
     const flags = parseFlags(args);
+    const verbose =
+      flags.verbose === true ||
+      process.env.SPECLOCK_VERBOSE === "1" ||
+      process.env.SPECLOCK_VERBOSE === "true";
     const result = semanticAudit(root);
 
     // --- Commit-message + diff-content semantic check ---
@@ -1269,9 +1273,15 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
         } catch { /* ignore */ }
       }
 
-      // 2. Collect added lines from the staged diff.
+      // 2. Collect added lines from the staged diff, skipping SpecLock-internal
+      //    files (see shouldSkipForSemanticAudit). Those files' contents literally
+      //    restate the locks, so scanning their added lines produces 100%
+      //    false-positive matches for every lock in the brain.
       const diffText = getStagedDiff(root);
-      const fileChanges = diffText ? parseDiff(diffText) : [];
+      const allParsedChanges = diffText ? parseDiff(diffText) : [];
+      const fileChanges = allParsedChanges.filter(
+        (fc) => !shouldSkipForSemanticAudit(fc.file, root)
+      );
       const addedSnippets = [];
       for (const fc of fileChanges) {
         for (const line of fc.addedLines) {
@@ -1354,15 +1364,40 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
       process.env.SPECLOCK_STRICT === "true" ||
       result.blocked;
 
+    // --- Three-tier output filter (v5.5.6) ---
+    // Investor audit: walls of LOW-confidence matches are user-hostile.
+    // Only HIGH and MEDIUM print by default. LOW rolls up into a one-liner.
+    // --verbose / SPECLOCK_VERBOSE=1 shows everything.
+    const OUTPUT_MIN_CONFIDENCE = 40;  // below this = "LOW", hidden by default
+    const MAX_VISIBLE_VIOLATIONS = 10; // hard cap on printed items
+
+    const allViolations = result.violations || [];
+    const highViolations = allViolations.filter((v) => (v.confidence || 0) >= 70);
+    const mediumViolations = allViolations.filter(
+      (v) => (v.confidence || 0) >= OUTPUT_MIN_CONFIDENCE && (v.confidence || 0) < 70
+    );
+    const lowViolations = allViolations.filter(
+      (v) => (v.confidence || 0) < OUTPUT_MIN_CONFIDENCE
+    );
+
+    // What actually gets printed
+    const visibleViolations = verbose
+      ? allViolations
+      : [...highViolations, ...mediumViolations];
+
     console.log(`\nSemantic Pre-Commit Audit`);
     console.log("=".repeat(50));
     console.log(`Mode: ${result.mode} | Threshold: ${result.threshold}%`);
-    console.log(`Files analyzed: ${result.filesChecked}`);
+    const filesLine = result.filesSkipped
+      ? `Files analyzed: ${result.filesChecked} (${result.filesSkipped} skipped)`
+      : `Files analyzed: ${result.filesChecked}`;
+    console.log(filesLine);
     console.log(`Active locks: ${result.activeLocks}`);
-    console.log(`Violations: ${result.violations.length}`);
-    if (result.violations.length > 0) {
+
+    if (visibleViolations.length > 0) {
       console.log("");
-      for (const v of result.violations) {
+      const toPrint = visibleViolations.slice(0, MAX_VISIBLE_VIOLATIONS);
+      for (const v of toPrint) {
         console.log(`  [${v.level}] ${v.file} (confidence: ${v.confidence}%)`);
         console.log(`    Lock: "${v.lockText}"`);
         console.log(`    Reason: ${v.reason}`);
@@ -1370,17 +1405,48 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
           console.log(`    Changes: +${v.addedLines} / -${v.removedLines} lines`);
         }
       }
+      const hiddenByCap = visibleViolations.length - toPrint.length;
+      if (hiddenByCap > 0) {
+        console.log(`  ... + ${hiddenByCap} more (output capped at ${MAX_VISIBLE_VIOLATIONS})`);
+      }
     }
-    console.log(`\n${result.message}`);
 
-    if (result.violations.length > 0 && !strict) {
+    // LOW-confidence rollup
+    if (!verbose && lowViolations.length > 0) {
+      console.log(
+        `  + ${lowViolations.length} low-confidence match(es) hidden (use --verbose or SPECLOCK_VERBOSE=1 to see)`
+      );
+    }
+
+    // --- New summary line ---
+    console.log("");
+    let summaryLine;
+    if (highViolations.length === 0 && mediumViolations.length === 0) {
+      summaryLine = `[OK] ${result.filesChecked} file(s) checked, no concerns.`;
+    } else if (highViolations.length > 0) {
+      summaryLine = `[!] ${highViolations.length} HIGH-confidence concern(s) — review before merging.`;
+    } else {
+      summaryLine = `[i] ${mediumViolations.length} medium-confidence note(s) (informational).`;
+    }
+    console.log(summaryLine);
+
+    // Preserve the machine-readable status message for any callers that grep for it
+    if (result.blocked) {
+      console.log(
+        `BLOCKED: ${highViolations.length} high-confidence violation(s) — hard enforcement active.`
+      );
+    }
+
+    if (highViolations.length > 0 && !strict) {
       console.log("\nWarning mode active — commit allowed. To enforce hard blocks, run:");
       console.log("  speclock audit-semantic --strict");
       console.log("  SPECLOCK_STRICT=1 git commit ...");
       console.log("  speclock enforce hard   (persistent, project-wide)");
     }
 
-    process.exit(strict && result.violations.length > 0 ? 1 : 0);
+    // Blocking decision is still driven by the engine's 70% threshold, so
+    // only HIGH-confidence matches can ever cause a non-zero exit.
+    process.exit(strict && highViolations.length > 0 ? 1 : 0);
   }
 
   // --- AUTH (v3.0) ---
