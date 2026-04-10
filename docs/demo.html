@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecLock Live Demo &mdash; Try It Without Installing</title>
+    <meta name="description" content="Try SpecLock live in your browser. Paste a commit message and a code change, and watch SpecLock's semantic engine catch AI rule violations in real time. No install required.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/demo.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="SpecLock Live Demo &mdash; Catch AI Rule Violations Before They Ship">
+    <meta property="og:description" content="Paste a commit message and a code change. See SpecLock's semantic engine analyze it in real time and block rule violations instantly.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/demo.html">
+    <meta property="og:site_name" content="SpecLock">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SpecLock Live Demo &mdash; Try It Without Installing">
+    <meta name="twitter:description" content="Paste a commit message and a code change. See SpecLock catch AI rule violations live in your browser.">
+
+    <!-- JSON-LD WebApplication schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "SpecLock Live Demo",
+      "url": "https://sgroy10.github.io/speclock/demo.html",
+      "description": "Interactive browser demo of SpecLock's semantic constraint engine. Paste a commit message and a code change, and see the engine catch rule violations in real time.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any (browser)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "Sandeep Roy",
+        "url": "https://github.com/sgroy10"
+      },
+      "isPartOf": {
+        "@type": "SoftwareSourceCode",
+        "name": "SpecLock",
+        "codeRepository": "https://github.com/sgroy10/speclock"
+      }
+    }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #e53e3e;
+            --accent-light: #fee2e2;
+            --accent-glow: rgba(229, 62, 62, 0.12);
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --yellow: #d97706;
+            --yellow-light: #fef3c7;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 120px;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* NAV (matches index.html) */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo .lock-icon {
+            width: 30px; height: 30px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: white;
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--accent); font-weight: 700; }
+        .btn-nav-cta {
+            background: #fff0f0; color: var(--accent); padding: 8px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.85rem; transition: all 0.2s; border: 1.5px solid var(--accent); cursor: pointer;
+        }
+        .btn-nav-cta:hover { background: var(--accent); color: white; }
+
+        /* HERO */
+        .hero {
+            padding: 140px 24px 40px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--green-light); border: 1px solid #bbf7d0;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--green); margin-bottom: 24px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
+        }
+        .badge .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        h1 {
+            font-size: clamp(2.2rem, 5.5vw, 3.6rem); font-weight: 900;
+            line-height: 1.1; letter-spacing: -1.5px; max-width: 900px;
+            margin: 0 auto 18px;
+        }
+        h1 .red { color: var(--accent); }
+        .hero-sub {
+            font-size: 1.1rem; color: var(--text-dim); max-width: 680px;
+            margin: 0 auto; font-weight: 400;
+        }
+        .hero-sub strong { color: var(--text); font-weight: 600; }
+
+        /* DEMO */
+        .demo-wrap {
+            max-width: 960px; margin: 0 auto; padding: 48px 24px 0;
+        }
+        .demo-card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+        }
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block; font-size: 0.82rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--text); margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .field label .hint {
+            text-transform: none; letter-spacing: normal; font-weight: 400;
+            color: var(--text-dim); font-family: 'Inter', sans-serif;
+            font-size: 0.82rem; margin-left: 8px;
+        }
+        .field textarea, .field input[type="text"] {
+            width: 100%; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.86rem; line-height: 1.6;
+            padding: 14px 16px; border: 1.5px solid var(--border);
+            border-radius: 10px; background: var(--surface);
+            color: var(--text); resize: vertical;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .field textarea:focus, .field input[type="text"]:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: white;
+        }
+        .field textarea.rules { min-height: 140px; }
+        .field textarea.commit { min-height: 48px; }
+        .field textarea.diff { min-height: 90px; }
+
+        .btn-run {
+            width: 100%; background: var(--accent); color: white;
+            padding: 16px 28px; border-radius: 12px; border: none;
+            font-size: 1rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-run:hover:not(:disabled) {
+            background: #c53030; transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .btn-run:disabled { opacity: 0.7; cursor: wait; }
+        .spinner {
+            width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
+        }
+        .btn-run.loading .spinner { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESULT PANEL */
+        .result-panel {
+            margin-top: 28px; border-radius: 14px; overflow: hidden;
+            border: 1px solid var(--border);
+            display: none;
+        }
+        .result-panel.visible { display: block; }
+        .result-banner {
+            padding: 20px 24px; font-size: 1.15rem; font-weight: 800;
+            display: flex; align-items: center; gap: 12px; letter-spacing: -0.3px;
+        }
+        .result-banner.blocked { background: var(--accent); color: white; }
+        .result-banner.warning { background: var(--yellow); color: white; }
+        .result-banner.ok { background: var(--green); color: white; }
+        .result-banner.error { background: var(--text-dim); color: white; }
+        .result-body { padding: 24px; background: white; }
+        .result-meta {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            font-size: 0.8rem; color: var(--text-dim);
+            margin-bottom: 20px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .result-meta strong { color: var(--text); }
+
+        .conflict-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 18px 20px; margin-bottom: 14px;
+        }
+        .conflict-head {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 16px; margin-bottom: 12px;
+        }
+        .conflict-lock {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+            font-weight: 600; color: var(--text); flex: 1;
+        }
+        .confidence-pill {
+            padding: 4px 12px; border-radius: 100px;
+            font-size: 0.72rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+        .confidence-pill.HIGH { background: var(--accent); color: white; }
+        .confidence-pill.MEDIUM { background: var(--yellow); color: white; }
+        .confidence-pill.LOW { background: var(--text-dim); color: white; }
+
+        .conflict-reasons {
+            list-style: none; padding: 0; margin: 0;
+        }
+        .conflict-reasons li {
+            font-size: 0.82rem; color: var(--text-dim);
+            padding: 6px 0 6px 22px; position: relative; line-height: 1.5;
+        }
+        .conflict-reasons li::before {
+            content: "\2192"; position: absolute; left: 0;
+            color: var(--accent); font-weight: 700;
+        }
+
+        .no-conflict-msg {
+            text-align: center; padding: 24px; color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* PRESETS */
+        .presets-wrap {
+            max-width: 960px; margin: 48px auto 0; padding: 0 24px;
+        }
+        .presets-wrap h2 {
+            font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        .presets-wrap .subtitle {
+            color: var(--text-dim); font-size: 0.95rem; margin-bottom: 24px;
+        }
+        .presets-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .preset-card {
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 12px; padding: 20px; cursor: pointer;
+            transition: all 0.18s; text-align: left;
+            font-family: inherit;
+        }
+        .preset-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 6px 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+        .preset-tag {
+            display: inline-block; font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--accent); background: var(--accent-light);
+            padding: 3px 10px; border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 10px;
+        }
+        .preset-card h3 {
+            font-size: 1rem; font-weight: 700; margin-bottom: 6px;
+        }
+        .preset-card p {
+            font-size: 0.84rem; color: var(--text-dim); line-height: 1.5;
+        }
+        .preset-card .preset-verdict {
+            margin-top: 10px; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem; color: var(--accent); font-weight: 700;
+        }
+
+        /* STICKY CTA */
+        .sticky-cta {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--text); color: white;
+            padding: 16px 24px; z-index: 90;
+            display: flex; align-items: center; justify-content: center;
+            gap: 18px; flex-wrap: wrap; text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+        }
+        .sticky-cta .cta-text {
+            font-size: 0.92rem; font-weight: 500;
+        }
+        .sticky-cta code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.12); color: #fbbf24;
+            padding: 4px 10px; border-radius: 6px; font-size: 0.84rem;
+            font-weight: 600;
+        }
+        .sticky-cta a.cta-link {
+            background: var(--accent); color: white; padding: 10px 22px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.88rem; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .sticky-cta a.cta-link:hover {
+            background: #c53030; transform: translateY(-1px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 12px 16px; }
+            .nav-links { display: none; }
+            .hero { padding: 110px 18px 30px; }
+            h1 { font-size: 2rem; letter-spacing: -0.8px; }
+            .hero-sub { font-size: 0.98rem; }
+            .demo-wrap { padding: 32px 16px 0; }
+            .demo-card { padding: 22px; }
+            .presets-wrap { padding: 0 16px; margin-top: 36px; }
+            .sticky-cta { flex-direction: column; gap: 10px; padding: 14px 16px; }
+            .sticky-cta .cta-text { font-size: 0.84rem; }
+            body { padding-bottom: 160px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="./" class="nav-logo">
+            <div class="lock-icon">&#x1F512;</div>
+            SpecLock
+        </a>
+        <div class="nav-links">
+            <a href="./" >Home</a>
+            <a href="./demo.html" class="active">Demo</a>
+            <a href="./faq.html">FAQ</a>
+            <a href="./vs.html">Compare</a>
+            <a href="./blog/">Blog</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" rel="noopener" class="btn-nav-cta">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="badge"><span class="dot"></span> LIVE IN YOUR BROWSER &middot; NO INSTALL</div>
+        <h1>Try SpecLock Live &mdash; <span class="red">Catch AI Rule Violations</span> Before They Ship</h1>
+        <p class="hero-sub">
+            Paste a commit message and a code change. See SpecLock's <strong>semantic engine</strong> analyze it in real time &mdash; just like it would on every commit inside your project.
+        </p>
+    </section>
+
+    <!-- DEMO FORM -->
+    <section class="demo-wrap">
+        <div class="demo-card">
+            <form id="demo-form" autocomplete="off">
+                <div class="field">
+                    <label for="rules-input">
+                        Your project rules
+                        <span class="hint">(one per line, CLAUDE.md style)</span>
+                    </label>
+                    <textarea id="rules-input" class="rules" spellcheck="false">- NEVER delete user data without explicit confirmation
+- NEVER modify authentication files without security review
+- ALWAYS use TypeScript
+- NEVER disable security checks "temporarily"
+- Database MUST stay PostgreSQL</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="commit-input">Commit message</label>
+                    <textarea id="commit-input" class="commit" spellcheck="false">Clean up old user data</textarea>
+                </div>
+
+                <div class="field">
+                    <label for="diff-input">
+                        Code change
+                        <span class="hint">(diff or snippet)</span>
+                    </label>
+                    <textarea id="diff-input" class="diff" spellcheck="false">// delete all user records from the database</textarea>
+                </div>
+
+                <button type="submit" class="btn-run" id="run-btn">
+                    <span class="spinner"></span>
+                    <span class="btn-label">Run SpecLock Analysis</span>
+                </button>
+            </form>
+
+            <div class="result-panel" id="result-panel" aria-live="polite"></div>
+        </div>
+    </section>
+
+    <!-- PRESETS -->
+    <section class="presets-wrap">
+        <h2>Try a preset attack</h2>
+        <p class="subtitle">Click any card to auto-fill the demo with a real-world AI failure mode SpecLock catches.</p>
+
+        <div class="presets-grid">
+            <button type="button" class="preset-card" data-preset="euphemism">
+                <span class="preset-tag">Euphemism cloaking</span>
+                <h3>&ldquo;Clean up old user data&rdquo;</h3>
+                <p>Sounds harmless. Actually deletes every user record. SpecLock maps &ldquo;clean up&rdquo; to &ldquo;delete&rdquo; and fires the user-data lock.</p>
+                <div class="preset-verdict">&#x2192; Caught at 100% confidence</div>
+            </button>
+
+            <button type="button" class="preset-card" data-preset="temporal">
+                <span class="preset-tag">Temporal evasion</span>
+                <h3>&ldquo;Temporarily disable authentication&rdquo;</h3>
+                <p>&ldquo;Temporarily&rdquo; is the most dangerous word in engineering. SpecLock treats it as a hard signal for an NEVER rule.</p>
+                <div class="preset-verdict">&#x2192; Caught at 100% confidence</div>
+            </button>
+
+            <button type="button" class="preset-card" data-preset="techswap">
+                <span class="preset-tag">Tech swap</span>
+                <h3>&ldquo;Convert backend to Python&rdquo;</h3>
+                <p>Project is locked to TypeScript. Migration keywords plus a different language trip the ALWAYS-use-TypeScript lock.</p>
+                <div class="preset-verdict">&#x2192; Caught as conflict</div>
+            </button>
+
+            <button type="button" class="preset-card" data-preset="compound">
+                <span class="preset-tag">Compound hiding</span>
+                <h3>&ldquo;Update UI components and drop the users table&rdquo;</h3>
+                <p>Sneaks a destructive migration behind a routine UI change. SpecLock catches the second clause regardless of the first.</p>
+                <div class="preset-verdict">&#x2192; Catches the table drop</div>
+            </button>
+        </div>
+    </section>
+
+    <!-- STICKY CTA -->
+    <div class="sticky-cta">
+        <div class="cta-text">
+            Like what you see? Run <code>npx speclock protect</code> in your project to enable this for every commit.
+        </div>
+        <a href="https://github.com/sgroy10/speclock" target="_blank" rel="noopener" class="cta-link">Get SpecLock Free</a>
+    </div>
+
+<script>
+/* ============================================================
+   SpecLock Live Demo
+   Primary: POST to https://speclock-mcp-production.up.railway.app/api/check
+   Fallback: embedded JS semantic engine (keyword + euphemism + synonym)
+   ============================================================ */
+
+(function() {
+  "use strict";
+
+  var API_URL = "https://speclock-mcp-production.up.railway.app/api/check";
+  var API_TIMEOUT_MS = 8000;
+
+  var form         = document.getElementById("demo-form");
+  var rulesInput   = document.getElementById("rules-input");
+  var commitInput  = document.getElementById("commit-input");
+  var diffInput    = document.getElementById("diff-input");
+  var runBtn       = document.getElementById("run-btn");
+  var btnLabel     = runBtn.querySelector(".btn-label");
+  var resultPanel  = document.getElementById("result-panel");
+
+  /* ---------- PRESETS ---------- */
+  var BASE_RULES = [
+    "- NEVER delete user data without explicit confirmation",
+    "- NEVER modify authentication files without security review",
+    "- ALWAYS use TypeScript",
+    "- NEVER disable security checks \"temporarily\"",
+    "- Database MUST stay PostgreSQL"
+  ].join("\n");
+
+  var PRESETS = {
+    euphemism: {
+      rules: BASE_RULES,
+      commit: "Clean up old user data",
+      diff: "// delete all user records from the database\nDELETE FROM users WHERE last_login < '2024-01-01';"
+    },
+    temporal: {
+      rules: BASE_RULES,
+      commit: "Temporarily disable authentication",
+      diff: "// auth.middleware.js\nmodule.exports = (req, res, next) => next(); // skip auth for now"
+    },
+    techswap: {
+      rules: BASE_RULES,
+      commit: "Convert backend to Python",
+      diff: "# server.py\nfrom flask import Flask\napp = Flask(__name__)\n# rewriting server.ts in Python for performance"
+    },
+    compound: {
+      rules: BASE_RULES,
+      commit: "Update UI components and drop the users table",
+      diff: "// ui/Button.tsx — restyle\n// db/migrations/007.sql\nDROP TABLE users;"
+    }
+  };
+
+  var presetButtons = document.querySelectorAll(".preset-card");
+  for (var i = 0; i < presetButtons.length; i++) {
+    presetButtons[i].addEventListener("click", function() {
+      var key = this.getAttribute("data-preset");
+      var p = PRESETS[key];
+      if (!p) return;
+      rulesInput.value  = p.rules;
+      commitInput.value = p.commit;
+      diffInput.value   = p.diff;
+      // scroll form into view and auto-run
+      document.querySelector(".demo-card").scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(function() { form.requestSubmit(); }, 350);
+    });
+  }
+
+  /* ---------- FORM SUBMIT ---------- */
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    runAnalysis();
+  });
+
+  function setLoading(loading) {
+    if (loading) {
+      runBtn.disabled = true;
+      runBtn.classList.add("loading");
+      btnLabel.textContent = "Analyzing...";
+    } else {
+      runBtn.disabled = false;
+      runBtn.classList.remove("loading");
+      btnLabel.textContent = "Run SpecLock Analysis";
+    }
+  }
+
+  function parseRules(text) {
+    return text.split(/\r?\n/).map(function(l) {
+      return l.replace(/^\s*[-*]\s*/, "").trim();
+    }).filter(function(l) { return l.length > 0; });
+  }
+
+  function buildAction(commit, diff) {
+    var c = (commit || "").trim();
+    var d = (diff || "").trim();
+    if (c && d) return c + "\n\n" + d;
+    return c || d;
+  }
+
+  function runAnalysis() {
+    var rules  = parseRules(rulesInput.value);
+    var action = buildAction(commitInput.value, diffInput.value);
+
+    if (rules.length === 0) {
+      showError("Add at least one rule to check against.");
+      return;
+    }
+    if (!action) {
+      showError("Enter a commit message or code change to analyze.");
+      return;
+    }
+
+    setLoading(true);
+    resultPanel.classList.remove("visible");
+
+    callRemote(rules, action).then(function(remote) {
+      renderResult(remote, "live");
+    }).catch(function(err) {
+      // Fallback to local engine
+      var local = localAnalyze(rules, action);
+      renderResult(local, "local");
+    }).finally(function() {
+      setLoading(false);
+    });
+  }
+
+  /* ---------- REMOTE CALL ---------- */
+  function callRemote(rules, action) {
+    return new Promise(function(resolve, reject) {
+      var controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      var timer = setTimeout(function() {
+        if (controller) controller.abort();
+        reject(new Error("timeout"));
+      }, API_TIMEOUT_MS);
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: action, locks: rules }),
+        signal: controller ? controller.signal : undefined
+      }).then(function(res) {
+        clearTimeout(timer);
+        if (!res.ok) {
+          reject(new Error("HTTP " + res.status));
+          return;
+        }
+        return res.json();
+      }).then(function(data) {
+        if (data) resolve(normalizeRemote(data));
+      }).catch(function(err) {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
+
+  function normalizeRemote(data) {
+    // Map the /api/check response to our common result shape
+    var conflicts = (data.conflicts || []).map(function(c) {
+      return {
+        lockText:   c.lockText || c.text || "",
+        confidence: typeof c.confidence === "number" ? c.confidence : 0,
+        level:      c.level || confidenceLevel(c.confidence || 0),
+        reasons:    Array.isArray(c.reasons) ? c.reasons : []
+      };
+    });
+    return {
+      hasConflict: !!data.hasConflict,
+      conflicts:   conflicts,
+      source:      data.source || "remote"
+    };
+  }
+
+  /* ============================================================
+     LOCAL FALLBACK — SpecLock semantic engine (simplified JS port)
+     Mirrors src/core/semantics.js: synonym groups, euphemism map,
+     scope matching, confidence scoring.
+     ============================================================ */
+
+  var SYNONYM_GROUPS = [
+    ["remove","delete","drop","eliminate","destroy","kill","purge","wipe","erase","obliterate","nuke","scrub","trash","dump","discard","dispose"],
+    ["truncate","clear","empty","flush","reset"],
+    ["disable","deactivate","turn off","switch off","shut off","shut down","halt","suspend","pause","bypass","skip"],
+    ["uninstall","unplug","disconnect","detach","decouple","sever"],
+    ["downgrade","rollback","revert","regress","undo"],
+    ["add","create","introduce","insert","new","generate"],
+    ["enable","activate","turn on","switch on","start"],
+    ["install","plug in","connect","attach","integrate"],
+    ["upgrade","update","patch","bump"],
+    ["change","modify","alter","mutate","transform","rewrite","revise","amend","adjust","tweak","tamper"],
+    ["replace","swap","substitute","switch","exchange","override","overwrite"],
+    ["move","relocate","migrate","transfer","shift","transition","convert","port","rewrite in"],
+    ["merge","combine","consolidate","unify","join"],
+    ["database","db","datastore","schema","table","collection","sql","storage"],
+    ["postgresql","postgres","mysql","mongodb","mongo","firebase","firestore","supabase","dynamodb","redis","sqlite"],
+    ["record","records","row","rows","document","documents","entry","entries","data","content","file","files"],
+    ["user","users","customer","customers","member","members","subscriber","subscribers","person","people"],
+    ["account","accounts","profile","profiles"],
+    ["api","endpoint","route","rest","graphql","rpc","webhook","service"],
+    ["security","auth","authentication","authorization","login","token","credential","permission","access control"],
+    ["encrypt","encryption","cipher","hash","cryptographic","tls","ssl","https"],
+    ["test","testing","spec","coverage","unit test","integration test","e2e"],
+    ["typescript","ts","tsx"],
+    ["javascript","js","jsx","node","nodejs"],
+    ["python","py","flask","django","fastapi"],
+    ["java","kotlin","scala"],
+    ["ruby","rails"],
+    ["go","golang"],
+    ["rust","cargo"]
+  ];
+
+  var EUPHEMISMS = {
+    "clean up":        ["delete","remove","purge"],
+    "tidy up":         ["delete","remove"],
+    "clean":           ["delete","remove"],
+    "sanitize":        ["delete","remove"],
+    "get rid of":      ["delete","remove"],
+    "retire":          ["delete","remove","deprecate"],
+    "deprecate":       ["delete","remove","disable"],
+    "archive":         ["delete","remove","hide"],
+    "sunset":          ["delete","remove","disable"],
+    "wind down":       ["delete","remove","disable"],
+    "phase out":       ["delete","remove","disable"],
+    "streamline":      ["remove","simplify","modify","reduce","weaken","bypass","disable"],
+    "optimize":        ["modify","change","remove","reduce"],
+    "simplify":        ["remove","modify","reduce"],
+    "refactor":        ["modify","change","rewrite"],
+    "improve":         ["modify","change"],
+    "temporarily":     ["disable","bypass","skip","remove"],
+    "for now":         ["disable","bypass","skip","remove"],
+    "just for now":    ["disable","bypass","skip","remove"],
+    "for the moment":  ["disable","bypass","skip"],
+    "turn off":        ["disable","deactivate"],
+    "switch off":      ["disable","deactivate"],
+    "skip":            ["disable","bypass"],
+    "bypass":          ["disable","skip"],
+    "transition":      ["migrate","switch","change","move","replace"],
+    "move to":         ["migrate","switch","replace"],
+    "convert to":      ["migrate","switch","replace","rewrite"],
+    "rewrite in":      ["migrate","replace","rewrite"],
+    "port to":         ["migrate","switch","replace"]
+  };
+
+  // Locate synonym group for a word/phrase
+  function findGroup(token) {
+    var t = (token || "").toLowerCase().trim();
+    if (!t) return -1;
+    for (var i = 0; i < SYNONYM_GROUPS.length; i++) {
+      for (var j = 0; j < SYNONYM_GROUPS[i].length; j++) {
+        if (SYNONYM_GROUPS[i][j] === t) return i;
+      }
+    }
+    return -1;
+  }
+
+  // Expand action text with euphemism synonyms (creates an enriched token bag)
+  function enrichTokens(text) {
+    var lower = " " + (text || "").toLowerCase().replace(/[^a-z0-9\s"_-]/g, " ").replace(/\s+/g, " ") + " ";
+    var enriched = lower;
+    var firedEuphemisms = [];
+    for (var phrase in EUPHEMISMS) {
+      if (lower.indexOf(" " + phrase + " ") !== -1 || lower.indexOf(phrase) !== -1) {
+        // Only count as euphemism if it actually appears
+        var re = new RegExp("\\b" + phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b");
+        if (re.test(lower)) {
+          firedEuphemisms.push(phrase);
+          enriched += " " + EUPHEMISMS[phrase].join(" ");
+        }
+      }
+    }
+    return { enriched: enriched, euphemisms: firedEuphemisms };
+  }
+
+  // Tokenize & normalize: return a Set of single words + detected multi-word phrases
+  function tokenize(text) {
+    var lower = (text || "").toLowerCase();
+    var words = lower.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(function(w) { return w.length > 0; });
+    var set = {};
+    for (var i = 0; i < words.length; i++) set[words[i]] = true;
+    // also capture known multi-word synonym phrases
+    for (var g = 0; g < SYNONYM_GROUPS.length; g++) {
+      for (var k = 0; k < SYNONYM_GROUPS[g].length; k++) {
+        var phrase = SYNONYM_GROUPS[g][k];
+        if (phrase.indexOf(" ") !== -1 && lower.indexOf(phrase) !== -1) {
+          set[phrase] = true;
+        }
+      }
+    }
+    return set;
+  }
+
+  // Get group IDs that appear in a token set
+  function groupsIn(tokenSet) {
+    var groups = {};
+    for (var tok in tokenSet) {
+      var g = findGroup(tok);
+      if (g !== -1) groups[g] = true;
+    }
+    return groups;
+  }
+
+  // Check whether a lock rule is a NEVER / MUST-NOT rule
+  function isProhibitive(ruleText) {
+    var t = (ruleText || "").toLowerCase();
+    return /\b(never|don'?t|do not|must not|cannot|shouldn'?t|should not|no )/i.test(t) ||
+           /\b(must|always)\b/i.test(t); // ALWAYS X also flags changes that violate X
+  }
+
+  // Calculate confidence between an enriched action and one rule
+  function analyzeOne(rule, action) {
+    var enrichedInfo = enrichTokens(action);
+    var actionTokens = tokenize(enrichedInfo.enriched);
+    var ruleTokens   = tokenize(rule);
+
+    var actionGroups = groupsIn(actionTokens);
+    var ruleGroups   = groupsIn(ruleTokens);
+
+    // Count intersection of semantic groups
+    var sharedGroups = [];
+    for (var g in actionGroups) {
+      if (ruleGroups[g]) sharedGroups.push(g);
+    }
+
+    var reasons = [];
+    var confidence = 0;
+
+    if (sharedGroups.length === 0) {
+      // Special case: rule says "ALWAYS use X" — any mention of a *different*
+      // language in the same category also conflicts.
+      var langGroups = [22,23,24,25,26,27,28,29]; // TS/JS/Py/Java/Ruby/Go/Rust
+      var ruleLangs = langGroups.filter(function(lg) { return ruleGroups[lg]; });
+      var actionLangs = langGroups.filter(function(lg) { return actionGroups[lg]; });
+      if (ruleLangs.length && actionLangs.length) {
+        var diff = actionLangs.filter(function(x) { return ruleLangs.indexOf(x) === -1; });
+        if (diff.length > 0) {
+          confidence = 85;
+          reasons.push("Rule requires one language; action introduces a different one.");
+          reasons.push("Conflicting language groups detected (tech-swap pattern).");
+          return { hasConflict: true, confidence: confidence, level: "HIGH", reasons: reasons };
+        }
+      }
+      return { hasConflict: false, confidence: 0, level: "LOW", reasons: [] };
+    }
+
+    // Base score: each shared semantic group = 35 points (cap later)
+    confidence = Math.min(95, sharedGroups.length * 35);
+
+    // Boost: prohibitive rule AND destructive action => very high confidence
+    var destructiveGroups = [0, 1, 2]; // remove/delete, truncate/clear, disable
+    var hasDestructive = destructiveGroups.some(function(dg) { return actionGroups[dg]; });
+    if (isProhibitive(rule) && hasDestructive) {
+      confidence = Math.max(confidence, 92);
+      reasons.push("Rule is prohibitive (NEVER/MUST NOT) and action contains a destructive operation.");
+    }
+
+    // Boost: euphemism detected
+    if (enrichedInfo.euphemisms.length > 0) {
+      confidence = Math.min(100, confidence + 8);
+      reasons.push("Euphemism detected: \"" + enrichedInfo.euphemisms.join("\", \"") + "\" maps to destructive operations.");
+    }
+
+    // Boost: subject match (e.g. "users" appears in both rule and action)
+    var subjectGroups = [16, 17]; // users/people, accounts/profiles
+    var sharedSubject = subjectGroups.some(function(sg) { return actionGroups[sg] && ruleGroups[sg]; });
+    if (sharedSubject) {
+      confidence = Math.min(100, confidence + 5);
+      reasons.push("Action targets the same subject the rule protects.");
+    }
+
+    // Describe the overlapping concepts
+    var conceptWords = [];
+    for (var i = 0; i < sharedGroups.length && conceptWords.length < 4; i++) {
+      var gid = sharedGroups[i];
+      // Pick the first matching word from action for that group
+      for (var tok in actionTokens) {
+        if (findGroup(tok) === parseInt(gid, 10)) {
+          conceptWords.push(tok);
+          break;
+        }
+      }
+    }
+    if (conceptWords.length > 0) {
+      reasons.unshift("Semantic overlap on: " + conceptWords.join(", ") + ".");
+    }
+
+    if (!reasons.length) {
+      reasons.push("Semantic groups in action overlap with groups protected by rule.");
+    }
+
+    return {
+      hasConflict: confidence >= 40,
+      confidence:  confidence,
+      level:       confidenceLevel(confidence),
+      reasons:     reasons
+    };
+  }
+
+  function confidenceLevel(c) {
+    if (c >= 70) return "HIGH";
+    if (c >= 40) return "MEDIUM";
+    return "LOW";
+  }
+
+  function localAnalyze(rules, action) {
+    var conflicts = [];
+    for (var i = 0; i < rules.length; i++) {
+      var r = analyzeOne(rules[i], action);
+      if (r.hasConflict) {
+        conflicts.push({
+          lockText:   rules[i],
+          confidence: r.confidence,
+          level:      r.level,
+          reasons:    r.reasons
+        });
+      }
+    }
+    // sort by confidence desc
+    conflicts.sort(function(a, b) { return b.confidence - a.confidence; });
+    return {
+      hasConflict: conflicts.length > 0,
+      conflicts:   conflicts,
+      source:      "local-fallback"
+    };
+  }
+
+  /* ---------- RENDER ---------- */
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function showError(msg) {
+    resultPanel.classList.add("visible");
+    resultPanel.innerHTML =
+      '<div class="result-banner error">' + escapeHtml(msg) + '</div>';
+  }
+
+  function renderResult(result, mode) {
+    resultPanel.classList.add("visible");
+
+    var bannerClass, bannerText;
+    if (!result.hasConflict || result.conflicts.length === 0) {
+      bannerClass = "ok";
+      bannerText  = "\u2705 NO CONCERNS";
+    } else {
+      // Highest confidence drives the banner
+      var max = 0;
+      for (var i = 0; i < result.conflicts.length; i++) {
+        if (result.conflicts[i].confidence > max) max = result.conflicts[i].confidence;
+      }
+      if (max >= 70) {
+        bannerClass = "blocked";
+        bannerText  = "\uD83D\uDEAB BLOCKED";
+      } else {
+        bannerClass = "warning";
+        bannerText  = "\u26A0\uFE0F WARNING";
+      }
+    }
+
+    var modeLabel = (mode === "live")
+      ? "Live SpecLock engine (Railway)"
+      : "Local fallback (browser)";
+    var sourceLabel = result.source ? result.source : modeLabel;
+
+    var html = '<div class="result-banner ' + bannerClass + '">' + bannerText + '</div>';
+    html += '<div class="result-body">';
+    html += '<div class="result-meta">';
+    html += '<span><strong>Engine:</strong> ' + escapeHtml(modeLabel) + '</span>';
+    html += '<span><strong>Source:</strong> ' + escapeHtml(sourceLabel) + '</span>';
+    html += '<span><strong>Locks fired:</strong> ' + result.conflicts.length + '</span>';
+    html += '</div>';
+
+    if (!result.hasConflict || result.conflicts.length === 0) {
+      html += '<div class="no-conflict-msg">No rule conflicts detected. SpecLock would let this commit through.</div>';
+    } else {
+      for (var j = 0; j < result.conflicts.length; j++) {
+        var c = result.conflicts[j];
+        html += '<div class="conflict-card">';
+        html += '  <div class="conflict-head">';
+        html += '    <div class="conflict-lock">' + escapeHtml(c.lockText) + '</div>';
+        html += '    <div class="confidence-pill ' + escapeHtml(c.level) + '">' + escapeHtml(c.level) + ' &middot; ' + Math.round(c.confidence) + '%</div>';
+        html += '  </div>';
+        if (c.reasons && c.reasons.length) {
+          html += '  <ul class="conflict-reasons">';
+          for (var k = 0; k < c.reasons.length; k++) {
+            html += '    <li>' + escapeHtml(c.reasons[k]) + '</li>';
+          }
+          html += '  </ul>';
+        }
+        html += '</div>';
+      }
+    }
+
+    html += '</div>';
+    resultPanel.innerHTML = html;
+    resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+})();
+</script>
+
+</body>
+</html>
