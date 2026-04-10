@@ -29,10 +29,16 @@ import { analyzeConflict } from "./semantics.js";
 
 /**
  * Get enforcement config from brain, with defaults.
+ *
+ * Default mode is "advisory" (warn only). Users opt in to hard blocking
+ * with `speclock protect --strict`, `speclock enforce hard`, the --strict
+ * flag on audit commands, or SPECLOCK_STRICT=1 env var. The investor audit
+ * found hard-block-by-default caused uninstalls within an hour due to the
+ * heuristic false-positive rate on things like "Refactor login page".
  */
 export function getEnforcementConfig(brain) {
   const defaults = {
-    mode: "advisory",       // "advisory" | "hard"
+    mode: "advisory",       // "advisory" (warn — default) | "hard" (block)
     blockThreshold: 70,     // minimum confidence % to block in hard mode
     allowOverride: true,    // whether overrides are permitted
     escalationLimit: 3,     // overrides before auto-note

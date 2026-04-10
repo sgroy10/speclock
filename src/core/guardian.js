@@ -16,9 +16,46 @@ import { installHook, isHookInstalled } from "./hooks.js";
 import { syncRules } from "./rules-sync.js";
 import { generateContext } from "./context.js";
 
+// --- Starter CLAUDE.md for greenfield projects ---
+
+const STARTER_CLAUDE_MD = `# Project Rules
+
+These rules are enforced by SpecLock — your AI coding assistant will respect them.
+
+## Database & Storage
+- NEVER delete user data without explicit confirmation
+- NEVER modify production database schema without migration
+
+## Authentication & Security
+- NEVER modify authentication files without security review
+- NEVER commit secrets, API keys, or credentials
+- NEVER disable security checks "temporarily"
+
+## Code Quality
+- ALWAYS write tests for new features
+- NEVER push directly to main branch
+- NEVER skip code review on critical paths
+
+## Edit these rules to match your project. Add your own with:
+##   speclock add-lock "Your rule here"
+`;
+
+/**
+ * Create a starter CLAUDE.md with safe defaults for greenfield projects.
+ * Used when `protect` is called on a project with no existing rule files.
+ */
+export function createStarterClaudeMd(root) {
+  const filePath = path.join(root, "CLAUDE.md");
+  if (fs.existsSync(filePath)) {
+    return { created: false, path: filePath, reason: "already exists" };
+  }
+  fs.writeFileSync(filePath, STARTER_CLAUDE_MD);
+  return { created: true, path: filePath };
+}
+
 // --- Rule file discovery ---
 
-const RULE_FILES = [
+export const RULE_FILES = [
   { file: ".cursorrules", tool: "Cursor" },
   { file: ".cursor/rules/rules.mdc", tool: "Cursor (MDC)" },
   { file: "CLAUDE.md", tool: "Claude Code" },
@@ -209,13 +246,29 @@ export function protect(root, options = {}) {
     hookStatus: "",
     synced: [],
     errors: [],
+    starterCreated: false,
+    starterPath: null,
+    strict: options.strict === true,
   };
 
   // 1. Init
   const brain = ensureInit(root);
 
   // 2. Discover
-  const ruleFiles = discoverRuleFiles(root);
+  let ruleFiles = discoverRuleFiles(root);
+
+  // 2b. Greenfield support: if no rule files found, auto-create a starter
+  // CLAUDE.md with safe defaults (unless explicitly disabled).
+  if (ruleFiles.length === 0 && !options.skipStarter) {
+    const starter = createStarterClaudeMd(root);
+    if (starter.created) {
+      report.starterCreated = true;
+      report.starterPath = "CLAUDE.md";
+      // Re-run discovery so the flow continues normally with the new file.
+      ruleFiles = discoverRuleFiles(root);
+    }
+  }
+
   report.discovered = ruleFiles.map((f) => ({
     file: f.file,
     tool: f.tool,
@@ -321,13 +374,20 @@ export function formatProtectReport(report) {
   lines.push("  " + "=".repeat(50));
   lines.push("");
 
+  // Starter CLAUDE.md was auto-created (greenfield support)
+  if (report.starterCreated) {
+    lines.push("  No rule files found.");
+    lines.push(`  [+] Created starter CLAUDE.md with safe defaults — edit it to match your project.`);
+    lines.push("");
+  }
+
   // Discovered files
   if (report.discovered.length > 0) {
     lines.push("  Rule files found:");
     for (const f of report.discovered) {
       lines.push(`    [+] ${f.file} (${f.tool}, ${f.lines} lines)`);
     }
-  } else {
+  } else if (!report.starterCreated) {
     lines.push("  [!] No rule files found.");
   }
   lines.push("");
@@ -375,8 +435,21 @@ export function formatProtectReport(report) {
   // Final message
   const total = report.added.locks + report.added.skipped;
   if (total > 0) {
-    lines.push("  Your rules are now ENFORCED, not just suggested.");
-    lines.push("  AI agents that violate constraints will be blocked.");
+    if (report.strict) {
+      lines.push("  Your rules are now ENFORCED (strict mode).");
+      lines.push("  Commits that violate constraints will be BLOCKED.");
+    } else {
+      lines.push("  Your rules are now TRACKED (warning mode — default).");
+      lines.push("  Violations will be printed loudly, but commits will NOT be blocked.");
+      lines.push("  Opt in to hard enforcement any time with: speclock protect --strict");
+    }
+  }
+
+  // Greenfield guidance — tell the user to edit the starter file
+  if (report.starterCreated) {
+    lines.push("");
+    lines.push("  Next: edit CLAUDE.md to add project-specific rules, then run:");
+    lines.push('    speclock check "your action here"');
   }
   lines.push("");
 

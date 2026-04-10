@@ -2,7 +2,7 @@
 
   "name": "speclock",
 
-  "version": "5.5.3",
+  "version": "5.5.4",
 
   "mcpName": "io.github.sgroy10/speclock",
 
@@ -229,6 +229,222 @@
 
   
   "locks": [
+
+  
+  
+  "Database MUST stay PostgreSQL",
+
+  
+  
+  "ALWAYS use TypeScript",
+
+  
+  
+  "NEVER modify auth files",
+
+  
+  
+  "NEVER delete patient data",
+
+  
+  
+  "These rules must NEVER be violated:",
+
+  
+  
+  "DO NOT violate: No breaking changes to public API",
+
+  
+  
+  "DO NOT violate: Never modify authentication files without security review",
+
+  
+  
+  "DO NOT violate: Never commit code changes without bumping the version number. Every code change that touches src/ files requires a patch version bump before commit.",
+
+  
+  
+  "DO NOT violate: ZERO bolt.diy branding anywhere — no \"bolt\" in user-facing UI, page titles, meta tags, social previews, or marketing. Internal code references (CSS variables, artifact tags) must be migrated to vibelock namespace.",
+
+  
+  
+  "DO NOT violate: Every generated app MUST look beautiful by default — modern typography, gradient accents, micro-interactions, proper spacing, responsive design. A todo app must have a stunning landing page. No ugly scaffolds. Design quality is a core differentiator.",
+
+  
+  
+  "DO NOT violate: SpecLock MUST be automatic and invisible to non-technical users — constraints detected from natural conversation, locked silently, protection felt but not explained. Power users can see the constraint dashboard. No manual setup required.",
+
+  
+  
+  "DO NOT violate: VibeLock is NOT a Bolt clone — we are constraint-first, multilingual, and robotics-capable. Every product decision must answer: \"Does this move VibeLock closer to becoming the trusted platform for multilingual natural-language creation of apps, agents, devices, and robot behaviors?\"",
+
+  
+  
+  "DO NOT violate: Never expose SpecLock complexity to normal users — its power should be FELT (safety, continuity, nothing breaks) more than explained. No jargon, no constraint IDs, no JSON. Just trust.",
+
+  
+  
+  "DO NOT violate: Rola (robotics layer) must NOT be rushed into production before the core platform (app creation + SpecLock + multilingual + design quality) is rock solid. Stage 4 per vision timeline.",
+
+  
+  
+  "DO NOT violate: Preview experience must match or exceed Lovable/Bolt — responsive preview frames (mobile/tablet/desktop), new-tab preview, fast refresh, and eventually shareable preview links. The sandbox must feel polished and professional.",
+
+  
+  
+  "DO NOT violate: Non-technical users must NEVER need to configure a database manually. Storage must work out of the box with zero configuration.",
+
+  
+  
+  "DO NOT violate: ZERO bolt.diy code — this is a clean-room build. No copy-pasting from the fork. Fresh architecture, fresh components, fresh code. We learned our lesson from 10 hours of debugging someone else's mess.",
+
+  
+  
+  "DO NOT violate: UI must be Apple-level polished — every pixel matters. Hermes brand colors (orange-black), subtle animations, beautiful typography, perfect spacing. First impressions are critical. No ugly scaffolds, no default gray UIs. Think Lovable/Orchid level branding but with our own identity.",
+
+  
+  
+  "DO NOT violate: Auto-deploy pipeline: push to git → Railway auto-deploys → URL works. No manual railway up commands. Clean CI/CD from day one.",
+
+  
+  
+  "DO NOT violate: vibelock.in is the LIVE production domain, pointing to Railway project \"captivating-tranquility\". It runs the main branch (Remix/bolt.diy fork codebase). When anyone asks about vibelock.in, this is the codebase — NOT the v2 Next.js branch.",
+
+  
+  
+  "DO NOT violate: VibeLock v3 is a CLEAN BUILD — zero bolt.diy code. Fresh Next.js 15, fresh components, fresh architecture. No copying from the bolt.diy fork. The v3 branch starts empty.",
+
+  
+  
+  "DO NOT violate: Built-in database for user apps: Railway PostgreSQL with schema-per-project isolation. User never sees connection strings or SQL. AI auto-provisions tables. Free tier: 1 project, 100MB.",
+
+  
+  
+  "DO NOT violate: SpecLock constraint engine MUST be baked into the codebase — not an external MCP call. Port the core semantics.js logic into the v3 codebase. Auto-detect constraints from conversation, enforce on every generation.",
+
+  
+  
+  "DO NOT violate: Memory system: per-project auto-saved memory (goal, decisions, constraints, context). Stored in PostgreSQL project_memory table. Loaded into system prompt at every conversation turn. User can view/edit in Memory panel. Inspired by Claude memory + OpenClaw bootstrap injection.",
+
+  
+  
+  "DO NOT violate: Wax views must show OPEN THROUGH-HOLES at every stone position — not closed cups. You must see background through each hole. This is production jewelry CAD standard. The sketch prompt must ask for drilled through-holes, gold render must preserve them, wax must clone them exactly.",
+
+  
+  
+  "DO NOT violate: NEVER make multiple changes at once. When fixing a bug, fix ONLY that one thing. Do not refactor, do not \"improve\" unrelated code, do not touch working prompts. Test the fix before deploying. One commit per fix.",
+
+  
+  
+  "DO NOT violate: Each Hitem3D run costs ~$2 USD. NEVER deploy untested code that touches the pipeline. Test every API endpoint with curl BEFORE asking user to test. Verify response sizes, status codes, and content. The user's time and money are at stake — treat every deploy as production.",
+
+  
+  
+  "DO NOT violate: The /api/refine endpoint response must NOT exceed 5MB total JSON size. If GLB is larger than 3MB after decimation, return file URLs via /api/files/{filename} instead of base64. The browser WILL fail on 20MB+ JSON responses — this was proven when 16MB GLB caused \"Failed to fetch\".",
+
+  
+  
+  "DO NOT violate: Always call `speclock_session_briefing` at start of session and `speclock_session_summary` before ending.",
+
+  
+  
+  "NEVER VIOLATE: No breaking changes to public API",
+
+  
+  
+  "NEVER VIOLATE: Never modify authentication files without security review",
+
+  
+  
+  "NEVER VIOLATE: Never commit code changes without bumping the version number. Every code change that touches src/ files requires a patch version bump before commit.",
+
+  
+  
+  "NEVER VIOLATE: ZERO bolt.diy branding anywhere — no \"bolt\" in user-facing UI, page titles, meta tags, social previews, or marketing. Internal code references (CSS variables, artifact tags) must be migrated to vibelock namespace.",
+
+  
+  
+  "NEVER VIOLATE: Every generated app MUST look beautiful by default — modern typography, gradient accents, micro-interactions, proper spacing, responsive design. A todo app must have a stunning landing page. No ugly scaffolds. Design quality is a core differentiator.",
+
+  
+  
+  "NEVER VIOLATE: SpecLock MUST be automatic and invisible to non-technical users — constraints detected from natural conversation, locked silently, protection felt but not explained. Power users can see the constraint dashboard. No manual setup required.",
+
+  
+  
+  "NEVER VIOLATE: VibeLock is NOT a Bolt clone — we are constraint-first, multilingual, and robotics-capable. Every product decision must answer: \"Does this move VibeLock closer to becoming the trusted platform for multilingual natural-language creation of apps, agents, devices, and robot behaviors?\"",
+
+  
+  
+  "NEVER VIOLATE: Never expose SpecLock complexity to normal users — its power should be FELT (safety, continuity, nothing breaks) more than explained. No jargon, no constraint IDs, no JSON. Just trust.",
+
+  
+  
+  "NEVER VIOLATE: Rola (robotics layer) must NOT be rushed into production before the core platform (app creation + SpecLock + multilingual + design quality) is rock solid. Stage 4 per vision timeline.",
+
+  
+  
+  "NEVER VIOLATE: Preview experience must match or exceed Lovable/Bolt — responsive preview frames (mobile/tablet/desktop), new-tab preview, fast refresh, and eventually shareable preview links. The sandbox must feel polished and professional.",
+
+  
+  
+  "NEVER VIOLATE: Non-technical users must NEVER need to configure a database manually. Storage must work out of the box with zero configuration.",
+
+  
+  
+  "NEVER VIOLATE: ZERO bolt.diy code — this is a clean-room build. No copy-pasting from the fork. Fresh architecture, fresh components, fresh code. We learned our lesson from 10 hours of debugging someone else's mess.",
+
+  
+  
+  "NEVER VIOLATE: UI must be Apple-level polished — every pixel matters. Hermes brand colors (orange-black), subtle animations, beautiful typography, perfect spacing. First impressions are critical. No ugly scaffolds, no default gray UIs. Think Lovable/Orchid level branding but with our own identity.",
+
+  
+  
+  "NEVER VIOLATE: Auto-deploy pipeline: push to git → Railway auto-deploys → URL works. No manual railway up commands. Clean CI/CD from day one.",
+
+  
+  
+  "NEVER VIOLATE: vibelock.in is the LIVE production domain, pointing to Railway project \"captivating-tranquility\". It runs the main branch (Remix/bolt.diy fork codebase). When anyone asks about vibelock.in, this is the codebase — NOT the v2 Next.js branch.",
+
+  
+  
+  "NEVER VIOLATE: VibeLock v3 is a CLEAN BUILD — zero bolt.diy code. Fresh Next.js 15, fresh components, fresh architecture. No copying from the bolt.diy fork. The v3 branch starts empty.",
+
+  
+  
+  "NEVER VIOLATE: Built-in database for user apps: Railway PostgreSQL with schema-per-project isolation. User never sees connection strings or SQL. AI auto-provisions tables. Free tier: 1 project, 100MB.",
+
+  
+  
+  "NEVER VIOLATE: SpecLock constraint engine MUST be baked into the codebase — not an external MCP call. Port the core semantics.js logic into the v3 codebase. Auto-detect constraints from conversation, enforce on every generation.",
+
+  
+  
+  "NEVER VIOLATE: Memory system: per-project auto-saved memory (goal, decisions, constraints, context). Stored in PostgreSQL project_memory table. Loaded into system prompt at every conversation turn. User can view/edit in Memory panel. Inspired by Claude memory + OpenClaw bootstrap injection.",
+
+  
+  
+  "NEVER VIOLATE: Wax views must show OPEN THROUGH-HOLES at every stone position — not closed cups. You must see background through each hole. This is production jewelry CAD standard. The sketch prompt must ask for drilled through-holes, gold render must preserve them, wax must clone them exactly.",
+
+  
+  
+  "NEVER VIOLATE: NEVER make multiple changes at once. When fixing a bug, fix ONLY that one thing. Do not refactor, do not \"improve\" unrelated code, do not touch working prompts. Test the fix before deploying. One commit per fix.",
+
+  
+  
+  "NEVER VIOLATE: Each Hitem3D run costs ~$2 USD. NEVER deploy untested code that touches the pipeline. Test every API endpoint with curl BEFORE asking user to test. Verify response sizes, status codes, and content. The user's time and money are at stake — treat every deploy as production.",
+
+  
+  
+  "NEVER VIOLATE: The /api/refine endpoint response must NOT exceed 5MB total JSON size. If GLB is larger than 3MB after decimation, return file URLs via /api/files/{filename} instead of base64. The browser WILL fail on 20MB+ JSON responses — this was proven when 16MB GLB caused \"Failed to fetch\".",
+
+  
+  
+  "NEVER VIOLATE: Always call `speclock_session_briefing` at start of session and `speclock_session_summary` before ending.",
+
+  
+  
+  "Always call `speclock_session_briefing` at start of session and `speclock_session_summary` before ending.",
 
   
   

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.sgroy10/speclock",
+  "description": "AI Constraint Engine — enforces CLAUDE.md and .cursorrules as laws. 51 MCP tools.",
+  "repository": {
+    "url": "https://github.com/sgroy10/speclock",
+    "source": "github"
+  },
+  "version": "5.5.3",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "speclock",
+      "version": "5.5.3",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ],
+  "remoteEndpoints": [
+    {
+      "url": "https://speclock-mcp-production.up.railway.app/mcp",
+      "transport": {
+        "type": "streamable-http"
+      }
+    }
+  ]
+}

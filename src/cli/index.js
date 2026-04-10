@@ -67,7 +67,16 @@ import { getReplay, listSessions, formatReplay } from "../core/replay.js";
 import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
-import { protect, formatProtectReport } from "../core/guardian.js";
+import { protect, formatProtectReport, discoverRuleFiles, extractConstraints, RULE_FILES } from "../core/guardian.js";
+import {
+  installForClient,
+  uninstallForClient,
+  installAll,
+  uninstallAll,
+  formatResult,
+  nextStepsFor,
+  SUPPORTED_CLIENTS,
+} from "../core/mcp-install.js";
 
 // --- Argument parsing ---
 
@@ -123,7 +132,7 @@ function refreshContext(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.5.3 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.5.4 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -134,7 +143,12 @@ Commands:
   goal <text>                     Set or update the project goal
   lock <text> [--tags a,b]        Add a non-negotiable constraint
   lock remove <id>                Remove a lock by ID
-  protect                         Zero-config: read rule files, extract locks, enforce
+  protect [--strict]              Zero-config: read rule files, extract locks, install hook
+                                  (default: warn mode — violations print but DON'T block commits.
+                                   Add --strict for hard blocks.)
+  mcp install <client>            Auto-install SpecLock MCP server into an AI client
+                                  (claude-code, cursor, windsurf, cline, codex, all)
+  mcp uninstall <client>          Remove SpecLock MCP server from an AI client
   guard <file> [--lock "text"]    Inject lock warning into a file
   unguard <file>                  Remove lock warning from a file
   decide <text> [--tags a,b]      Record a decision
@@ -146,8 +160,10 @@ Commands:
   report                          Show violation report + stats
   hook install                    Install git pre-commit hook
   hook remove                     Remove git pre-commit hook
-  audit                           Audit staged files against locks
-  audit-semantic                  Semantic audit: analyze code changes vs locks
+  audit [--strict]                Audit staged files against locks (warn mode default;
+                                  --strict or SPECLOCK_STRICT=1 exits 1 on violation)
+  audit-semantic [--strict]       Semantic audit: analyze code changes vs locks
+                                  (warn mode default; use --strict for hard blocks)
   audit-verify                    Verify HMAC audit chain integrity
   enforce <advisory|hard>         Set enforcement mode (advisory=warn, hard=block)
   override <lockId> <reason>      Override a lock with justification
@@ -168,6 +184,7 @@ Commands:
   watch                           Start file watcher (live dashboard)
   serve [--project <path>]        Start MCP stdio server
   status                          Show project brain summary
+  doctor                          Diagnostic health check (install, git, rules, MCP)
 
 Options:
   --tags <a,b,c>                  Comma-separated tags
@@ -550,12 +567,30 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
   // --- PROTECT (zero-config guardian mode) ---
   if (cmd === "protect") {
     const flags = parseFlags(args);
+    const strict = flags.strict === true || flags.block === true;
     const opts = {
       skipHook: flags["no-hook"] === true,
       skipSync: flags["no-sync"] === true,
+      strict,
     };
     const report = protect(root, opts);
     console.log(formatProtectReport(report));
+
+    // Set persistent enforcement mode on the brain so the hook honours it.
+    // Default is "advisory" (warn). Users opt in to hard blocks with --strict.
+    try {
+      setEnforcementMode(root, strict ? "hard" : "advisory");
+    } catch (_) { /* ignore — brain may not exist yet */ }
+
+    if (strict) {
+      console.log("  Hard enforcement active. Every commit that violates a lock will be BLOCKED.");
+      console.log("  To relax: speclock protect   (without --strict)");
+    } else {
+      console.log("  Warning mode active. To enforce hard blocks, run: speclock protect --strict");
+      console.log("  Violations will be printed at commit time but commits will NOT be blocked.");
+    }
+    console.log("");
+
     if (report.errors.length > 0 && report.discovered.length === 0) {
       process.exit(1);
     }
@@ -610,6 +645,101 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
     process.env.SPECLOCK_PROJECT_ROOT = projectArg;
     await import("../mcp/server.js");
     return;
+  }
+
+  // --- MCP INSTALL / UNINSTALL ---
+  // One-command autoinstaller: wires SpecLock into Claude Code, Cursor,
+  // Windsurf, Cline, Codex (or all of them) without any JSON hand-editing.
+  if (cmd === "mcp") {
+    const sub = args[0];
+    const client = args[1];
+    const flags = parseFlags(args.slice(2));
+
+    const supportedLabel = SUPPORTED_CLIENTS.join(", ");
+
+    if (!sub || (sub !== "install" && sub !== "uninstall")) {
+      console.error("Usage:");
+      console.error(`  speclock mcp install <client>     (${supportedLabel})`);
+      console.error(`  speclock mcp uninstall <client>`);
+      console.error("");
+      console.error("Flags:");
+      console.error("  --no-project     Skip project-scoped config (.mcp.json, .cursor/mcp.json)");
+      process.exit(1);
+    }
+
+    if (!client) {
+      console.error(`Error: <client> is required.`);
+      console.error(`Supported: ${supportedLabel}`);
+      process.exit(1);
+    }
+
+    if (!SUPPORTED_CLIENTS.includes(client)) {
+      console.error(`Unknown client "${client}".`);
+      console.error(`Supported: ${supportedLabel}`);
+      process.exit(1);
+    }
+
+    const options = {
+      includeProject: flags["no-project"] !== true,
+    };
+
+    const isInstall = sub === "install";
+    const header = isInstall
+      ? "\nSpecLock MCP — Autoinstaller"
+      : "\nSpecLock MCP — Uninstaller";
+    console.log(header);
+    console.log("=".repeat(50));
+
+    let results;
+    if (client === "all") {
+      results = isInstall
+        ? installAll(root, options)
+        : uninstallAll(root, options);
+    } else {
+      results = [
+        isInstall
+          ? installForClient(client, root, options)
+          : uninstallForClient(client, root, options),
+      ];
+    }
+
+    let anySuccess = false;
+    let anyError = false;
+
+    for (const r of results) {
+      console.log(`\n  ${r.client}:`);
+      console.log(formatResult(r, sub));
+      if (r.errors.length > 0) anyError = true;
+      if (
+        r.writes.some(
+          (w) => w.status === "installed" || w.status === "removed"
+        )
+      ) {
+        anySuccess = true;
+      }
+    }
+
+    console.log("");
+    if (isInstall && anySuccess) {
+      console.log("  Next steps:");
+      if (client === "all") {
+        console.log("    Restart any AI clients that were updated.");
+      } else {
+        console.log(`    ${nextStepsFor(client)}`);
+      }
+      console.log("");
+      console.log("  Verify: speclock status");
+    } else if (!isInstall && anySuccess) {
+      console.log("  SpecLock MCP server removed. Restart your AI client to apply.");
+    } else if (!anySuccess && !anyError) {
+      console.log(
+        isInstall
+          ? "  SpecLock was already installed everywhere. Nothing to do."
+          : "  SpecLock was not installed anywhere. Nothing to do."
+      );
+    }
+
+    process.exit(anyError ? 1 : 0);
   }
 
   // --- TEMPLATE ---
@@ -706,23 +836,47 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
 
   // --- AUDIT ---
   if (cmd === "audit") {
+    const flags = parseFlags(args);
+    // Warn mode is the default (investor audit: hard-block had too many false positives).
+    // Users opt in to hard blocking with --strict, SPECLOCK_STRICT=1, or by running
+    // `speclock enforce hard` (which sets the persistent brain enforcement mode).
+    const brain = readBrain(root);
+    const brainMode = brain ? (getEnforcementConfig(brain).mode || "advisory") : "advisory";
+    const strict =
+      flags.strict === true ||
+      flags.block === true ||
+      process.env.SPECLOCK_STRICT === "1" ||
+      process.env.SPECLOCK_STRICT === "true" ||
+      brainMode === "hard";
+
     const result = auditStagedFiles(root);
     if (result.passed) {
       console.log(result.message);
       process.exit(0);
-    } else {
-      console.log("\nSPECLOCK AUDIT FAILED");
-      console.log("=".repeat(50));
-      for (const v of result.violations) {
-        console.log(`  [${v.severity}] ${v.file}`);
-        console.log(`    Lock: ${v.lockText}`);
-        console.log(`    Reason: ${v.reason}`);
-        console.log("");
-      }
-      console.log(result.message);
+    }
+
+    // Violations found — print them for both warn and strict modes.
+    const header = strict ? "SPECLOCK AUDIT FAILED" : "SPECLOCK WARNINGS";
+    console.log(`\n${header}`);
+    console.log("=".repeat(50));
+    for (const v of result.violations) {
+      console.log(`  [${v.severity}] ${v.file}`);
+      console.log(`    Lock: ${v.lockText}`);
+      console.log(`    Reason: ${v.reason}`);
+      console.log("");
+    }
+    console.log(result.message);
+
+    if (strict) {
       console.log("Commit blocked. Unlock files or unstage them to proceed.");
       process.exit(1);
     }
+
+    console.log("Warning mode active — commit allowed. To enforce hard blocks, run:");
+    console.log("  speclock audit --strict");
+    console.log("  SPECLOCK_STRICT=1 git commit ...");
+    console.log("  speclock enforce hard   (persistent, project-wide)");
+    process.exit(0);
   }
 
   // --- AUDIT-VERIFY (v2.1 enterprise) ---
@@ -858,7 +1012,18 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
 
   // --- AUDIT-SEMANTIC (v2.5) ---
   if (cmd === "audit-semantic") {
+    const flags = parseFlags(args);
     const result = semanticAudit(root);
+
+    // Warn mode default: only exit 1 if --strict, SPECLOCK_STRICT=1, or brain is in "hard" mode
+    // (result.blocked already reflects "hard" mode from brain config).
+    const strict =
+      flags.strict === true ||
+      flags.block === true ||
+      process.env.SPECLOCK_STRICT === "1" ||
+      process.env.SPECLOCK_STRICT === "true" ||
+      result.blocked;
+
     console.log(`\nSemantic Pre-Commit Audit`);
     console.log("=".repeat(50));
     console.log(`Mode: ${result.mode} | Threshold: ${result.threshold}%`);
@@ -877,7 +1042,15 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
       }
     }
     console.log(`\n${result.message}`);
-    process.exit(result.blocked ? 1 : 0);
+
+    if (result.violations.length > 0 && !strict) {
+      console.log("\nWarning mode active — commit allowed. To enforce hard blocks, run:");
+      console.log("  speclock audit-semantic --strict");
+      console.log("  SPECLOCK_STRICT=1 git commit ...");
+      console.log("  speclock enforce hard   (persistent, project-wide)");
+    }
+
+    process.exit(strict && result.violations.length > 0 ? 1 : 0);
   }
 
   // --- AUTH (v3.0) ---
@@ -1285,6 +1458,207 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
   if (cmd === "status") {
     showStatus(root);
     return;
+  }
+
+  // --- DOCTOR: Diagnostic health check ---
+  if (cmd === "doctor") {
+    const fs = await import("fs");
+    const os = await import("os");
+    const lines = [];
+    const fixes = [];
+    let issueCount = 0;
+
+    lines.push("");
+    lines.push("SpecLock Doctor — Health Check");
+    lines.push("================================");
+    lines.push("");
+
+    // --- 1. Installation ---
+    lines.push("Installation");
+    let pkgVersion = "unknown";
+    try {
+      // Find our own package.json — walk up from this module
+      const selfPkgPath = path.join(root, "node_modules", "speclock", "package.json");
+      if (fs.existsSync(selfPkgPath)) {
+        pkgVersion = JSON.parse(fs.readFileSync(selfPkgPath, "utf-8")).version;
+      } else {
+        // Maybe running from the repo itself
+        const localPkg = path.join(root, "package.json");
+        if (fs.existsSync(localPkg)) {
+          const p = JSON.parse(fs.readFileSync(localPkg, "utf-8"));
+          if (p.name === "speclock") pkgVersion = p.version;
+        }
+      }
+      lines.push(`  ✓ SpecLock v${pkgVersion} installed`);
+    } catch (e) {
+      lines.push(`  ✗ SpecLock version check failed: ${e.message}`);
+      issueCount++;
+    }
+
+    const speclockDir = path.join(root, ".speclock");
+    if (fs.existsSync(speclockDir)) {
+      lines.push(`  ✓ .speclock/ directory present`);
+    } else {
+      lines.push(`  ✗ .speclock/ directory missing`);
+      fixes.push("Run: speclock setup");
+      issueCount++;
+    }
+
+    const brainPath = path.join(speclockDir, "brain.json");
+    let brain = null;
+    let activeLockCount = 0;
+    if (fs.existsSync(brainPath)) {
+      try {
+        brain = JSON.parse(fs.readFileSync(brainPath, "utf-8"));
+        activeLockCount = (brain.specLock?.items || []).filter((l) => l.active !== false).length;
+        lines.push(`  ✓ brain.json valid (${activeLockCount} locks)`);
+      } catch (e) {
+        lines.push(`  ✗ brain.json is not valid JSON: ${e.message}`);
+        fixes.push("Delete .speclock/brain.json and run: speclock setup");
+        issueCount++;
+      }
+    } else if (fs.existsSync(speclockDir)) {
+      lines.push(`  ✗ brain.json missing`);
+      fixes.push("Run: speclock init");
+      issueCount++;
+    }
+    lines.push("");
+
+    // --- 2. Git Integration ---
+    lines.push("Git Integration");
+    const gitDir = path.join(root, ".git");
+    const isGitRepo = fs.existsSync(gitDir);
+    if (isGitRepo) {
+      lines.push(`  ✓ Git repository detected`);
+    } else {
+      lines.push(`  ✗ Not a git repository`);
+      fixes.push("Run: git init");
+      issueCount++;
+    }
+
+    if (isGitRepo) {
+      const hookPath = path.join(gitDir, "hooks", "pre-commit");
+      if (fs.existsSync(hookPath)) {
+        const hookContent = fs.readFileSync(hookPath, "utf-8");
+        const hasMarker = hookContent.includes("SPECLOCK-HOOK");
+        const runsSpeclock = /speclock\s+audit/.test(hookContent) || /speclock/.test(hookContent);
+        if (hasMarker && runsSpeclock) {
+          lines.push(`  ✓ Pre-commit hook installed`);
+          lines.push(`  ✓ Hook runs speclock`);
+        } else if (hasMarker) {
+          lines.push(`  ⚠ Pre-commit hook has SpecLock marker but does not run speclock`);
+          fixes.push("Run: speclock hook install");
+          issueCount++;
+        } else {
+          lines.push(`  ✗ Pre-commit hook exists but was not installed by SpecLock`);
+          fixes.push("Run: speclock hook install (will append to existing hook)");
+          issueCount++;
+        }
+      } else {
+        lines.push(`  ✗ Pre-commit hook not installed`);
+        fixes.push("Run: speclock hook install");
+        issueCount++;
+      }
+    }
+
+    // Enforcement mode (if brain exists)
+    if (brain) {
+      const mode = brain.enforcement?.mode || "advisory";
+      const modeLabel = mode === "hard" ? "hard (block)" : "warn (advisory)";
+      lines.push(`  ✓ Mode: ${modeLabel}` + (mode !== "hard" ? " (use 'speclock enforce hard' for hard enforcement)" : ""));
+    }
+    lines.push("");
+
+    // --- 3. Rule Files ---
+    lines.push("Rule Files");
+    const discovered = discoverRuleFiles(root);
+    const discoveredMap = new Map(discovered.map((f) => [f.file, f]));
+    let totalRuleFilesFound = 0;
+    for (const entry of RULE_FILES) {
+      const found = discoveredMap.get(entry.file);
+      if (found) {
+        const extracted = extractConstraints(found.content, found.file);
+        lines.push(`  ✓ ${entry.file} (${extracted.locks.length} locks extracted)`);
+        totalRuleFilesFound++;
+      } else {
+        lines.push(`  ✗ ${entry.file} (not found)`);
+      }
+    }
+    if (totalRuleFilesFound === 0) {
+      fixes.push("Run: speclock protect (auto-creates a starter CLAUDE.md)");
+      issueCount++;
+    }
+    lines.push("");
+
+    // --- 4. MCP Integration ---
+    lines.push("MCP Integration");
+    const home = os.homedir();
+
+    function checkMcpConfig(label, filePath, fixCmd) {
+      if (fs.existsSync(filePath)) {
+        try {
+          const cfg = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+          const servers = cfg.mcpServers || cfg.servers || {};
+          const hasSpeclock = Object.keys(servers).some((k) => /speclock/i.test(k)) ||
+            JSON.stringify(cfg).toLowerCase().includes("speclock");
+          if (hasSpeclock) {
+            lines.push(`  ✓ ${label} (${filePath.replace(home, "~")})`);
+            return true;
+          }
+          lines.push(`  ✗ ${label} (config exists at ${filePath.replace(home, "~")}, but SpecLock not configured)`);
+          lines.push(`    Fix: ${fixCmd}`);
+          issueCount++;
+          return false;
+        } catch (_) {
+          lines.push(`  ✗ ${label} (${filePath.replace(home, "~")}: invalid JSON)`);
+          lines.push(`    Fix: ${fixCmd}`);
+          issueCount++;
+          return false;
+        }
+      }
+      lines.push(`  ✗ ${label} (${filePath.replace(home, "~")})`);
+      lines.push(`    Fix: ${fixCmd}`);
+      issueCount++;
+      return false;
+    }
+
+    checkMcpConfig(
+      "Claude Code project (.mcp.json)",
+      path.join(root, ".mcp.json"),
+      "speclock mcp install claude-code"
+    );
+    checkMcpConfig(
+      "Claude Code global (~/.claude/mcp.json)",
+      path.join(home, ".claude", "mcp.json"),
+      "speclock mcp install claude-code --global"
+    );
+    checkMcpConfig(
+      "Cursor project (.cursor/mcp.json)",
+      path.join(root, ".cursor", "mcp.json"),
+      "speclock mcp install cursor"
+    );
+    checkMcpConfig(
+      "Cursor global (~/.cursor/mcp.json)",
+      path.join(home, ".cursor", "mcp.json"),
+      "speclock mcp install cursor --global"
+    );
+    checkMcpConfig(
+      "Windsurf (~/.codeium/windsurf/mcp_config.json)",
+      path.join(home, ".codeium", "windsurf", "mcp_config.json"),
+      "speclock mcp install windsurf"
+    );
+    lines.push("");
+
+    // --- 5. Summary ---
+    if (issueCount === 0) {
+      lines.push("VERDICT: ✓ HEALTHY — all checks passed");
+    } else {
+      lines.push(`VERDICT: ⚠ ${issueCount} issue${issueCount === 1 ? "" : "s"} found (see fixes above)`);
+    }
+    lines.push("");
+
+    console.log(lines.join("\n"));
+    process.exit(issueCount === 0 ? 0 : 1);
   }
 
   // --- RELEASE: Automated version bump + publish + deploy ---

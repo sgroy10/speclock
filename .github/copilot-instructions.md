@@ -1,0 +1,57 @@
+# GitHub Copilot Instructions (SpecLock)
+
+> Auto-synced. Run `speclock sync --format copilot` to update.
+
+## Project: QualityLens — Jewelry manufacturer QC manual management and AI checklist generation system for Sky Gold & Diamonds Ltd. Stack: Node.js/Express + React/Vite/Tailwind + Railway PostgreSQL + Gemini AI. Monorepo /server + /client. GitHub: sgroy10/qualitylens. Railway auto-deploy.
+
+## Constraints
+
+When generating or modifying code, respect these constraints:
+
+- **DO NOT** violate: Always call `speclock_session_briefing` at start of session and `speclock_session_summary` before ending.
+- **DO NOT** violate: The /api/refine endpoint response must NOT exceed 5MB total JSON size. If GLB is larger than 3MB after decimation, return file URLs via /api/files/{filename} instead of base64. The browser WILL fail on 20MB+ JSON responses — this was proven when 16MB GLB caused "Failed to fetch".
+- **DO NOT** violate: Each Hitem3D run costs ~$2 USD. NEVER deploy untested code that touches the pipeline. Test every API endpoint with curl BEFORE asking user to test. Verify response sizes, status codes, and content. The user's time and money are at stake — treat every deploy as production.
+- **DO NOT** violate: Hitem3D settings: model=hitem3dv2.0, resolution=1536pro, face=2000000, request_type=1 (geometry only), format=2 (GLB). Submit+poll architecture — POST /api/generate-3d/submit returns task_id, GET /api/generate-3d/poll/{task_id} polls status. 15 min max poll. These settings are PROVEN WORKING — do not change.
+- **DO NOT** violate: NEVER make multiple changes at once. When fixing a bug, fix ONLY that one thing. Do not refactor, do not "improve" unrelated code, do not touch working prompts. Test the fix before deploying. One commit per fix.
+- **DO NOT** violate: Blender refine.py must NOT use voxel_remesh() or subdivide() — these destroy prong tips and stone seat detail. Hitem3D 2M face output has enough detail. Blender only does: scale to mm → light cleanup (remove doubles, fix normals) → sharpen edges → weighted normals → decimate to 100K faces → export STL + GLB.
+- **DO NOT** violate: Wax views must show OPEN THROUGH-HOLES at every stone position — not closed cups. You must see background through each hole. This is production jewelry CAD standard. The sketch prompt must ask for drilled through-holes, gold render must preserve them, wax must clone them exactly.
+- **DO NOT** violate: JewelCraft Grounding Pattern is MANDATORY. Pipeline: Photo → Pencil Sketch (same angle, through-holes not cups) → Gold Render (from sketch, holes preserved) → Wax Views (from gold render, exact material clone). Each stage feeds PREVIOUS stage's output image. NEVER send original photo to Hitem3D. NEVER skip grounding. NEVER fallback to original image.
+- **DO NOT** violate: Memory system: per-project auto-saved memory (goal, decisions, constraints, context). Stored in PostgreSQL project_memory table. Loaded into system prompt at every conversation turn. User can view/edit in Memory panel. Inspired by Claude memory + OpenClaw bootstrap injection.
+- **DO NOT** violate: SpecLock constraint engine MUST be baked into the codebase — not an external MCP call. Port the core semantics.js logic into the v3 codebase. Auto-detect constraints from conversation, enforce on every generation.
+- **DO NOT** violate: Built-in database for user apps: Railway PostgreSQL with schema-per-project isolation. User never sees connection strings or SQL. AI auto-provisions tables. Free tier: 1 project, 100MB.
+- **DO NOT** violate: VibeLock v3 is a CLEAN BUILD — zero bolt.diy code. Fresh Next.js 15, fresh components, fresh architecture. No copying from the bolt.diy fork. The v3 branch starts empty.
+- **DO NOT** violate: Railway environment variables are already set: DATABASE_URL (Railway PostgreSQL internal), DEEPSEEK_API_KEY, BETTER_AUTH_SECRET, BETTER_AUTH_URL, NEXT_PUBLIC_APP_URL, PORT=5173, NODE_ENV=production, DEFAULT_NUM_CTX=32768. OpenRouter API key is set via OPEN_ROUTER_API_KEY. Add new env vars via Railway GraphQL API or CLI: railway variables set KEY=VALUE.
+- **DO NOT** violate: DEPLOY PIPELINE: Code lives in github.com/sgroy10/vibelock branch v3. Railway project is "captivating-tranquility" (ID: ced04e82-b903-458d-9351-ac5944054e92), service ID: 439001ce-1854-454f-8b05-842fa925963f, environment ID: c2cb15c3-9a96-4854-a65c-c3aa0c3ee253. GitHub repo trigger IS connected — git push to the configured branch auto-deploys. Domain: www.vibelock.in. Railway CLI is installed and authenticated as sgroy10@gmail.com. To redeploy from git: use GraphQL mutation serviceInstanceRedeploy. To check deploy status: query deployments via GraphQL. NEVER waste time polling curl — check deploy status via API.
+- **DO NOT** violate: vibelock.in is the LIVE production domain, pointing to Railway project "captivating-tranquility". It runs the main branch (Remix/bolt.diy fork codebase). When anyone asks about vibelock.in, this is the codebase — NOT the v2 Next.js branch.
+- **DO NOT** violate: Auto-deploy pipeline: push to git → Railway auto-deploys → URL works. No manual railway up commands. Clean CI/CD from day one.
+- **DO NOT** violate: UI must be Apple-level polished — every pixel matters. Hermes brand colors (orange-black), subtle animations, beautiful typography, perfect spacing. First impressions are critical. No ugly scaffolds, no default gray UIs. Think Lovable/Orchid level branding but with our own identity.
+- **DO NOT** violate: ZERO bolt.diy code — this is a clean-room build. No copy-pasting from the fork. Fresh architecture, fresh components, fresh code. We learned our lesson from 10 hours of debugging someone else's mess.
+- **DO NOT** violate: Non-technical users must NEVER need to configure a database manually. Storage must work out of the box with zero configuration.
+- **DO NOT** violate: Preview experience must match or exceed Lovable/Bolt — responsive preview frames (mobile/tablet/desktop), new-tab preview, fast refresh, and eventually shareable preview links. The sandbox must feel polished and professional.
+- **DO NOT** violate: Rola (robotics layer) must NOT be rushed into production before the core platform (app creation + SpecLock + multilingual + design quality) is rock solid. Stage 4 per vision timeline.
+- **DO NOT** violate: Never expose SpecLock complexity to normal users — its power should be FELT (safety, continuity, nothing breaks) more than explained. No jargon, no constraint IDs, no JSON. Just trust.
+- **DO NOT** violate: VibeLock is NOT a Bolt clone — we are constraint-first, multilingual, and robotics-capable. Every product decision must answer: "Does this move VibeLock closer to becoming the trusted platform for multilingual natural-language creation of apps, agents, devices, and robot behaviors?"
+- **DO NOT** violate: Multilingual is NOT just translation — the AI must understand cultural context, respond in the user's language naturally, generate UI labels in the user's language, and make non-English speakers feel first-class. Support Gujarati, Hindi, Spanish, English at minimum, with universal language detection for any language.
+- **DO NOT** violate: SpecLock MUST be automatic and invisible to non-technical users — constraints detected from natural conversation, locked silently, protection felt but not explained. Power users can see the constraint dashboard. No manual setup required.
+- **DO NOT** violate: Every generated app MUST look beautiful by default — modern typography, gradient accents, micro-interactions, proper spacing, responsive design. A todo app must have a stunning landing page. No ugly scaffolds. Design quality is a core differentiator.
+- **DO NOT** violate: ZERO bolt.diy branding anywhere — no "bolt" in user-facing UI, page titles, meta tags, social previews, or marketing. Internal code references (CSS variables, artifact tags) must be migrated to vibelock namespace.
+- **DO NOT** violate: Never commit code changes without bumping the version number. Every code change that touches src/ files requires a patch version bump before commit.
+- **DO NOT** violate: Never push code to git without completing the full release checklist: (1) bump version in ALL 7 files (package.json, http-server.js, server.js, compliance.js, cli/index.js, dashboard/index.html x2), (2) npm publish, (3) git commit, (4) git push, (5) git tag vX.Y.Z, (6) git push origin tag, (7) railway up, (8) curl health to verify version. All 8 steps are mandatory — skipping any step is a violation.
+- **DO NOT** violate: Never modify authentication files without security review
+- **DO NOT** violate: No breaking changes to public API
+
+## Project Decisions
+
+- QualityLens uses Gemini API (key: set as GEMINI_API_KEY on Railway) instead of Anthropic. All AI features (chat, vision captioning, order parsing, checklist generation) use @google/generative-ai SDK with gemini-2.5-flash model. No Anthropic SDK.
+- The ONLY remaining bug is /api/refine response too large for browser. The fix is ONLY: reduce decimation target OR return file URLs. Do NOT touch grounding code, prompts, frontend grounding logic, or Hitem3D code to fix this. Isolate the fix to refine endpoint response handling ONLY.
+- Grounding pipeline prompts (sketch, gold, wax) are PROVEN WORKING as of commit fa36c95. Sketch asks for through-holes referencing Rhino/Matrix CAD. Gold preserves holes exactly. Wax is exact material clone. These prompts produced perfect results — do not modify without testing first.
+- ARCHITECTURE PIVOT: Replace WebContainer (browser-based WASM) with Cloudflare Containers for code execution. WebContainer has unreliable file writing — files generated by AI streaming don't persist to the virtual filesystem. Cloudflare Containers provide real Linux filesystem at ~$20/mo for 1,000 users. Cloudflare account: sgroy10@gmail.com, Account ID: 3e8eb36d3c9062ca1df6523a9cd0011f. Wrangler CLI authenticated. Also rebuild workspace UI to match Lovable quality — clean typography, proper spacing, professional layout.
+- File operation format: structured JSON operations (create/update/delete/shell), NOT XML tags. Parsed from AI streaming output. Inspired by OpenClaw's structured patch format.
+- Tech stack v3: Next.js 15 (App Router, standalone output), React 19, Tailwind v4, Framer Motion, Zustand, @webcontainer/api, Vercel AI SDK + Gemini Flash via OpenRouter, Prisma + Railway PostgreSQL, better-auth, xterm.js, CodeMirror 6 (dev mode only), lucide-react icons.
+- Branch strategy: main = current live bolt.diy fork (keep running). v3 = clean build. When v3 is ready, switch Railway repo trigger from main to v3 (or merge v3 to main).
+- LLM: Gemini 2.5 Flash via OpenRouter. Cheapest good-quality coding LLM. Already configured. Budget: $50/month for API calls.
+- VibeLock brand is LIGHT theme inspired by Hermes: warm cream/orange backgrounds (#FFF8F0, #FFF1E6), dark text (#1A1A1A, #2D2D2D), orange accents (#FF6B2C). NOT dark theme. Think Hermes.com — luxurious, warm, readable. Auth forms must be modern and beautiful, not basic HTML.
+- Build sequentially: (1) Project scaffold + Railway auto-deploy pipeline, (2) Auth + database from day 1, (3) Home page with stunning UI, (4) Chat + AI streaming, (5) WebContainer sandbox + preview, (6) Terminal, (7) SpecLock integration, (8) Multilingual. No skipping steps.
+
+---
+*Auto-synced by [SpecLock](https://github.com/sgroy10/speclock)*

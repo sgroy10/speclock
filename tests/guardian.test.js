@@ -317,13 +317,32 @@ test("edge-cases", "extracts Ensure/Enforce constraints", () => {
 // FULL PROTECT FLOW
 // ============================================================
 
-test("protect", "returns error when no rule files found", () => {
+test("protect", "auto-creates starter CLAUDE.md when no rule files found", () => {
   const dir = makeTempDir();
   try {
     initGitRepo(dir);
     const report = protect(dir, { skipHook: true, skipSync: true });
+    // Greenfield support: should auto-create CLAUDE.md and continue normally
+    assertEqual(report.starterCreated, true);
+    assertEqual(report.starterPath, "CLAUDE.md");
+    assert(fs.existsSync(path.join(dir, "CLAUDE.md")), "starter CLAUDE.md should exist");
+    // Should have discovered the newly-created CLAUDE.md and extracted locks from it
+    assertEqual(report.discovered.length, 1);
+    assertEqual(report.discovered[0].file, "CLAUDE.md");
+    assert(report.extracted.locks >= 6, `Expected >= 6 extracted locks from starter, got ${report.extracted.locks}`);
+    assert(report.added.locks >= 6, `Expected >= 6 added locks from starter, got ${report.added.locks}`);
+    assertEqual(report.errors.length, 0);
+  } finally { cleanup(dir); }
+});
+
+test("protect", "returns error when no rule files AND --skipStarter", () => {
+  const dir = makeTempDir();
+  try {
+    initGitRepo(dir);
+    const report = protect(dir, { skipHook: true, skipSync: true, skipStarter: true });
     assert(report.errors.length > 0);
     assert(report.errors[0].includes("No AI rule files found"));
+    assert(!fs.existsSync(path.join(dir, "CLAUDE.md")), "CLAUDE.md should NOT be created when skipStarter is set");
   } finally { cleanup(dir); }
 });
 
@@ -429,6 +448,7 @@ test("format", "formats report with discovered files", () => {
     hookInstalled: true, hookStatus: "installed",
     synced: [".cursor/rules/speclock.mdc", "AGENTS.md"],
     errors: [],
+    strict: true,
   };
   const output = formatProtectReport(report);
   assert(output.includes("SpecLock Protect"));

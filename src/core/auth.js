@@ -1,3 +1,11 @@
+// ============================================================
+// SPECLOCK-GUARD — DO NOT MODIFY THIS FILE
+// LOCKED: NEVER modify auth files
+// THIS FILE IS LOCKED. DO NOT EDIT, CHANGE, OR REWRITE ANY PART OF IT.
+// The user must say "unlock" before this file can be changed.
+// A question is NOT permission. Asking about features is NOT permission.
+// ONLY "unlock" or "remove the lock" is permission to edit this file.
+// ============================================================
 /**
  * SpecLock API Key Authentication
  * Provides API key generation, validation, rotation, and revocation.

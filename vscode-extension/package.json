@@ -1,0 +1,96 @@
+{
+  "name": "speclock",
+  "displayName": "SpecLock — AI Rule Enforcer",
+  "description": "Enforces your .cursorrules, CLAUDE.md, and AGENTS.md — makes AI rules unbreakable. Zero-config protection for AI-assisted coding.",
+  "version": "0.1.0",
+  "publisher": "sgroy10",
+  "author": {
+    "name": "Sandeep Roy",
+    "url": "https://github.com/sgroy10"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sgroy10/speclock"
+  },
+  "homepage": "https://github.com/sgroy10/speclock",
+  "bugs": {
+    "url": "https://github.com/sgroy10/speclock/issues"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "cursor",
+    "cursorrules",
+    "claude",
+    "claude-code",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "copilot",
+    "windsurf",
+    "ai-guardrails",
+    "code-protection",
+    "constraints",
+    "enforcement",
+    "mcp",
+    "speclock"
+  ],
+  "activationEvents": [
+    "workspaceContains:.cursorrules",
+    "workspaceContains:CLAUDE.md",
+    "workspaceContains:AGENTS.md",
+    "workspaceContains:.speclock/brain.json",
+    "workspaceContains:SPECLOCK.md"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "speclock.protect",
+        "title": "SpecLock: Protect — Read rule files & enforce constraints",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "speclock.check",
+        "title": "SpecLock: Check — Test if an action conflicts with locks"
+      },
+      {
+        "command": "speclock.status",
+        "title": "SpecLock: Status — Show active locks and project state"
+      },
+      {
+        "command": "speclock.init",
+        "title": "SpecLock: Initialize — Set up SpecLock in this project"
+      },
+      {
+        "command": "speclock.showLocks",
+        "title": "SpecLock: Show All Locks"
+      }
+    ],
+    "configuration": {
+      "title": "SpecLock",
+      "properties": {
+        "speclock.autoProtectOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically run 'speclock protect' when opening a workspace with rule files"
+        },
+        "speclock.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show SpecLock lock count in the status bar"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0"
+  }
+}
