@@ -1,0 +1,52 @@
+name: 'SpecLock — Enforce AI Rule Files'
+description: 'Run SpecLock semantic audit on your repo. Enforces CLAUDE.md, .cursorrules, AGENTS.md as pre-commit/CI laws.'
+author: 'Sandeep Roy'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  mode:
+    description: 'Enforcement mode: warn (default) or strict'
+    required: false
+    default: 'warn'
+  rule-files:
+    description: 'Comma-separated list of rule files to load (defaults to auto-detect)'
+    required: false
+    default: ''
+  fail-on-high:
+    description: 'Fail the workflow on HIGH-confidence violations (default true)'
+    required: false
+    default: 'true'
+  speclock-version:
+    description: 'SpecLock version to install (default latest)'
+    required: false
+    default: 'latest'
+
+outputs:
+  passed:
+    description: 'Whether the semantic audit passed (true/false)'
+    value: ${{ steps.audit.outputs.passed }}
+  violations:
+    description: 'Number of HIGH-confidence violations detected'
+    value: ${{ steps.audit.outputs.violations }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install SpecLock
+      shell: bash
+      run: |
+        echo "Installing speclock@${{ inputs.speclock-version }}..."
+        npm install -g speclock@${{ inputs.speclock-version }}
+        speclock --version || speclock version || true
+
+    - name: Run SpecLock audit
+      id: audit
+      shell: bash
+      env:
+        SPECLOCK_MODE: ${{ inputs.mode }}
+        SPECLOCK_RULE_FILES: ${{ inputs.rule-files }}
+        SPECLOCK_FAIL_ON_HIGH: ${{ inputs.fail-on-high }}
+      run: bash ${{ github.action_path }}/entrypoint.sh
+      working-directory: ${{ github.workspace }}
