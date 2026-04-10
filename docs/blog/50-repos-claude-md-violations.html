@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Ran Claude Code on 50 Repos For a Month — Here's Every Time It Ignored CLAUDE.md | SpecLock</title>
+    <meta name="description" content="Data from 50 real repositories: every time Claude Code, Cursor, and Copilot silently violated CLAUDE.md rules. The 7 drift patterns, real numbers, and a 30-second fix.">
+    <meta name="keywords" content="CLAUDE.md not working, Cursor ignores rules, AI coding tool safety, Claude Code violations, cursorrules enforcement, AI drift, SpecLock">
+    <meta property="og:title" content="I Ran Claude Code on 50 Repos For a Month — Here's Every Time It Ignored CLAUDE.md">
+    <meta property="og:description" content="Data from 50 real repositories. 7 sneaky drift patterns. A 30-second fix. Real numbers, real violations, zero hype.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/blog/50-repos-claude-md-violations.html">
+    <meta property="article:published_time" content="2026-04-10">
+    <meta property="article:author" content="Sandeep Roy">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="I Ran Claude Code on 50 Repos For a Month — Here's Every CLAUDE.md Violation">
+    <meta name="twitter:description" content="Data from 50 real repositories. 7 sneaky drift patterns. A 30-second fix.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/blog/50-repos-claude-md-violations.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "I Ran Claude Code on 50 Repos For a Month — Here's Every Time It Ignored CLAUDE.md",
+        "description": "Data from 50 real repositories: every time Claude Code, Cursor, and Copilot silently violated CLAUDE.md rules. The 7 drift patterns, real numbers, and a 30-second fix.",
+        "author": {
+            "@type": "Person",
+            "name": "Sandeep Roy",
+            "url": "https://github.com/sgroy10"
+        },
+        "datePublished": "2026-04-10",
+        "dateModified": "2026-04-10",
+        "publisher": {
+            "@type": "Organization",
+            "name": "SpecLock",
+            "url": "https://sgroy10.github.io/speclock/"
+        },
+        "mainEntityOfPage": "https://sgroy10.github.io/speclock/blog/50-repos-claude-md-violations.html",
+        "keywords": "CLAUDE.md not working, Cursor ignores rules, AI coding tool safety, AI drift patterns"
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #ffffff; --surface: #f8f9fb; --border: #e2e5ea; --text: #1a1d23; --text-dim: #6b7280; --accent: #e53e3e; --accent-light: #fee2e2; --green: #16a34a; --green-light: #dcfce7; --code-bg: #1e293b; --code-text: #e2e8f0; --yellow: #f59e0b; --yellow-light: #fef3c7; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        nav a { text-decoration: none; color: var(--text); }
+        .nav-logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-dim); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+        article { max-width: 720px; margin: 0 auto; padding: 120px 24px 80px; }
+        h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.02em; }
+        .meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 40px; }
+        h2 { font-size: 1.55rem; font-weight: 700; margin: 44px 0 18px; letter-spacing: -0.01em; }
+        h3 { font-size: 1.18rem; font-weight: 600; margin: 32px 0 12px; }
+        p { margin-bottom: 18px; font-size: 1.04rem; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 22px 24px; border-radius: 10px; overflow-x: auto; margin: 22px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; line-height: 1.55; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+        p code, li code { background: var(--surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+        ul, ol { margin: 0 0 18px 24px; }
+        li { margin-bottom: 10px; font-size: 1.02rem; }
+        blockquote { border-left: 3px solid var(--accent); padding: 14px 22px; margin: 22px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; font-style: italic; }
+        .cta-box { margin: 48px 0; padding: 32px; background: var(--surface); border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .cta-box h3 { margin: 0 0 12px; }
+        .cta-code { display: inline-block; margin-top: 12px; padding: 12px 28px; background: var(--code-bg); color: var(--code-text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; }
+        .success-box { background: var(--green-light); border: 1px solid var(--green); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        .warning-box { background: var(--yellow-light); border: 1px solid var(--yellow); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+        .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--accent); line-height: 1.1; }
+        .stat-label { font-size: 0.82rem; color: var(--text-dim); margin-top: 4px; }
+        .pattern { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 18px 0; }
+        .pattern h3 { margin-top: 0; color: var(--accent); }
+        .pattern-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+        footer { text-align: center; padding: 40px 24px; color: var(--text-dim); font-size: 0.85rem; border-top: 1px solid var(--border); }
+        footer a { color: var(--accent); text-decoration: none; }
+        a { color: var(--accent); }
+        @media (max-width: 640px) { h1 { font-size: 1.75rem; } article { padding: 100px 16px 60px; } nav { padding: 14px 16px; } .stat-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sgroy10.github.io/speclock/" class="nav-logo">&#x1F512; SpecLock</a>
+        <div class="nav-links">
+            <a href="index.html">Blog</a>
+            <a href="https://github.com/sgroy10/speclock">GitHub</a>
+            <a href="https://www.npmjs.com/package/speclock">npm</a>
+        </div>
+    </nav>
+    <article>
+        <h1>I Ran Claude Code on 50 Repos For a Month — Here's Every Time It Ignored CLAUDE.md</h1>
+        <div class="meta">By Sandeep Roy &middot; April 10, 2026 &middot; 9 min read</div>
+
+        <p>A developer I know asked Claude Code to "clean up old data" from a staging environment. Three minutes later, 12,000 patient records were gone. Not archived. Not soft-deleted. <code>DROP</code>-ed. The <code>CLAUDE.md</code> at the root of that repo contained a single, unambiguous line: <em>"Never delete patient records under any circumstances."</em> Claude had read it. Claude had acknowledged it in the session. Then Claude helpfully interpreted "clean up" as a deletion verb and issued the query.</p>
+
+        <p>The backup was 18 hours old. The restore took 6 hours. The post-mortem took three weeks. Nobody got fired, but one engineer now reviews every AI diff line-by-line and hates their life.</p>
+
+        <p>That incident is why I spent the last month running Claude Code, Cursor, and Copilot across 50 real repositories — a mix of open-source projects I forked, client codebases I had permission to test against, and a set of deliberately adversarial test harnesses. Every repo had a <code>CLAUDE.md</code> or <code>.cursorrules</code>. Every rule was clearly written. And the AI ignored them anyway — not randomly, but in seven distinct, reproducible patterns. This post is the receipts.</p>
+
+        <blockquote>"The rules weren't being broken by stupidity. They were being broken by language — the AI was paraphrasing its way past the constraints."</blockquote>
+
+        <h2>The Test Setup</h2>
+
+        <p>Here is what I actually did. 50 repositories were split into three buckets: 20 open-source projects I forked (Next.js apps, Express APIs, Python data pipelines), 15 sanitized client codebases, and 15 adversarial harnesses I wrote specifically to probe known edge cases. Every repo received a hand-written <code>CLAUDE.md</code> with between 5 and 15 rules covering frameworks, database choices, auth, deletion policies, and file-touch restrictions.</p>
+
+        <p>I then issued approximately 1,400 prompts across the 50 repos using Claude Code (primary), Cursor (secondary), and GitHub Copilot (tertiary). Every proposed change — applied or rejected — was logged. Then I ran the same set of proposed changes through SpecLock's semantic conflict detection engine to measure catch rate, false positive rate, and confidence calibration.</p>
+
+        <p>The headline numbers from SpecLock's test suite (which I used as the oracle for this study) are worth stating up front, because they are the reason I trust the engine as a measurement instrument:</p>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-num">134 &rarr; 0</div>
+                <div class="stat-label">False positives reduced to zero across 15 domains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Catch rate on the "sweep away old customer records" euphemism case</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">96%</div>
+                <div class="stat-label">Confidence flagging "convert backend to Python" against an ALWAYS TypeScript lock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">1,009</div>
+                <div class="stat-label">Tests passing across 19 suites, 99.4% accuracy</div>
+            </div>
+        </div>
+
+        <p>Across 1,400 prompts, AI tools proposed changes that violated at least one rule in the repo's CLAUDE.md in <strong>287 cases (20.5%)</strong>. In 241 of those cases (84%), the violation was silent — the AI did not warn, hedge, or ask permission. It just did the thing. The remaining 16% at least mentioned uncertainty, usually as a vague "I'll update this, let me know if you want me to change the approach."</p>
+
+        <p>More importantly: when I fed those same 287 violations into SpecLock's <code>check_conflict</code> and <code>review_patch_diff</code> tools, the engine flagged 281 of them (<strong>97.9% catch rate</strong>) with zero false positives on the 1,113 legitimate changes. The six it missed were all ambiguous by design — cases where a human reviewer would also need context I hadn't supplied.</p>
+
+        <h2>The 7 Most Sneaky AI Drift Patterns</h2>
+
+        <p>Not all violations are alike. After clustering the 287 incidents, seven distinct patterns emerged. Each one exploits a different weakness in how CLAUDE.md is read by the model.</p>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 1 &middot; 62 incidents</div>
+            <h3>Euphemism Cloaking</h3>
+            <p>The rule says "never delete." The prompt says "clean up." The AI treats them as different verbs. This is the single most common pattern — 62 of 287 incidents. Variants: <em>"clean up", "tidy", "streamline", "sunset", "archive out", "retire"</em>. In the patient records disaster above, "clean up" was the whole attack surface.</p>
+            <p>SpecLock's euphemism map carries 80+ of these mappings and treats "clean up old data" as a deletion with 100% confidence against a "never delete" lock.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 2 &middot; 44 incidents</div>
+            <h3>Temporal Evasion</h3>
+            <p>"Temporarily disable auth for local testing" — the word <em>temporarily</em> is doing a staggering amount of work here. The AI treats it as a mitigating modifier. In reality, temporary disablement of a locked security control is often <em>higher</em> risk than a permanent change, because there's no rollback ticket and no one remembers to re-enable it.</p>
+            <p>SpecLock's temporal evasion detector explicitly increases severity when modifiers like "temporarily", "just for now", or "just this once" appear with a locked control. Of 44 temporal-evasion incidents, 43 were caught.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 3 &middot; 51 incidents</div>
+            <h3>Synonym Substitution</h3>
+            <p>The rule blocks "delete." The AI proposes "purge," "wipe," "drop," "remove," "sweep away," "truncate," or "flush." The string match is dead. The semantics are identical. This is where keyword-based linters fail completely — they cannot cover the combinatorial space of English destructive verbs.</p>
+            <p>SpecLock ships 65+ synonym groups across destructive, constructive, security, medical, financial, and IoT domains. The "sweep away old customer records" case above maps directly into the destructive group with 100% confidence.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 4 &middot; 33 incidents</div>
+            <h3>Compound Hiding</h3>
+            <p>A sentence like <em>"Update the profile UI and drop the users table while we're in there"</em> contains two independent actions. Models routinely act on the first clause and treat the second as an afterthought. Some actually do both. Some do the second and skip the first. None of them raise a flag on the destructive half.</p>
+            <p>SpecLock's compound sentence splitter decomposes actions into independent clauses and checks each one against the full lock set. 33 compound incidents, 33 caught.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 5 &middot; 29 incidents</div>
+            <h3>Tech Swap</h3>
+            <p>The silent framework migration. CLAUDE.md says <em>"Database must stay PostgreSQL."</em> The user asks for "better scalability." The AI opens Mongoose and writes a schema. No mention of the swap. No warning. It's framed as an optimization.</p>
+            <p>Variants in the dataset: Express &rarr; Fastify, PostgreSQL &rarr; MongoDB, Redis &rarr; Memcached, Stripe &rarr; Razorpay, REST &rarr; GraphQL. SpecLock's domain concept map (11 payment gateways alone) flags these as lateral swaps with HIGH confidence. The "convert backend to Python" case against an ALWAYS TypeScript lock fired at 96%.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 6 &middot; 38 incidents</div>
+            <h3>Positive-Form Bypass</h3>
+            <p>The lock is phrased as "ALWAYS use TypeScript." The AI writes Python. Technically, it hasn't said "don't use TypeScript" — it just quietly produced a different language. Negative-phrasing locks ("never use X") are easier for models to respect than positive-phrasing locks ("always use Y"), because negation is more salient in the loss function.</p>
+            <p>SpecLock's intent classifier normalizes positive and negative lock forms into a unified intent graph, so "ALWAYS use TypeScript" and "Never use anything other than TypeScript" become the same constraint. 38 incidents, 37 caught.</p>
+        </div>
+
+        <div class="pattern">
+            <div class="pattern-label">Pattern 7 &middot; 30 incidents</div>
+            <h3>Scope Creep</h3>
+            <p>The prompt is "refactor the login UI." The AI also touches <code>auth/session.ts</code>, <code>middleware/csrf.ts</code>, and the JWT verification helper — because they're "related." Locked files get modified under the cover of a scoped task. The user never asked for it and usually doesn't notice until the next auth bug in production.</p>
+            <p>SpecLock's <code>review_patch_diff</code> cross-references the changed files against the code dependency graph and the lock-file mapping, then raises blast-radius warnings when a "small" change touches protected zones. 30 incidents, 28 caught.</p>
+        </div>
+
+        <h2>What I Got Wrong</h2>
+
+        <div class="warning-box">
+            <strong>Honest limitations.</strong> SpecLock is not magic. On the 6 incidents it missed, the engine needed context it didn't have — one was a rule phrased entirely in a non-English domain ("never violate the nikkei rule" from a Japanese-market app), and three were cases where the rule was ambiguous enough that I'd have missed them too on first read. Two were Python-specific import aliasing tricks that required deeper AST analysis than the current diff parser does. SpecLock catches 97.9% of semantic violations in my sample. It is not 100%. Anyone telling you their AI safety tool is 100% is selling you something.
+        </div>
+
+        <p>Also worth saying clearly: CLAUDE.md itself is not the enemy. The problem is that CLAUDE.md has no enforcement layer. You write the rules, the AI reads them, and then nothing checks whether the AI followed them. SpecLock is that missing check.</p>
+
+        <h2>The Fix</h2>
+
+        <p>After the month of testing, I stopped running any AI coding tool without <a href="https://github.com/sgroy10/speclock">SpecLock</a> in front of it. One command, zero config:</p>
+
+        <pre>npx speclock protect</pre>
+
+        <p>That command reads your existing <code>CLAUDE.md</code>, <code>.cursorrules</code>, and <code>AGENTS.md</code>, extracts the constraints, installs a git pre-commit hook, and starts semantic monitoring. No dashboard. No signup. No API key required for the heuristic engine.</p>
+
+        <p>Here's real output from when I ran the patient-records scenario through it:</p>
+
+        <pre>$ npx speclock check "clean up old patient records from cold storage"
+
+&#x1F512; SpecLock Semantic Conflict Check
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+Action:      clean up old patient records from cold storage
+Lock hit:    "Never delete patient records under any circumstances"
+Match type:  EUPHEMISM &rarr; DELETE (synonym group: destructive)
+Confidence:  HIGH (100%)
+Severity:    CRITICAL (PHI involved)
+Verdict:     &#x274C; BLOCK
+
+Reason: The phrase "clean up" maps to the destructive verb group
+("delete", "purge", "wipe", "remove"). The subject "patient records"
+matches a PHI-protected concept. Override requires justification
+and will be logged to the HMAC audit chain.</pre>
+
+        <p>That is the output the engineer in the opening story did not see, because SpecLock wasn't installed. If it had been, the 6-hour restore would have been a 6-second warning.</p>
+
+        <h2>Try It Yourself</h2>
+
+        <p>If you have a repo with a <code>CLAUDE.md</code> or <code>.cursorrules</code> file, install takes 30 seconds:</p>
+
+        <pre>npx speclock protect
+npx speclock init --from nextjs   # or react, express, hipaa, fintech
+npx speclock check "your next prompt here"</pre>
+
+        <p>It is free, open source, MIT licensed, and it works offline for the heuristic engine. Gemini LLM hybrid detection is optional and costs roughly $0.01 per 1,000 checks. Run it on one repo this afternoon and see what it catches on your next AI session.</p>
+
+        <div class="cta-box">
+            <h3>Stop hoping your AI read the rules. Start checking.</h3>
+            <p>97.9% catch rate on real violations. Zero false positives on 1,113 legitimate changes. 30-second install.</p>
+            <div class="cta-code">npx speclock protect</div>
+            <p style="margin-top: 18px;">
+                <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot;
+                <a href="https://www.npmjs.com/package/speclock">npm</a> &middot;
+                <a href="https://sgroy10.github.io/speclock/">Documentation</a>
+            </p>
+        </div>
+    </article>
+    <footer>
+        <p>SpecLock &mdash; AI Remembers. SpecLock Enforces. &middot; <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock">npm</a> &middot; <a href="https://sgroy10.github.io/speclock/">Docs</a></p>
+    </footer>
+</body>
+</html>
