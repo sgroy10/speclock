@@ -1,10 +1,10 @@
 # SpecLock
 
-> AI Constraint Engine that enforces CLAUDE.md, .cursorrules, and AGENTS.md rules as laws. Your AI remembers your rules — SpecLock makes it obey them. 51 MCP tools, 991 tests, 0 false positives.
+> AI Constraint Engine that enforces CLAUDE.md, .cursorrules, and AGENTS.md rules as laws. Your AI remembers your rules — SpecLock makes it obey them. 51 MCP tools, 1034 tests, 0 false positives.
 
 SpecLock is the only tool that stops AI coding assistants from breaking things you told them not to touch. Other tools remember context. SpecLock enforces it — across sessions, across tools, across teams. It provides semantic conflict detection scored 100/100 on independent adversarial testing, hard enforcement that blocks AI from proceeding on violations, tamper-proof HMAC audit trails, and universal rules sync across all major AI coding tools.
 
-- **Version:** 5.5.3
+- **Version:** 5.6.1
 - **Author:** Sandeep Roy
 - **License:** MIT
 - **npm:** [speclock](https://www.npmjs.com/package/speclock)
@@ -12,7 +12,7 @@ SpecLock is the only tool that stops AI coding assistants from breaking things y
 - **Official MCP Registry:** io.github.sgroy10/speclock
 - **Website:** [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/)
 - **Smithery:** [sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
-- **Tests:** 991 tests across 19 suites, 0 false positives, 15.7ms per check
+- **Tests:** 1034 tests across 23 suites, 0 false positives, 15.7ms per check
 - **MCP Tools:** 51
 - **Dependencies:** 3 npm dependencies. Zero runtime dependencies for the semantic engine. Pure JavaScript.
 

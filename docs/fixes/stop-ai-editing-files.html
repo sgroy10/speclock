@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop AI From Editing Files It Shouldn't Touch | SpecLock</title>
+    <meta name="description" content="Your AI agent keeps touching files you told it to leave alone. CLAUDE.md and .cursorrules don't stop it because they only suggest. SpecLock turns 'never modify auth.ts' into a hard runtime block across Claude Code, Cursor, Windsurf, Cline, and Copilot.">
+    <meta property="og:title" content="Stop AI From Editing Files It Shouldn't Touch">
+    <meta property="og:description" content="Rules files suggest. They don't enforce. SpecLock makes 'never touch this file' a constraint your coding agent physically can't break.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/fixes/stop-ai-editing-files.html">
+    <meta property="og:image" content="https://sgroy10.github.io/speclock/og-image.png">
+    <meta property="article:published_time" content="2026-06-06">
+    <meta property="article:author" content="Sandeep Roy">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Stop AI From Editing Files It Shouldn't Touch">
+    <meta name="twitter:description" content="Rules files suggest. SpecLock enforces. Make 'never touch this file' a hard block across every AI coding tool.">
+    <meta name="twitter:image" content="https://sgroy10.github.io/speclock/og-image.png">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/fixes/stop-ai-editing-files.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Stop AI From Editing Files It Shouldn't Touch",
+        "description": "Rules files suggest, they don't enforce. SpecLock turns 'never modify this file' into a hard runtime constraint across Claude Code, Cursor, Windsurf, Cline, and Copilot.",
+        "author": {
+            "@type": "Person",
+            "name": "Sandeep Roy",
+            "url": "https://github.com/sgroy10"
+        },
+        "datePublished": "2026-06-06",
+        "dateModified": "2026-06-06",
+        "publisher": {
+            "@type": "Organization",
+            "name": "SpecLock",
+            "url": "https://sgroy10.github.io/speclock/"
+        },
+        "mainEntityOfPage": "https://sgroy10.github.io/speclock/fixes/stop-ai-editing-files.html"
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #ffffff; --surface: #f8f9fb; --border: #e2e5ea; --text: #1a1d23; --text-dim: #6b7280; --accent: #FF6B2C; --accent-light: #fff0e8; --green: #16a34a; --green-light: #dcfce7; --red: #e53e3e; --red-light: #fee2e2; --code-bg: #1e293b; --code-text: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        nav a { text-decoration: none; color: var(--text); }
+        .nav-logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-dim); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+        article { max-width: 700px; margin: 0 auto; padding: 120px 24px 80px; }
+        h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+        .meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 40px; }
+        h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 16px; }
+        h3 { font-size: 1.15rem; font-weight: 600; margin: 28px 0 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 20px 24px; border-radius: 10px; overflow-x: auto; margin: 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.5; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+        p code, li code { background: var(--surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+        ul, ol { margin: 0 0 18px 24px; }
+        li { margin-bottom: 8px; font-size: 1.02rem; }
+        blockquote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 20px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; }
+        .cta-box { margin: 48px 0; padding: 32px; background: var(--surface); border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .cta-box h3 { margin: 0 0 12px; }
+        .cta-code { display: inline-block; margin-top: 12px; padding: 12px 28px; background: var(--code-bg); color: var(--code-text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; }
+        .success-box { background: var(--green-light); border: 1px solid var(--green); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        .block-box { background: var(--red-light); border: 1px solid var(--red); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        footer { text-align: center; padding: 40px 24px; color: var(--text-dim); font-size: 0.85rem; }
+        footer a { color: var(--accent); text-decoration: none; }
+        a { color: var(--accent); }
+        @media (max-width: 640px) { h1 { font-size: 1.7rem; } article { padding: 100px 16px 60px; } nav { padding: 14px 16px; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sgroy10.github.io/speclock/" class="nav-logo">&#x1F512; SpecLock</a>
+        <div class="nav-links">
+            <a href="../blog/index.html">Blog</a>
+            <a href="https://github.com/sgroy10/speclock">GitHub</a>
+            <a href="https://www.npmjs.com/package/speclock">npm</a>
+        </div>
+    </nav>
+    <article>
+        <h1>Stop AI From Editing Files It Shouldn't Touch</h1>
+        <div class="meta">By Sandeep Roy &middot; June 6, 2026 &middot; 5 min read</div>
+
+        <p>You asked for one small change. "Add a loading spinner to the dashboard." Twenty minutes later you're reading a diff that also rewrote <code>auth.ts</code>, "tidied up" your migrations folder, and quietly deleted the rate-limiter you spent a week getting right.</p>
+
+        <p>You did everything you were supposed to do. Your <code>CLAUDE.md</code> says, in bold: <em>"NEVER modify authentication files."</em> Your <code>.cursorrules</code> says it too. And the agent still touched them &mdash; then told you it had "improved" your codebase.</p>
+
+        <p>This is the single most common grievance from people working with AI coding agents: <em>"the agents do not do what they're told &mdash; they do what they want"</em> (<a href="https://medium.com/design-bootcamp/claude-code-keeps-breaking-things-i-didnt-touch-here-s-how-i-fixed-it-d0dc22d3029d">Medium</a>). Scope creep isn't a one-off. It's the default behavior.</p>
+
+        <h2>Why "Never Touch This File" Doesn't Work</h2>
+
+        <p>The reason is structural, not a bug you can prompt your way out of. A rules file &mdash; <code>CLAUDE.md</code>, <code>.cursorrules</code>, <code>AGENTS.md</code> &mdash; is loaded into the model's context as <strong>suggestions</strong>. The model reads them, weighs them against your latest prompt, and picks whatever feels most immediate. Usually your prompt wins and the rule loses.</p>
+
+        <p>It gets worse as the file grows. LLMs reliably follow roughly 150&ndash;200 instructions before attention thins out, and Claude Code's own system prompt already eats a chunk of that budget. The result is well-documented: <em>"rules at the top are followed, rules at the bottom intermittently or not at all"</em> (<a href="https://news.ycombinator.com/item?id=46102048">Hacker News</a>). Cursor users report the same thing &mdash; an entire forum thread titled <a href="https://forum.cursor.com/t/cursor-just-ignores-rules/69188">"Cursor just ignores rules."</a></p>
+
+        <p>So your "never touch auth" rule is real, it's written down, and there is <strong>nothing between the rule and the file</strong>. No mechanism checks the proposed edit against the rule before it lands. The violation passes silently. You find out in code review &mdash; or in production.</p>
+
+        <h2>The Fix: Make the Boundary a Hard Constraint</h2>
+
+        <p><a href="https://github.com/sgroy10/speclock">SpecLock</a> is an open-source AI constraint engine that reads the rules you already wrote and enforces them as <strong>runtime hard constraints</strong>. Instead of hoping the model remembers "don't touch auth," SpecLock checks every proposed change against your locks and <em>blocks</em> the ones that would cross a line you drew.</p>
+
+        <p>One command, no new files to author:</p>
+
+        <pre>npx speclock protect</pre>
+
+        <p>SpecLock reads your existing <code>CLAUDE.md</code> / <code>.cursorrules</code> / <code>AGENTS.md</code>, discovers the rules in them, and turns prose like "never modify authentication files" into a lock it can actually enforce. It runs as an MCP server (51 tools) and works across Claude Code, Cursor, Windsurf, Cline, and Copilot &mdash; the same boundary, every agent.</p>
+
+        <h2>Before and After: An Actual Block</h2>
+
+        <p>Say you have this lock, derived from your rules file:</p>
+
+        <pre>Lock: NEVER modify auth files (src/auth/**)</pre>
+
+        <h3>Before SpecLock</h3>
+
+        <p>You ask for a spinner. The agent decides <code>src/auth/session.ts</code> needs "a small cleanup" along the way. The edit applies. The diff is buried in a 14-file changeset. Nothing flags it. You merge.</p>
+
+        <div class="block-box">
+            <strong>After SpecLock &mdash; the change is intercepted:</strong>
+            <pre style="margin-top: 12px;">&#x1F512; BLOCKED by SpecLock
+
+  Proposed: edit src/auth/session.ts
+  Conflicts with lock: "NEVER modify auth files (src/auth/**)"
+  Confidence: HIGH
+
+  This change was not part of your request and touches a
+  locked path. Override explicitly or leave auth untouched.</pre>
+        </div>
+
+        <p>The agent can't quietly slip the edit past you. The block is loud, it names the exact constraint, and you decide &mdash; reject it, or explicitly override if you genuinely meant to. Either way the change is <strong>visible and intentional</strong> instead of silent and accidental.</p>
+
+        <div class="success-box">
+            <strong>Semantic, not just path-matching.</strong> SpecLock also catches the sneaky route &mdash; moving auth logic into a "helper" file and deleting the original, or "refactoring login into a simpler pattern" that quietly strips it out. It reads what the change <em>means</em>, not just which path it hit.
+        </div>
+
+        <h2>Lock the Files It Keeps Breaking. Let It Work Everywhere Else.</h2>
+
+        <p>The point isn't to cage the agent. It's to draw a fence around the handful of files that must not change &mdash; auth, migrations, payment logic, that one config &mdash; and let the AI move fast everywhere else. You keep the speed. You lose the 2 a.m. "wait, why did it touch <em>that</em>?" surprise.</p>
+
+        <p>And when SpecLock blocks something, it keeps the receipt. Run <code>speclock wins</code> to get a shareable "Save Receipt" of exactly what it stopped &mdash; proof, and a story worth telling.</p>
+
+        <div class="cta-box">
+            <h3>Stop hoping it respects the boundary. Enforce it.</h3>
+            <p>SpecLock is free, open source, and takes one command to set up.</p>
+            <div class="cta-code">npx speclock protect</div>
+            <p style="margin-top: 16px;">
+                <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot;
+                <a href="https://www.npmjs.com/package/speclock">npm</a> &middot;
+                <a href="https://sgroy10.github.io/speclock/">Documentation</a>
+            </p>
+        </div>
+    </article>
+    <footer>
+        <p>SpecLock &mdash; Your rules, enforced. Not suggested. &middot; <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock">npm</a> &middot; <a href="https://sgroy10.github.io/speclock/">Docs</a></p>
+    </footer>
+</body>
+</html>

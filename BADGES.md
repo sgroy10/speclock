@@ -124,24 +124,24 @@ After running `speclock protect`, you can also run `speclock badge` to print the
 
 ## 5. Tests Passing
 
-![Tests](https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success)
+![Tests](https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success)
 
 **Markdown**
 
 ```markdown
-[![Tests](https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success)](https://github.com/sgroy10/speclock)
+[![Tests](https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success)](https://github.com/sgroy10/speclock)
 ```
 
 **HTML**
 
 ```html
-<a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests"></a>
+<a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success" alt="Tests"></a>
 ```
 
 **reStructuredText**
 
 ```rst
-.. image:: https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success
+.. image:: https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success
    :target: https://github.com/sgroy10/speclock
    :alt: Tests
 ```
@@ -183,7 +183,7 @@ After running `speclock protect`, you can also run `speclock badge` to print the
 ```markdown
 [![Protected by SpecLock](https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock)](https://github.com/sgroy10/speclock)
 [![SpecLock](https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock)](https://www.npmjs.com/package/speclock)
-[![Tests](https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success)](https://github.com/sgroy10/speclock)
+[![Tests](https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success)](https://github.com/sgroy10/speclock)
 [![Downloads](https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C)](https://www.npmjs.com/package/speclock)
 ```
 

@@ -25,7 +25,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1009%20passing-success" alt="Tests" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success" alt="Tests" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads" /></a>
 </p>
 
@@ -49,8 +49,11 @@ speclock doctor                   # Verify everything is set up correctly
 
 That's it. Your AI now has rules it can't ignore. Default mode is WARN (loud warnings, no blocks). Opt in to hard enforcement with `speclock protect --strict`.
 
-## What's New in v5.5.4
+## What's New in v5.6.1
 
+- **`speclock wins`** — a shareable "Save Receipt" of everything SpecLock blocked your AI from doing. Screenshot-ready and screenshot-worthy.
+- **`speclock wrapped`** — a Spotify-Wrapped-style recap of your saves, all-time and monthly (alias: `speclock recap`).
+- **Dynamic "🔒 N violations blocked" README badge** — a new live badge variant that shows the real number of violations SpecLock has blocked for you. Add it with `speclock badge`.
 - **Default WARN mode** — no more false-positive blocks. Loud warnings instead. Opt in to strict with `--strict` or `SPECLOCK_STRICT=1`.
 - **`speclock mcp install <client>`** — autoinstaller for Claude Code, Cursor, Windsurf, Cline, Codex. No more hand-editing JSON.
 - **Greenfield support** — `speclock protect` in fresh projects auto-creates CLAUDE.md with safe defaults.
@@ -71,6 +74,8 @@ speclock check "action description"   # Test if an action would conflict with lo
 speclock add-lock "rule"              # Add a new lock
 speclock list-locks                   # Show all locks
 speclock enforce hard|advisory        # Change enforcement mode
+speclock wins                         # Shareable "Save Receipt" of what SpecLock blocked (screenshot it!)
+speclock wrapped                      # Spotify-Wrapped-style recap of your saves (alias: recap)
 ```
 
 Full command reference: `npx speclock help`
@@ -90,7 +95,7 @@ AI:     ⚠️  BLOCKED — violates lock "Never touch the auth system"
         Should I find another approach?
 ```
 
-**100/100 on Claude's independent test suite. 991 tests across 19 suites. 0 false positives. 15.7ms per check.**
+**100/100 on Claude's independent test suite. 1034 tests across 23 suites. 0 false positives. 15.7ms per check.**
 
 ## The Problem
 
@@ -489,6 +494,12 @@ speclock drift --days 7                        # Last 7 days only
 speclock coverage                              # Lock Coverage Audit
 speclock strengthen                            # Grade and improve locks
 
+# Share & Stats
+speclock wins                                  # Shareable "Save Receipt" (screenshot it!)
+speclock wrapped                               # All-time + monthly recap (alias: recap)
+speclock stats                                 # Your local usage dashboard
+speclock badge                                 # Print README badges (6 variants + live badge)
+
 # Auth
 speclock auth create-key --role developer
 speclock auth rotate-key <keyId>
@@ -577,7 +588,7 @@ The AI opens the file and sees:
 
 ## Test Results
 
-**Pre-publish gate runs all 18 suites before every npm publish. If any test fails, publish is blocked.**
+**Pre-publish gate runs all 23 suites before every npm publish. If any test fails, publish is blocked.**
 
 | Suite | Tests | Pass Rate | What it covers |
 |-------|------:|----------:|----------------|
@@ -600,9 +611,9 @@ The AI opens the file and sees:
 | REST API v2 | 9 | 100% | Typed constraint endpoints, SSE |
 | PII/Export Detection | 8 | 100% | SSN, email export, data access violations |
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
-| **Total** | **991** | **100%** | **19 suites, 15+ domains** |
+| **Total** | **1034** | **100%** | **23 suites, 15+ domains** |
 
-**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.5.4. Zero false positives. Zero missed violations. 15.7ms per check.
+**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.6.1. Zero false positives. Zero missed violations. 15.7ms per check.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
@@ -630,7 +641,7 @@ Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aero
 
 ## Changelog
 
-Prior-version feature tours. The Quick Start and What's New sections above cover v5.5.4 — this section preserves details on features shipped in v5.0–v5.4.
+Prior-version feature tours. The Quick Start and What's New sections above cover v5.6.1 — this section preserves details on features shipped in v5.0–v5.5.
 
 ### v5.4 — Drift Score, Lock Coverage, Lock Strengthener
 
@@ -891,4 +902,4 @@ Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that 
 
 ---
 
-<p align="center"><i>SpecLock v5.5.4 — Your AI has rules. SpecLock makes them unbreakable. 991 tests, 100% pass rate, 51 MCP tools, Default WARN mode, MCP Autoinstaller, Greenfield support, Doctor health check. Developed by Sandeep Roy.</i></p>
+<p align="center"><i>SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable. 1034 tests, 100% pass rate, 51 MCP tools, Save Receipt (speclock wins), Wrapped recap, Default WARN mode, MCP Autoinstaller, Greenfield support, Doctor health check. Developed by Sandeep Roy.</i></p>

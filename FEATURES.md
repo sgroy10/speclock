@@ -1,4 +1,4 @@
-# SpecLock v5.5.3 — Complete Feature Guide
+# SpecLock v5.6.1 — Complete Feature Guide
 
 **AI Constraint Engine** — The only tool that gives AI coding assistants persistent memory AND active constraint enforcement across sessions.
 
@@ -23,6 +23,7 @@ SpecLock creates a `.speclock/` directory in your project that serves as **persi
 - **Changes** — What was built and when
 - **Sessions** — Which AI tools worked on the project and what they did
 - **Events** — Immutable HMAC-signed audit trail of everything that happened
+- **Save Receipt** — `speclock wins` turns those blocked violations into a shareable, screenshot-ready receipt of everything SpecLock stopped your AI from doing (with `speclock wrapped` for a Spotify-Wrapped-style recap)
 
 The AI reads this memory at the start of every session and is **blocked from violating constraints** — not just warned.
 
@@ -84,7 +85,7 @@ This is the breakthrough — SpecLock works on platforms that don't support MCP 
 
 Not keyword matching — **real semantic analysis** with Gemini Flash LLM hybrid for universal domain coverage.
 
-**991 tests across 19 suites. 99.4% accuracy. 0 false positives across 15 domains (fintech, e-commerce, IoT, healthcare, SaaS, robotics, autonomous systems, and more).**
+**1034 tests across 23 suites. 99.4% accuracy. 0 false positives across 15 domains (fintech, e-commerce, IoT, healthcare, SaaS, robotics, autonomous systems, and more).**
 
 The engine includes:
 - **65+ synonym groups** — Maps across destructive, constructive, modification, security, medical, financial, IoT, payments, and DevOps domains
@@ -371,6 +372,10 @@ npx speclock auth list-keys
 npx speclock status
 npx speclock serve --project .              # Start MCP server
 npx speclock watch                          # File watcher
+
+# Share & Recap
+npx speclock wins                           # Shareable "Save Receipt" of blocked actions
+npx speclock wrapped                        # Spotify-Wrapped-style recap (alias: recap)
 ```
 
 ---
@@ -406,7 +411,7 @@ npx speclock watch                          # File watcher
                          runs CLI commands)
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
-│              SpecLock Core Engine v5.5.3               │
+│              SpecLock Core Engine v5.6.1               │
 │  Semantic Engine | Enforcer | Policy | Audit | Git    │
 │  Gemini LLM Hybrid | HMAC Chain | RBAC | Encryption  │
 └──────────────────────┬───────────────────────────────┘
@@ -422,7 +427,7 @@ npx speclock watch                          # File watcher
 
 ---
 
-## Test Results (v5.5.2)
+## Test Results (v5.6.1)
 
 | Suite | Tests | Pass Rate | Domain |
 |-------|------:|----------:|--------|
@@ -445,7 +450,7 @@ npx speclock watch                          # File watcher
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
 | John (Indie Dev Journey) | 86 | 100% | 8-session Bolt.new build |
 | Sam (Enterprise HIPAA) | 124 | 100% | HIPAA locks, PHI, encryption, RBAC |
-| **Total** | **991** | **100%** | **19 suites** |
+| **Total** | **1034** | **100%** | **23 suites** |
 
 ---
 
@@ -459,4 +464,4 @@ npx speclock watch                          # File watcher
 
 ---
 
-*SpecLock v5.5.3 — Your AI has rules. SpecLock makes them unbreakable. Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Spec Compiler, Code Graph, Drift Score, 51 MCP Tools, 991 tests, 100% accuracy. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*
+*SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable. Save Receipt (speclock wins), Wrapped recap, Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Spec Compiler, Code Graph, Drift Score, 51 MCP Tools, 1034 tests, 100% accuracy. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*

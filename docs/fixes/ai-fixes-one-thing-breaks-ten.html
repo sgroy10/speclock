@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fixes One Thing and Breaks Ten Others | SpecLock</title>
+    <meta name="description" content="Your AI fixes one bug and quietly breaks ten other things. It's the #1 vibe-coding complaint for a reason: nothing stops the agent from rewriting code it shouldn't. SpecLock locks the code that must not change and blocks the collateral damage before it lands.">
+    <meta property="og:title" content="AI Fixes One Thing and Breaks Ten Others">
+    <meta property="og:description" content="The classic 'it fixed one thing but destroyed ten others.' SpecLock fences off the code the AI must not touch, so a small fix stays a small fix.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/fixes/ai-fixes-one-thing-breaks-ten.html">
+    <meta property="og:image" content="https://sgroy10.github.io/speclock/og-image.png">
+    <meta property="article:published_time" content="2026-06-06">
+    <meta property="article:author" content="Sandeep Roy">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Fixes One Thing and Breaks Ten Others">
+    <meta name="twitter:description" content="Fix one thing, break ten? SpecLock locks the code that must not change and blocks the collateral damage before it lands.">
+    <meta name="twitter:image" content="https://sgroy10.github.io/speclock/og-image.png">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/fixes/ai-fixes-one-thing-breaks-ten.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "AI Fixes One Thing and Breaks Ten Others",
+        "description": "The #1 vibe-coding complaint: the AI fixes one thing but destroys ten others. SpecLock fences off the code the AI must not touch so a small fix stays a small fix.",
+        "author": {
+            "@type": "Person",
+            "name": "Sandeep Roy",
+            "url": "https://github.com/sgroy10"
+        },
+        "datePublished": "2026-06-06",
+        "dateModified": "2026-06-06",
+        "publisher": {
+            "@type": "Organization",
+            "name": "SpecLock",
+            "url": "https://sgroy10.github.io/speclock/"
+        },
+        "mainEntityOfPage": "https://sgroy10.github.io/speclock/fixes/ai-fixes-one-thing-breaks-ten.html"
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #ffffff; --surface: #f8f9fb; --border: #e2e5ea; --text: #1a1d23; --text-dim: #6b7280; --accent: #FF6B2C; --accent-light: #fff0e8; --green: #16a34a; --green-light: #dcfce7; --red: #e53e3e; --red-light: #fee2e2; --code-bg: #1e293b; --code-text: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        nav a { text-decoration: none; color: var(--text); }
+        .nav-logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-dim); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+        article { max-width: 700px; margin: 0 auto; padding: 120px 24px 80px; }
+        h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+        .meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 40px; }
+        h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 16px; }
+        h3 { font-size: 1.15rem; font-weight: 600; margin: 28px 0 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 20px 24px; border-radius: 10px; overflow-x: auto; margin: 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.5; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+        p code, li code { background: var(--surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+        ul, ol { margin: 0 0 18px 24px; }
+        li { margin-bottom: 8px; font-size: 1.02rem; }
+        blockquote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 20px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; }
+        .cta-box { margin: 48px 0; padding: 32px; background: var(--surface); border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .cta-box h3 { margin: 0 0 12px; }
+        .cta-code { display: inline-block; margin-top: 12px; padding: 12px 28px; background: var(--code-bg); color: var(--code-text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; }
+        .success-box { background: var(--green-light); border: 1px solid var(--green); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        .block-box { background: var(--red-light); border: 1px solid var(--red); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        footer { text-align: center; padding: 40px 24px; color: var(--text-dim); font-size: 0.85rem; }
+        footer a { color: var(--accent); text-decoration: none; }
+        a { color: var(--accent); }
+        @media (max-width: 640px) { h1 { font-size: 1.7rem; } article { padding: 100px 16px 60px; } nav { padding: 14px 16px; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sgroy10.github.io/speclock/" class="nav-logo">&#x1F512; SpecLock</a>
+        <div class="nav-links">
+            <a href="../blog/index.html">Blog</a>
+            <a href="https://github.com/sgroy10/speclock">GitHub</a>
+            <a href="https://www.npmjs.com/package/speclock">npm</a>
+        </div>
+    </nav>
+    <article>
+        <h1>AI Fixes One Thing and Breaks Ten Others</h1>
+        <div class="meta">By Sandeep Roy &middot; June 6, 2026 &middot; 5 min read</div>
+
+        <p>You report one bug. The login button is misaligned. The AI fixes it &mdash; and on its way out, "refactors" the form component, renames a prop three other screens depend on, and changes the validation logic so empty emails now slip through.</p>
+
+        <p>One thing fixed. Ten things broken. You spend the rest of the afternoon undoing help.</p>
+
+        <p>If that feels familiar, it's because it's the single most-repeated complaint in vibe coding. As one widely-shared roundup put it bluntly: <em>"it will fix one thing but destroy 10 other things in your code"</em> (<a href="https://www.morphllm.com/reddit-vibe-coding">morphllm / Reddit</a>). And it's not just hobbyists &mdash; that same write-up notes 16 of 18 CTOs surveyed reported an AI-caused production disaster.</p>
+
+        <h2>Why a "Small Fix" Turns Into a Blast Radius</h2>
+
+        <p>An AI agent doesn't have a concept of "the smallest change that solves this." When you ask it to fix one thing, it sees the whole file, the whole module, the whole repo &mdash; and it's eager. It "improves" adjacent code because improving looks helpful. It has no fence telling it <em>this part is done, do not touch it.</em></p>
+
+        <p>You might think your rules file covers this. You wrote <em>"don't change the public API," "don't touch the payment module," "keep the validation strict."</em> But a rules file only <strong>suggests</strong>. The model reads it, then weighs it against your latest prompt &mdash; and "fix the login button" feels more urgent than a rule it skimmed 40 messages ago. Worse, once the file gets long, the rules at the bottom get followed <em>"intermittently or not at all"</em> (<a href="https://news.ycombinator.com/item?id=46102048">Hacker News</a>).</p>
+
+        <p>So there's nothing actually <em>holding the line</em> between the one file you wanted changed and the ten you didn't. The collateral edits land in the same diff, and you only catch them if you read every line.</p>
+
+        <h2>The Fix: Fence the Code That Must Not Change</h2>
+
+        <p><a href="https://github.com/sgroy10/speclock">SpecLock</a> is an open-source AI constraint engine. It reads the rules you already wrote and enforces them as <strong>runtime hard constraints</strong> &mdash; so the agent can fix the one thing you asked for and is <em>blocked</em> from quietly rewriting the rest.</p>
+
+        <pre>npx speclock protect</pre>
+
+        <p>That one command reads your existing <code>CLAUDE.md</code> / <code>.cursorrules</code> / <code>AGENTS.md</code>, turns the rules into locks, and starts enforcing across Claude Code, Cursor, Windsurf, Cline, and Copilot. No config, no new files to write. It runs as an MCP server with 51 tools, including <code>blast_radius</code> &mdash; which shows you exactly how far a proposed change reaches <em>before</em> it lands.</p>
+
+        <h2>Before and After: Containing the Damage</h2>
+
+        <p>Say SpecLock has these locks, derived from your rules:</p>
+
+        <pre>Lock 1: Do not modify the public API surface (src/api/**)
+Lock 2: Payment logic is frozen (src/billing/**)
+Lock 3: Validation must stay strict (no relaxing email/required checks)</pre>
+
+        <h3>Before SpecLock</h3>
+
+        <p>You ask: "Fix the misaligned login button." The agent fixes the CSS &mdash; and also edits <code>src/api/user.ts</code>, renames a prop, and loosens the email validator. All in one 9-file diff. It merges. Three screens break in production by morning.</p>
+
+        <div class="block-box">
+            <strong>After SpecLock &mdash; the collateral edits are stopped:</strong>
+            <pre style="margin-top: 12px;">&#x1F512; SpecLock reviewed this changeset
+
+  &#10003; src/components/LoginButton.css   allowed (your request)
+  &#10007; src/api/user.ts                  BLOCKED
+        violates Lock 1: public API surface is frozen
+  &#10007; src/auth/validate.ts             BLOCKED
+        violates Lock 3: relaxes email validation (HIGH)
+
+  1 change applied. 2 out-of-scope changes blocked.
+  The fix you asked for shipped. The damage didn't.</pre>
+        </div>
+
+        <p>The button gets fixed. The two changes you never asked for &mdash; the ones that would have broken three other screens &mdash; are stopped at the gate, each tagged with the exact rule it violated. You review them deliberately instead of discovering them in an incident.</p>
+
+        <div class="success-box">
+            <strong>It catches the euphemisms too.</strong> "Simplify the validation," "clean up the API helper," "refactor billing into a tidier shape" &mdash; SpecLock's semantic detection reads what the change <em>does</em>, so a relaxed check disguised as a cleanup still trips the lock.
+        </div>
+
+        <h2>Keep the Speed. Lose the Whack-a-Mole.</h2>
+
+        <p>The promise of AI coding was supposed to be <em>faster</em>, not <em>fix-one-break-ten followed by an hour of cleanup.</em> SpecLock gives you back the part that was missing: a hard line around the code that's already correct, so the agent can move fast everywhere it's actually safe to.</p>
+
+        <p>And every time it blocks a stray edit, SpecLock keeps a receipt. Run <code>speclock wins</code> for a shareable "Save Receipt" of exactly what it stopped &mdash; the disaster you didn't have.</p>
+
+        <div class="cta-box">
+            <h3>Lock the files it keeps breaking. Let it work everywhere else.</h3>
+            <p>SpecLock is free, open source, and takes one command to set up.</p>
+            <div class="cta-code">npx speclock protect</div>
+            <p style="margin-top: 16px;">
+                <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot;
+                <a href="https://www.npmjs.com/package/speclock">npm</a> &middot;
+                <a href="https://sgroy10.github.io/speclock/">Documentation</a>
+            </p>
+        </div>
+    </article>
+    <footer>
+        <p>SpecLock &mdash; Your rules, enforced. Not suggested. &middot; <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock">npm</a> &middot; <a href="https://sgroy10.github.io/speclock/">Docs</a></p>
+    </footer>
+</body>
+</html>

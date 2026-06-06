@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude ignores CLAUDE.md — How to Make It Actually Obey Your Rules | SpecLock</title>
+    <meta name="description" content="Claude ignores your CLAUDE.md once it gets long? That's the ~150-instruction limit at work — rules at the bottom get diluted. Here's the 2-line fix that turns CLAUDE.md into hard constraints Claude can't skip.">
+    <meta property="og:title" content="Claude Ignores CLAUDE.md? Here's the Real Fix.">
+    <meta property="og:description" content="Long CLAUDE.md files get silently diluted — LLMs reliably follow only ~150-200 instructions. SpecLock enforces your rules as runtime hard constraints instead of suggestions.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/fixes/claude-ignores-claude-md.html">
+    <meta property="article:published_time" content="2026-06-06">
+    <meta property="article:author" content="Sandeep Roy">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Claude Ignores CLAUDE.md? Here's the Real Fix.">
+    <meta name="twitter:description" content="CLAUDE.md is a suggestion, not a lock. SpecLock enforces your existing rules across Claude Code, Cursor, and more.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/fixes/claude-ignores-claude-md.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Claude Ignores CLAUDE.md (And How to Actually Fix It)",
+        "description": "Long CLAUDE.md files get silently diluted because LLMs reliably follow only ~150-200 instructions. SpecLock turns your existing CLAUDE.md into runtime hard constraints Claude cannot skip.",
+        "author": {
+            "@type": "Person",
+            "name": "Sandeep Roy",
+            "url": "https://github.com/sgroy10"
+        },
+        "datePublished": "2026-06-06",
+        "dateModified": "2026-06-06",
+        "publisher": {
+            "@type": "Organization",
+            "name": "SpecLock",
+            "url": "https://sgroy10.github.io/speclock/"
+        },
+        "mainEntityOfPage": "https://sgroy10.github.io/speclock/fixes/claude-ignores-claude-md.html"
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #ffffff; --surface: #f8f9fb; --border: #e2e5ea; --text: #1a1d23; --text-dim: #6b7280; --accent: #FF6B2C; --accent-light: #fff1e6; --green: #16a34a; --green-light: #dcfce7; --red: #e53e3e; --red-light: #fee2e2; --code-bg: #1e293b; --code-text: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+        nav a { text-decoration: none; color: var(--text); }
+        .nav-logo { font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-dim); transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+        article { max-width: 700px; margin: 0 auto; padding: 120px 24px 80px; }
+        h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+        .meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 40px; }
+        h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 16px; }
+        h3 { font-size: 1.15rem; font-weight: 600; margin: 28px 0 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 20px 24px; border-radius: 10px; overflow-x: auto; margin: 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.5; }
+        code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+        p code, li code { background: var(--surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+        ul, ol { margin: 0 0 18px 24px; }
+        li { margin-bottom: 8px; font-size: 1.02rem; }
+        blockquote { border-left: 3px solid var(--accent); padding: 12px 20px; margin: 20px 0; background: var(--accent-light); border-radius: 0 8px 8px 0; }
+        .cta-box { margin: 48px 0; padding: 32px; background: var(--surface); border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .cta-box h3 { margin: 0 0 12px; }
+        .cta-code { display: inline-block; margin-top: 12px; padding: 12px 28px; background: var(--code-bg); color: var(--code-text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; }
+        .success-box { background: var(--green-light); border: 1px solid var(--green); padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
+        .terminal { background: var(--code-bg); color: var(--code-text); padding: 20px 24px; border-radius: 10px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; line-height: 1.6; overflow-x: auto; }
+        .terminal .dim { color: #94a3b8; }
+        .terminal .block { color: #fca5a5; font-weight: 500; }
+        .terminal .ok { color: #86efac; }
+        footer { text-align: center; padding: 40px 24px; color: var(--text-dim); font-size: 0.85rem; }
+        footer a { color: var(--accent); text-decoration: none; }
+        a { color: var(--accent); }
+        @media (max-width: 640px) { h1 { font-size: 1.7rem; } article { padding: 100px 16px 60px; } nav { padding: 14px 16px; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://sgroy10.github.io/speclock/" class="nav-logo">&#x1F512; SpecLock</a>
+        <div class="nav-links">
+            <a href="../blog/index.html">Blog</a>
+            <a href="../faq.html">FAQ</a>
+            <a href="https://github.com/sgroy10/speclock">GitHub</a>
+            <a href="https://www.npmjs.com/package/speclock">npm</a>
+        </div>
+    </nav>
+    <article>
+        <h1>Claude ignores CLAUDE.md</h1>
+        <div class="meta">By Sandeep Roy &middot; June 6, 2026 &middot; 4 min read</div>
+
+        <p>You wrote a careful <code>CLAUDE.md</code>. Stack, conventions, the hard "never do this" rules. For the first few prompts Claude respects them. Then the session gets longer, and suddenly it's doing exactly the thing you told it never to do &mdash; like it never read the file at all.</p>
+
+        <p>If you've searched <em>"Claude ignores CLAUDE.md,"</em> you're in good company. It's now a textbook complaint on <a href="https://news.ycombinator.com/item?id=46102048" target="_blank">Hacker News</a> and across the <a href="https://www.shareuhack.com/en/posts/claude-code-claude-md-setup-guide-2026" target="_blank">setup guides</a>: rules at the top of the file get followed, rules near the bottom get followed intermittently or not at all.</p>
+
+        <h2>Why this happens (it's not you, it's the instruction limit)</h2>
+
+        <p>This isn't Claude being lazy. It's a measurable property of how large language models follow instructions. The consistent finding across practitioners: <strong>an LLM reliably follows only about 150&ndash;200 distinct instructions at once.</strong> Claude Code's own system prompt already eats roughly 50 of those before your file is even loaded.</p>
+
+        <p>So when your <code>CLAUDE.md</code> grows past a page or two, every additional rule competes for a shrinking pool of attention. The result:</p>
+
+        <ul>
+            <li><strong>Long files get diluted.</strong> The more rules you add, the weaker each one becomes. Bolding and ALL CAPS don't fix an attention problem.</li>
+            <li><strong>Bottom-of-file rules get dropped first.</strong> Position matters &mdash; the rule you put at line 200 is the one most likely to be silently skipped.</li>
+            <li><strong>Conversation length makes it worse.</strong> As the session fills the context window, CLAUDE.md drifts further from the model's focus. By message 15 it's effectively forgotten.</li>
+        </ul>
+
+        <p>The root cause is structural: <strong>CLAUDE.md is a suggestion, not a contract.</strong> Claude <em>reads</em> it, but nothing <em>stops</em> it from violating a rule. There is no enforcement layer between "the rule exists" and "the action happens."</p>
+
+        <h2>The fix: enforce the file you already wrote</h2>
+
+        <p><a href="https://github.com/sgroy10/speclock">SpecLock</a> is an npm package and MCP server that reads your <em>existing</em> <code>CLAUDE.md</code> (and <code>.cursorrules</code>, and <code>AGENTS.md</code>) and turns those prose rules into runtime <strong>hard constraints</strong>. Instead of hoping Claude remembers a rule, SpecLock checks every proposed action against your locked rules and blocks the ones that would break them &mdash; no matter how long your file got or where the rule sits.</p>
+
+        <p>Setup is two lines. You don't rewrite anything:</p>
+
+        <pre>cd your-project
+npx speclock protect</pre>
+
+        <p>That's it. <code>npx speclock protect</code> discovers your current rules file, compiles each rule into a lock, and starts enforcing across Claude Code, Cursor, Windsurf, Cline, and Copilot. No new rule syntax, no dashboard, no scripting.</p>
+
+        <div class="success-box">
+            <strong>What changes:</strong> the rule at the bottom of your CLAUDE.md gets enforced exactly as hard as the rule at the top. File length stops mattering, because enforcement no longer depends on the model paying attention.
+        </div>
+
+        <h2>Before / after</h2>
+
+        <p>Say line 180 of your <code>CLAUDE.md</code> reads: <code>"NEVER switch the framework. We use Express."</code></p>
+
+        <p><strong>Before SpecLock</strong> &mdash; you ask Claude to "optimize the routing," and it cheerfully migrates you to Fastify. The rule was there. Nothing checked it.</p>
+
+        <p><strong>After SpecLock</strong> &mdash; the same request, intercepted before the change lands:</p>
+
+        <div class="terminal">
+<span class="dim">$ claude: optimize the routing layer</span><br>
+<span class="dim">  &rarr; proposes: replace express import with fastify</span><br><br>
+<span class="block">&#x1F512; SpecLock BLOCKED this action</span><br>
+&nbsp;&nbsp;Constraint: "NEVER switch the framework. We use Express."<br>
+&nbsp;&nbsp;Source:&nbsp;&nbsp;&nbsp;&nbsp;CLAUDE.md (line 180)<br>
+&nbsp;&nbsp;Conflict:&nbsp;&nbsp;HIGH &mdash; patch introduces a Fastify import<br>
+&nbsp;&nbsp;<span class="dim">Override with: speclock override &mdash;reason "..."</span>
+        </div>
+
+        <p>The violation is now visible and deliberate instead of silent and accidental. You either reject it or override it on purpose. And SpecLock keeps a receipt &mdash; run <code>speclock wins</code> to see a shareable "Save Receipt" of everything it blocked.</p>
+
+        <h2>The honest version</h2>
+
+        <p>SpecLock doesn't make Claude smarter or extend the instruction limit. It moves your rules out of the "please remember this" layer and into a "this is checked every time" layer. That's the whole trick &mdash; and it's why a long CLAUDE.md stops being a liability.</p>
+
+        <div class="cta-box">
+            <h3>Stop hoping Claude reads to the bottom of the file.</h3>
+            <p>SpecLock is free, open source, and reads the CLAUDE.md you already have.</p>
+            <div class="cta-code">npx speclock protect</div>
+            <p style="margin-top: 16px;">
+                <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot;
+                <a href="https://www.npmjs.com/package/speclock">npm</a> &middot;
+                <a href="https://sgroy10.github.io/speclock/">Homepage</a>
+            </p>
+        </div>
+    </article>
+    <footer>
+        <p>SpecLock v5.6.1 &mdash; Your CLAUDE.md, enforced. Not suggested. &middot; <a href="https://github.com/sgroy10/speclock">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock">npm</a> &middot; <a href="https://sgroy10.github.io/speclock/">Docs</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecLock vs Claude Code Hooks — Compiler vs Assembly for AI Guardrails</title>
+    <meta name="description" content="SpecLock vs native Claude Code PreToolUse hooks. Hooks are raw primitives you hand-write per rule per repo, Claude-Code-only. SpecLock auto-derives enforceable locks from your prose rules, cross-agent. The compiler-vs-assembly comparison.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F512;</text></svg>">
+    <!-- Open Graph -->
+    <meta property="og:title" content="SpecLock vs Claude Code Hooks — Compiler vs Assembly">
+    <meta property="og:description" content="PreToolUse hooks are powerful raw primitives — but you hand-write bash per rule, per repo, Claude-Code-only. SpecLock compiles your prose rules into cross-agent locks automatically.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sgroy10.github.io/speclock/vs/speclock-vs-claude-code-hooks.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SpecLock vs Claude Code Hooks — Compiler vs Assembly">
+    <meta name="twitter:description" content="PreToolUse hooks are powerful raw primitives — but you hand-write bash per rule, per repo, Claude-Code-only. SpecLock compiles your prose rules into cross-agent locks automatically.">
+    <link rel="canonical" href="https://sgroy10.github.io/speclock/vs/speclock-vs-claude-code-hooks.html">
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "SpecLock vs Claude Code Hooks",
+      "description": "A fair comparison of SpecLock and native Claude Code PreToolUse hooks: hooks are hand-authored primitives; SpecLock auto-derives enforceable locks from prose rules, cross-agent.",
+      "url": "https://sgroy10.github.io/speclock/vs/speclock-vs-claude-code-hooks.html",
+      "author": {
+        "@type": "Person",
+        "name": "Sandeep Roy",
+        "url": "https://github.com/sgroy10"
+      },
+      "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "SpecLock",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8f9fb;
+            --surface-2: #f0f2f5;
+            --border: #e2e5ea;
+            --text: #1a1d23;
+            --text-dim: #6b7280;
+            --accent: #FF6B2C;
+            --accent-light: #ffe8dc;
+            --accent-glow: rgba(255, 107, 44, 0.12);
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --yellow: #d97706;
+            --yellow-light: #fef3c7;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo .lock-icon {
+            width: 30px; height: 30px; background: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: white;
+        }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-nav-cta {
+            background: #fff3ec; color: var(--accent); padding: 8px 18px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 0.85rem; transition: all 0.2s; border: 1.5px solid var(--accent); cursor: pointer;
+        }
+        .btn-nav-cta:hover { background: var(--accent); color: white; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 140px 24px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+        }
+        .page-header .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--blue-light); border: 1px solid #bfdbfe;
+            padding: 6px 16px; border-radius: 100px; font-size: 0.78rem;
+            color: var(--blue); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600;
+        }
+        .page-header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
+            line-height: 1.1; letter-spacing: -1.5px; max-width: 820px;
+            margin: 0 auto 16px;
+        }
+        .page-header h1 .red { color: var(--accent); }
+        .page-header p {
+            font-size: 1.1rem; color: var(--text-dim); max-width: 650px;
+            margin: 0 auto; line-height: 1.7;
+        }
+
+        /* CONTENT PROSE */
+        .prose {
+            max-width: 800px; margin: 0 auto; padding: 0 24px;
+        }
+        .prose h2 {
+            font-size: 1.6rem; font-weight: 800; letter-spacing: -0.6px;
+            margin: 48px 0 14px;
+        }
+        .prose h3 {
+            font-size: 1.15rem; font-weight: 800; letter-spacing: -0.3px;
+            margin: 28px 0 8px;
+        }
+        .prose p { color: var(--text-dim); font-size: 1rem; line-height: 1.75; margin-bottom: 14px; }
+        .prose strong { color: var(--text); }
+        .prose code {
+            background: var(--surface-2); padding: 2px 6px; border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+        }
+        .prose a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .prose a:hover { text-decoration: underline; }
+
+        /* COMPARISON TABLE */
+        .compare-section {
+            max-width: 1000px; margin: 0 auto; padding: 40px 24px 40px;
+        }
+        .compare-table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        table {
+            width: 100%; border-collapse: collapse; min-width: 600px;
+        }
+        thead th {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        thead th:first-child {
+            text-align: left;
+            border-radius: 0;
+        }
+        thead th.speclock-col {
+            background: var(--accent);
+            color: white;
+            position: relative;
+        }
+        tbody td {
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background: var(--surface);
+        }
+        td.speclock-col {
+            background: rgba(255, 107, 44, 0.05);
+            font-weight: 600;
+        }
+        .check {
+            color: var(--green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .cross {
+            color: #d1d5db;
+            font-size: 1.1rem;
+        }
+        .partial {
+            color: var(--yellow);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* VERDICT */
+        .verdict-section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            text-align: center;
+        }
+        .verdict-box {
+            background: linear-gradient(135deg, var(--accent-light), #fff7f3);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 48px 36px;
+        }
+        .verdict-box h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        .verdict-box p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 560px;
+            margin: 0 auto 28px;
+        }
+        .verdict-box code {
+            background: #fff; border: 1px solid var(--accent-light);
+            padding: 3px 8px; border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent);
+        }
+        .verdict-box .cta-buttons {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        }
+
+        /* FOOTER CTA */
+        .footer-cta {
+            text-align: center; padding: 80px 24px;
+            background: var(--surface);
+        }
+        .footer-cta .section-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+            margin-bottom: 12px; font-weight: 600;
+        }
+        .footer-cta h2 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 14px; }
+        .footer-cta p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 36px; }
+        .footer-cta .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--accent); color: white; padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 700;
+            font-size: 0.95rem; transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-primary:hover { background: #e85a1e; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .btn-secondary {
+            background: white; color: var(--text); padding: 13px 28px;
+            border-radius: 10px; text-decoration: none; font-weight: 600;
+            font-size: 0.95rem; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;
+        }
+        .btn-secondary:hover { border-color: var(--text-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+        footer {
+            text-align: center; padding: 24px; font-size: 0.82rem; color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--text-dim); text-decoration: none; }
+        footer a:hover { color: var(--text); }
+
+        @media (max-width: 768px) {
+            nav { padding: 14px 16px; }
+            .nav-links { display: none; }
+            .page-header { padding: 110px 16px 40px; }
+            .compare-section { padding: 24px 16px; }
+            .verdict-section { padding: 24px 16px 60px; }
+            thead th, tbody td { padding: 10px 12px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="../index.html" class="nav-logo">
+            <div class="lock-icon">&#x1F512;</div>
+            SpecLock
+        </a>
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+            <a href="../faq.html">FAQ</a>
+            <a href="../vs.html" style="color: var(--accent); font-weight: 600;">Compare</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a>
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-nav-cta">Get on Smithery</a>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="badge">SPECLOCK vs CLAUDE CODE HOOKS</div>
+        <h1><span class="red">SpecLock</span> vs Claude Code hooks: the compiler vs assembly</h1>
+        <p>Native PreToolUse hooks are a powerful, low-level enforcement primitive. SpecLock is the layer above them: it compiles the prose rules you already wrote into enforceable locks &mdash; automatically, and across every agent, not just Claude Code.</p>
+    </section>
+
+    <div class="prose">
+        <p>Claude Code ships a genuinely strong enforcement primitive. A <a href="https://code.claude.com/docs/en/hooks-guide" target="_blank">PreToolUse hook</a> can inspect a pending tool call and block it &mdash; returning exit code 2 or <code>permissionDecision: "deny"</code> stops the action even under <code>--dangerously-skip-permissions</code>. That's real, hard enforcement, built into the platform. If you want a fence the model physically cannot climb, hooks are the underlying mechanism.</p>
+        <p>The catch is what it takes to <em>use</em> them. Hooks are raw primitives. For every rule you care about, <strong>you hand-author a script</strong> &mdash; bash or similar &mdash; that parses the tool input, decides whether it violates your intent, and emits the right exit code. You write that logic per rule, wire it up per repo, and maintain it as your rules evolve. And it's <strong>Claude Code only</strong>: none of it carries over to Cursor, Windsurf, Cline, or Copilot.</p>
+        <p>That's the compiler-vs-assembly distinction. Hooks are the assembly language of AI guardrails: maximally flexible, but you write every instruction by hand. <strong>SpecLock is the compiler.</strong> It reads the CLAUDE.md / .cursorrules / AGENTS.md prose you already wrote, derives enforceable locks from it semantically, and applies them across agents &mdash; no per-rule scripting.</p>
+    </div>
+
+    <section class="compare-section">
+        <div class="compare-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Capability</th>
+                        <th class="speclock-col">SpecLock</th>
+                        <th>Claude Code hooks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Enforces rules (hard block at runtime)</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Derives rules from YOUR prose rules file</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span> <span class="partial">you script each rule</span></td>
+                    </tr>
+                    <tr>
+                        <td>No per-rule scripting required</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Cross-agent (Cursor, Windsurf, Cline, Copilot)</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span> <span class="partial">Claude Code only</span></td>
+                    </tr>
+                    <tr>
+                        <td>Semantic conflict detection</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="partial">whatever you code</span></td>
+                    </tr>
+                    <tr>
+                        <td>Drift detection &amp; scoring</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Patch review before apply</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="partial">DIY</span></td>
+                    </tr>
+                    <tr>
+                        <td>Shareable proof of blocked actions</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span> <span style="font-size:0.8rem; color:var(--accent);">speclock wins</span></td>
+                        <td><span class="cross">&#10005;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Setup effort</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span> <span style="font-size:0.8rem;">one command</span></td>
+                        <td><span class="partial">script + config per repo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Free &amp; open source</td>
+                        <td class="speclock-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span> <span style="font-size:0.8rem;">built in</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="prose">
+        <h2>When to use which</h2>
+        <h3>Use raw hooks if&hellip;</h3>
+        <p>You need a very specific, bespoke check that no general tool models &mdash; e.g. calling out to an internal service before a particular shell command &mdash; and you're 100% Claude Code, happy to maintain the script. Hooks give you total control at the cost of total responsibility. SpecLock itself builds on this same primitive, so you're never giving up the underlying power.</p>
+        <h3>Use SpecLock if&hellip;</h3>
+        <p>You already wrote your rules in plain English in CLAUDE.md (or .cursorrules / AGENTS.md) and you want them <strong>enforced without translating each one into bash</strong> &mdash; especially if your team uses more than one AI agent. SpecLock compiles prose to locks, runs across agents, scores drift, and gives you a shareable record of what it blocked. It's the fast path from "I wrote the rule" to "the rule is enforced everywhere."</p>
+        <h3>The honest summary</h3>
+        <p>Hooks are the engine; SpecLock is the car you can actually drive. If you enjoy writing and maintaining enforcement scripts per rule per repo, hooks are right there. If you'd rather point a tool at the rules file you already have and get cross-agent enforcement in one command, that's SpecLock.</p>
+    </div>
+
+    <section class="verdict-section">
+        <div class="verdict-box">
+            <h2>Stop hand-writing hooks.</h2>
+            <p>PreToolUse hooks can block anything &mdash; if you script it, per rule, per repo, for Claude Code alone. SpecLock compiles the rules you already wrote into cross-agent guardrails automatically.</p>
+            <p><code>npx speclock protect</code></p>
+            <div class="cta-buttons">
+                <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">Get SpecLock on Smithery</a>
+                <a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" class="btn-secondary">Read the hooks docs</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="footer-cta">
+        <div class="section-label">Get Started</div>
+        <h2>From prose rules to enforced locks.</h2>
+        <p>The compiler for AI guardrails. One command, every agent, no scripting. Free &amp; open source.</p>
+        <div class="cta-buttons">
+            <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank" class="btn-primary">Get SpecLock on Smithery</a>
+            <a href="https://github.com/sgroy10/speclock" target="_blank" class="btn-secondary">GitHub Repository</a>
+            <a href="https://sgroy10.github.io/speclock/" class="btn-secondary">Homepage</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.6.1 &mdash; AI Constraint Engine &middot; <a href="https://sgroy10.github.io/speclock/">Home</a> &middot; <a href="../vs.html">Compare</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+    </footer>
+
+</body>
+</html>

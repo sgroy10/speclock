@@ -81,6 +81,7 @@ import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
 import { buildWins, formatWinsCard } from "../core/wins.js";
+import { buildWrapped, formatWrappedCard } from "../core/wrapped.js";
 import { protect, formatProtectReport, discoverRuleFiles, extractConstraints, RULE_FILES } from "../core/guardian.js";
 import {
   installForClient,
@@ -325,10 +326,51 @@ export const BADGE_VARIANTS = [
 ];
 
 /**
- * Render the full badge gallery as a plain string (no console I/O) so tests
- * can assert against it.
+ * Count violations SpecLock has hard-blocked (enforced===true) for this
+ * project, read from the local audit trail. Always safe — returns 0 when
+ * SpecLock is not initialised or brain.json can't be read.
+ *
+ * @param {string} root project root (the dir containing .speclock/)
  */
-export function formatBadges() {
+export function countBlockedViolations(root) {
+  try {
+    const brain = readBrain(root);
+    if (!brain) return 0;
+    const violations = Array.isArray(brain.state && brain.state.violations)
+      ? brain.state.violations
+      : [];
+    return violations.filter((v) => v && v.enforced === true).length;
+  } catch (_) {
+    return 0;
+  }
+}
+
+/**
+ * Build the shields.io "endpoint" JSON for the live "violations blocked" badge.
+ * Drop this object at a public URL and point a shields.io endpoint badge at it:
+ *   https://img.shields.io/endpoint?url=<your-url>
+ * shields.io renders the label/message/color from this exact schema.
+ *
+ * @param {number} blocked count of hard-blocked violations
+ */
+export function buildShieldsEndpoint(blocked) {
+  return {
+    schemaVersion: 1,
+    label: "protected by speclock",
+    message: `${blocked} blocks`,
+    color: "orange",
+  };
+}
+
+/**
+ * Render the full badge gallery as a plain string (no console I/O) so tests
+ * can assert against it. When `root` is given, a live "violations blocked"
+ * variant (static badge markdown + shields.io endpoint JSON) is appended,
+ * reflecting the real hard-block count recorded for that project.
+ *
+ * @param {string} [root] project root — enables the dynamic blocked-count badge
+ */
+export function formatBadges(root) {
   const lines = [];
   lines.push("");
   lines.push("SpecLock Badges");
@@ -339,6 +381,24 @@ export function formatBadges() {
     lines.push(v.markdown);
     lines.push("");
   }
+
+  // --- Dynamic "violations blocked" variant (v5.6) ---
+  // Live count of hard-blocked violations from this project's audit trail.
+  if (root) {
+    const blocked = countBlockedViolations(root);
+    lines.push("Violations blocked (live, static badge):");
+    lines.push(
+      `[![SpecLock](https://img.shields.io/badge/🔒%20SpecLock-${blocked}%20violations%20blocked-FF6B2C?style=flat)](https://github.com/sgroy10/speclock)`
+    );
+    lines.push("");
+    lines.push("Violations blocked (live, shields.io endpoint):");
+    lines.push("  Host this JSON, then use img.shields.io/endpoint?url=<your-url>");
+    lines.push("  " + JSON.stringify(buildShieldsEndpoint(blocked)));
+    lines.push("");
+    lines.push(`  Plain text:  🔒 ${blocked} violations blocked`);
+    lines.push("");
+  }
+
   lines.push("Add to your README.md to show your support.");
   lines.push("Browse all variants: https://sgroy10.github.io/speclock/badge.html");
   lines.push("");
@@ -349,7 +409,7 @@ export function formatBadges() {
 
 function printHelp() {
   console.log(`
-SpecLock v5.6.0 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -406,9 +466,13 @@ Commands:
   stats                           Show YOUR usage dashboard from local telemetry log
   wins                            Show a shareable "Save Receipt" of what
                                   SpecLock blocked for you (screenshot it!)
+  wrapped                         Show a Spotify-Wrapped-style recap of your
+                                  all-time + this-month saves (alias: recap)
   doctor                          Diagnostic health check (install, git, rules, MCP)
   badge                           Print "Protected by SpecLock" README badges
-                                  (copy-paste Markdown for all 6 variants)
+                                  (copy-paste Markdown for all 6 variants, plus
+                                   a live "🔒 N violations blocked" badge +
+                                   shields.io endpoint JSON for this project)
 
 Options:
   --tags <a,b,c>                  Comma-separated tags
@@ -1913,6 +1977,18 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
     return;
   }
 
+  // --- WRAPPED — shareable all-time / monthly recap (v5.6) ---
+  if (cmd === "wrapped" || cmd === "recap") {
+    try {
+      const view = buildWrapped(root);
+      console.log(formatWrappedCard(view));
+    } catch (err) {
+      console.error(`Failed to build wrapped: ${err.message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
   // --- TELEMETRY (opt-in, v5.5) ---
   if (cmd === "telemetry") {
     const sub = args[0];
@@ -2208,7 +2284,7 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
 
   // --- BADGE: print README badge variants ---
   if (cmd === "badge" || cmd === "badges") {
-    console.log(formatBadges());
+    console.log(formatBadges(root));
     return;
   }
 
