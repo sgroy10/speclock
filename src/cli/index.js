@@ -80,6 +80,7 @@ import { getReplay, listSessions, formatReplay } from "../core/replay.js";
 import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
+import { buildWins, formatWinsCard } from "../core/wins.js";
 import { protect, formatProtectReport, discoverRuleFiles, extractConstraints, RULE_FILES } from "../core/guardian.js";
 import {
   installForClient,
@@ -348,7 +349,7 @@ export function formatBadges() {
 
 function printHelp() {
   console.log(`
-SpecLock v5.5.7 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.6.0 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -403,6 +404,8 @@ Commands:
   serve [--project <path>]        Start MCP stdio server
   status                          Show project brain summary
   stats                           Show YOUR usage dashboard from local telemetry log
+  wins                            Show a shareable "Save Receipt" of what
+                                  SpecLock blocked for you (screenshot it!)
   doctor                          Diagnostic health check (install, git, rules, MCP)
   badge                           Print "Protected by SpecLock" README badges
                                   (copy-paste Markdown for all 6 variants)
@@ -1893,6 +1896,18 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
       console.log(formatStatsDashboard(view));
     } catch (err) {
       console.error(`Failed to build stats: ${err.message}`);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // --- WINS — shareable "Save Receipt" (v5.6) ---
+  if (cmd === "wins" || cmd === "win" || cmd === "saves") {
+    try {
+      const view = buildWins(root);
+      console.log(formatWinsCard(view));
+    } catch (err) {
+      console.error(`Failed to build wins: ${err.message}`);
       process.exit(1);
     }
     return;
