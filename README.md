@@ -49,6 +49,10 @@ speclock doctor                   # Verify everything is set up correctly
 
 That's it. Your AI now has rules it can't ignore. Default mode is WARN (loud warnings, no blocks). Opt in to hard enforcement with `speclock protect --strict`.
 
+## What's New in v5.7.0
+
+- **The Saves Wall** — publish a save to a public, indexable page with `speclock wins --publish` (opt-in). Each gets a shareable URL with a rich social card, and a live "🔒 blocked by speclock · N" badge counts every published block. Browse them at [/saves](https://speclock-mcp-production.up.railway.app/saves).
+
 ## What's New in v5.6.1
 
 - **`speclock wins`** — a shareable "Save Receipt" of everything SpecLock blocked your AI from doing. Screenshot-ready and screenshot-worthy.
@@ -75,6 +79,7 @@ speclock add-lock "rule"              # Add a new lock
 speclock list-locks                   # Show all locks
 speclock enforce hard|advisory        # Change enforcement mode
 speclock wins                         # Shareable "Save Receipt" of what SpecLock blocked (screenshot it!)
+speclock wins --publish               # Publish your latest save to the public Saves Wall (opt-in)
 speclock wrapped                      # Spotify-Wrapped-style recap of your saves (alias: recap)
 ```
 
@@ -902,4 +907,4 @@ Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that 
 
 ---
 
-<p align="center"><i>SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable. 1034 tests, 100% pass rate, 51 MCP tools, Save Receipt (speclock wins), Wrapped recap, Default WARN mode, MCP Autoinstaller, Greenfield support, Doctor health check. Developed by Sandeep Roy.</i></p>
+<p align="center"><i>SpecLock v5.7.0 — Your AI has rules. SpecLock makes them unbreakable. 1043 tests, 100% pass rate, 51 MCP tools, Save Receipt (speclock wins), Wrapped recap, Default WARN mode, MCP Autoinstaller, Greenfield support, Doctor health check. Developed by Sandeep Roy.</i></p>

@@ -80,7 +80,7 @@ import { getReplay, listSessions, formatReplay } from "../core/replay.js";
 import { computeDriftScore, formatDriftScore } from "../core/drift-score.js";
 import { computeCoverage, formatCoverage } from "../core/coverage.js";
 import { analyzeLockStrength, formatStrength } from "../core/strengthen.js";
-import { buildWins, formatWinsCard } from "../core/wins.js";
+import { buildWins, formatWinsCard, buildPublishPayload } from "../core/wins.js";
 import { buildWrapped, formatWrappedCard } from "../core/wrapped.js";
 import { protect, formatProtectReport, discoverRuleFiles, extractConstraints, RULE_FILES } from "../core/guardian.js";
 import {
@@ -409,7 +409,7 @@ export function formatBadges(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.7.0 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]
@@ -466,6 +466,8 @@ Commands:
   stats                           Show YOUR usage dashboard from local telemetry log
   wins                            Show a shareable "Save Receipt" of what
                                   SpecLock blocked for you (screenshot it!)
+  wins --publish [--as <handle>]  Publish your latest save to the public
+                                  Saves Wall (opt-in; prints a shareable URL)
   wrapped                         Show a Spotify-Wrapped-style recap of your
                                   all-time + this-month saves (alias: recap)
   doctor                          Diagnostic health check (install, git, rules, MCP)
@@ -718,6 +720,84 @@ export function formatStatsDashboard(view) {
   lines.push("");
 
   return lines.join("\n");
+}
+
+// --- Saves Wall publish (opt-in) ---
+
+function getFlagValue(args, name) {
+  const i = args.indexOf(name);
+  return i >= 0 && i + 1 < args.length ? args[i + 1] : "";
+}
+
+function promptConfirm(question) {
+  return new Promise((resolve) => {
+    try {
+      if (!process.stdin.isTTY) return resolve(false);
+      process.stdout.write(question);
+      let buf = "";
+      const onData = (chunk) => {
+        buf += chunk.toString();
+        if (buf.includes("\n")) {
+          process.stdin.removeListener("data", onData);
+          process.stdin.pause();
+          const a = buf.trim().toLowerCase();
+          resolve(a === "y" || a === "yes");
+        }
+      };
+      process.stdin.resume();
+      process.stdin.on("data", onData);
+      setTimeout(() => {
+        try { process.stdin.removeListener("data", onData); } catch {}
+        try { process.stdin.pause(); } catch {}
+        resolve(false);
+      }, 30000).unref?.();
+    } catch { resolve(false); }
+  });
+}
+
+/**
+ * Opt-in publish of the most recent save to the public Saves Wall. Always
+ * shows the exact text first and (unless --yes) asks for confirmation, so the
+ * user knowingly exposes their own content. Endpoint overridable via
+ * SPECLOCK_API_URL (used for local testing).
+ */
+async function publishSave(view, args) {
+  const payload = buildPublishPayload(view, { author: getFlagValue(args, "--as") });
+  if (!payload) {
+    console.log("\nNothing to publish yet — no saves recorded. Come back after SpecLock blocks something.");
+    return;
+  }
+  const base = (process.env.SPECLOCK_API_URL || "https://speclock-mcp-production.up.railway.app").replace(/\/$/, "");
+  console.log("\n— Publish to the public Saves Wall (opt-in) —");
+  console.log("This makes ONE save publicly visible. It will show:");
+  console.log(`   Action: ${payload.action}`);
+  console.log(`   Rule:   ${payload.lockText}`);
+  if (payload.author) console.log(`   By:     @${payload.author}`);
+  console.log(`   Wall:   ${base}/saves`);
+
+  const skip = args.includes("--yes") || args.includes("-y");
+  if (!skip) {
+    const ok = await promptConfirm("\nPublish this publicly? [y/N]: ");
+    if (!ok) { console.log("Cancelled. Nothing was published."); return; }
+  }
+
+  try {
+    const resp = await fetch(`${base}/api/saves`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => "");
+      console.error(`Publish failed (HTTP ${resp.status}). ${t.slice(0, 200)}`);
+      return;
+    }
+    const data = await resp.json();
+    console.log(`\n🔗 Published: ${data.url}`);
+    console.log("   Share that link — it renders a rich card.");
+  } catch (err) {
+    console.error(`Publish failed: ${err.message}`);
+  }
 }
 
 // --- Main ---
@@ -1970,6 +2050,13 @@ Tip: Run "speclock sync --all" to push constraints to Cursor, Claude, Copilot, W
     try {
       const view = buildWins(root);
       console.log(formatWinsCard(view));
+
+      // Opt-in publish to the public Saves Wall.
+      if (args.includes("--publish")) {
+        await publishSave(view, args);
+      } else if (view.totalSaves > 0) {
+        console.log("      Publish one publicly:  speclock wins --publish");
+      }
     } catch (err) {
       console.error(`Failed to build wins: ${err.message}`);
       process.exit(1);

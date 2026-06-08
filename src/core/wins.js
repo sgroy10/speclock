@@ -264,3 +264,23 @@ export function formatWinsCard(view) {
 
   return lines.join("\n");
 }
+
+/**
+ * Build the publish payload for the most recent save, for `speclock wins
+ * --publish`. Returns null when there is nothing to publish. Pure/testable —
+ * the CLI handles the opt-in confirmation and the network POST.
+ */
+export function buildPublishPayload(view, { tool = "", author = "" } = {}) {
+  if (!view || !Array.isArray(view.recent) || view.recent.length === 0) return null;
+  const r = view.recent[0];
+  if (!r || !r.action || !r.lockText) return null;
+  return {
+    action: r.action,
+    lockText: r.lockText,
+    level: r.level || "HIGH",
+    enforced: !!r.enforced,
+    tool: tool || "",
+    author: author || "",
+    blockedAt: r.at || undefined,
+  };
+}

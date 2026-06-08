@@ -109,13 +109,28 @@ import {
   revokeSession,
   listSessions,
 } from "../core/sso.js";
+import {
+  sanitizeSavePayload,
+  appendSave,
+  getSave,
+  listSaves,
+  countSaves,
+  renderSavePage,
+  renderWallPage,
+  badgeEndpointJson,
+} from "../core/saves-wall.js";
 import { fileURLToPath } from "url";
 import _path from "path";
 
 const PROJECT_ROOT = process.env.SPECLOCK_PROJECT_ROOT || process.cwd();
-const VERSION = "5.6.1";
+const VERSION = "5.7.0";
 const AUTHOR = "Sandeep Roy";
 const START_TIME = Date.now();
+
+// --- Saves Wall storage dir (attach a Railway volume here for durability) ---
+const SAVES_DIR = process.env.SPECLOCK_SAVES_DIR || _path.join(PROJECT_ROOT, ".speclock");
+// Base URL used for canonical/OG links on rendered Saves Wall pages.
+const PUBLIC_BASE_URL = (process.env.SPECLOCK_PUBLIC_URL || "https://speclock-mcp-production.up.railway.app").replace(/\/$/, "");
 
 // --- Rate Limiting ---
 const RATE_LIMIT = parseInt(process.env.SPECLOCK_RATE_LIMIT || "100", 10);
@@ -870,6 +885,62 @@ app.post("/api/check", async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: `Check failed: ${err.message}` });
   }
+});
+
+// ---------------------------------------------------------------------------
+// SAVES WALL (v5.7) — opt-in public Save Receipts + live "N blocked" badge.
+// Publishing is always client-initiated; the server only stores what is posted.
+// ---------------------------------------------------------------------------
+
+// Publish a save (opt-in, from `speclock wins --publish`).
+app.post("/api/saves", (req, res) => {
+  setCorsHeaders(res);
+  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ error: "Rate limit exceeded. Try again later." });
+  }
+  const result = sanitizeSavePayload(req.body || {});
+  if (!result.ok) {
+    return res.status(400).json({ error: result.error });
+  }
+  try {
+    appendSave(SAVES_DIR, result.save);
+    return res.status(201).json({
+      id: result.save.id,
+      url: `${PUBLIC_BASE_URL}/saves/${result.save.id}`,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: `Could not store save: ${err.message}` });
+  }
+});
+
+// Live shields.io endpoint badge: "blocked by speclock | N".
+app.get("/api/badge/saves", (req, res) => {
+  setCorsHeaders(res);
+  res.setHeader("Cache-Control", "max-age=300");
+  let count = 0;
+  try { count = countSaves(SAVES_DIR); } catch { /* default 0 */ }
+  return res.json(badgeEndpointJson(count));
+});
+
+// The wall index (HTML).
+app.get("/saves", (req, res) => {
+  setCorsHeaders(res);
+  let saves = [];
+  try { saves = listSaves(SAVES_DIR, { limit: 100 }); } catch { /* empty */ }
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  return res.send(renderWallPage(saves, { baseUrl: PUBLIC_BASE_URL }));
+});
+
+// A single public save receipt (HTML).
+app.get("/saves/:id", (req, res) => {
+  setCorsHeaders(res);
+  let save = null;
+  try { save = getSave(SAVES_DIR, req.params.id); } catch { /* 404 below */ }
+  const { status, html } = renderSavePage(save, { baseUrl: PUBLIC_BASE_URL });
+  res.status(status);
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  return res.send(html);
 });
 
 // Health check endpoint (enhanced for enterprise)

@@ -43,6 +43,7 @@ const SUITES = [
   { file: "wins.test.mjs",                  name: "Wins (Save Receipt)",   expected: 9 },
   { file: "wrapped.test.mjs",               name: "Wrapped (Recap)",       expected: 10 },
   { file: "badge.test.mjs",                 name: "Badge (live variant)",  expected: 6 },
+  { file: "saves-wall.test.mjs",            name: "Saves Wall",            expected: 9 },
 
   // Journey tests (2 tests)
   { file: "john-vibecoder-journey.test.js", name: "John (Vibe Coder)",     expected: null },
