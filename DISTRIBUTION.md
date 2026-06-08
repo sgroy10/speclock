@@ -25,7 +25,7 @@ It also knows what's safe:
 - "Add a new React component" → no conflict with "always use React"
 - "Enable audit logging" → opposite of "never disable logging" — safe
 
-51 MCP tools, 1034 tests, MIT licensed. Works with Claude Code, Cursor, Windsurf, Copilot.
+51 MCP tools, 1043 tests, MIT licensed. Works with Claude Code, Cursor, Windsurf, Copilot.
 
 GitHub: https://github.com/sgroy10/speclock
 npm: `speclock`
@@ -55,7 +55,7 @@ Zero-config. One command. Also works with CLAUDE.md, AGENTS.md, copilot-instruct
 
 https://github.com/sgroy10/speclock
 
-MIT licensed, 1034 tests, 0 false positives.
+MIT licensed, 1043 tests, 0 false positives.
 ```
 
 ---
@@ -126,7 +126,7 @@ One command. Zero flags. Reads your existing .cursorrules / CLAUDE.md / AGENTS.m
 Your rules are now laws.
 
 **5/**
-51 MCP tools. 1034 tests. 0 false positives. MIT licensed.
+51 MCP tools. 1043 tests. 0 false positives. MIT licensed.
 
 Works with: Claude Code, Cursor, Windsurf, Copilot, Gemini, Aider
 
@@ -158,7 +158,7 @@ The semantic engine catches what keyword matching misses: euphemisms, temporal e
 
 9 out of 10 test violations caught. Zero false positives.
 
-1034 tests. 51 MCP tools. MIT licensed. Solo project.
+1043 tests. 51 MCP tools. MIT licensed. Solo project.
 
 If you're using AI coding tools and trust your rule files to protect your codebase — they're not. They're suggestions.
 
@@ -176,8 +176,8 @@ github.com/sgroy10/speclock
 | Channel | Status | Link |
 |---------|--------|------|
 | **Official MCP Registry** | ✅ Published | io.github.sgroy10/speclock |
-| npm v5.6.1 | ✅ Published | npmjs.com/package/speclock |
-| Railway v5.6.1 | ✅ Deployed | speclock-mcp-production.up.railway.app |
+| npm v5.7.0 | ✅ Published | npmjs.com/package/speclock |
+| Railway v5.7.0 | ✅ Deployed | speclock-mcp-production.up.railway.app |
 | GitHub Topics (13) | ✅ Added | — |
 | Smithery | ✅ Listed | sgroy10/speclock |
 | mcpservers.org | ✅ Listed | — |

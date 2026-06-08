@@ -1,4 +1,4 @@
-# SpecLock v5.6.1 — Complete Feature Guide
+# SpecLock v5.7.0 — Complete Feature Guide
 
 **AI Constraint Engine** — The only tool that gives AI coding assistants persistent memory AND active constraint enforcement across sessions.
 
@@ -85,7 +85,7 @@ This is the breakthrough — SpecLock works on platforms that don't support MCP 
 
 Not keyword matching — **real semantic analysis** with Gemini Flash LLM hybrid for universal domain coverage.
 
-**1034 tests across 23 suites. 99.4% accuracy. 0 false positives across 15 domains (fintech, e-commerce, IoT, healthcare, SaaS, robotics, autonomous systems, and more).**
+**1043 tests across 24 suites. 99.4% accuracy. 0 false positives across 15 domains (fintech, e-commerce, IoT, healthcare, SaaS, robotics, autonomous systems, and more).**
 
 The engine includes:
 - **65+ synonym groups** — Maps across destructive, constructive, modification, security, medical, financial, IoT, payments, and DevOps domains
@@ -411,7 +411,7 @@ npx speclock wrapped                        # Spotify-Wrapped-style recap (alias
                          runs CLI commands)
                │                  │
 ┌──────────────▼──────────────────▼────────────────────┐
-│              SpecLock Core Engine v5.6.1               │
+│              SpecLock Core Engine v5.7.0               │
 │  Semantic Engine | Enforcer | Policy | Audit | Git    │
 │  Gemini LLM Hybrid | HMAC Chain | RBAC | Encryption  │
 └──────────────────────┬───────────────────────────────┘
@@ -427,7 +427,7 @@ npx speclock wrapped                        # Spotify-Wrapped-style recap (alias
 
 ---
 
-## Test Results (v5.6.1)
+## Test Results (v5.7.0)
 
 | Suite | Tests | Pass Rate | Domain |
 |-------|------:|----------:|--------|
@@ -436,6 +436,7 @@ npx speclock wrapped                        # Spotify-Wrapped-style recap (alias
 | Claude Regression | 3 | 100% | Regression tests |
 | PII/Export Detection | 8 | 100% | PII and export detection |
 | Question Framing | 9 | 100% | Question vs action disambiguation |
+| Synonym Gaps | 17 | 100% | Synonym and euphemism coverage |
 | Typed Constraints | 13 | 100% | Numerical, range, state, temporal |
 | Patch Gateway | 57 | 100% | Intent review, blast radius, lock mapping |
 | Diff-Native Review | 76 | 100% | Diff parsing, signal scoring, hard escalation |
@@ -447,10 +448,14 @@ npx speclock wrapped                        # Spotify-Wrapped-style recap (alias
 | Compliance Export | 50 | 100% | SOC 2, HIPAA, CSV |
 | Phase 4 (Full Stack) | 91 | 100% | Fintech, e-commerce, IoT, healthcare, SaaS |
 | Auth & Crypto | 114 | 100% | API keys, RBAC, AES-256 |
-| Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
+| Guardian (Protect) | 63 | 100% | Zero-config rule file extraction |
+| Wins (Save Receipt) | 9 | 100% | Shareable save receipt rendering |
+| Wrapped (Recap) | 10 | 100% | Wrapped-style recap aggregation |
+| Badge (live variant) | 6 | 100% | Dynamic "N blocked" badge |
+| Saves Wall | 9 | 100% | Public save publish + render (XSS-safe) |
 | John (Indie Dev Journey) | 86 | 100% | 8-session Bolt.new build |
 | Sam (Enterprise HIPAA) | 124 | 100% | HIPAA locks, PHI, encryption, RBAC |
-| **Total** | **1034** | **100%** | **23 suites** |
+| **Total** | **1043** | **100%** | **24 suites** |
 
 ---
 
@@ -464,4 +469,4 @@ npx speclock wrapped                        # Spotify-Wrapped-style recap (alias
 
 ---
 
-*SpecLock v5.6.1 — Your AI has rules. SpecLock makes them unbreakable. Save Receipt (speclock wins), Wrapped recap, Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Spec Compiler, Code Graph, Drift Score, 51 MCP Tools, 1034 tests, 100% accuracy. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*
+*SpecLock v5.7.0 — Your AI has rules. SpecLock makes them unbreakable. Saves Wall (speclock wins --publish), Save Receipt (speclock wins), Wrapped recap, Zero-config Guardian Mode, Universal Rules Sync, AI Patch Firewall, Spec Compiler, Code Graph, Drift Score, 51 MCP Tools, 1043 tests, 100% accuracy. Free & open source (MIT). Developed by Sandeep Roy (https://github.com/sgroy10).*

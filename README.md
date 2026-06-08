@@ -594,7 +594,7 @@ The AI opens the file and sees:
 
 ## Test Results
 
-**Pre-publish gate runs all 23 suites before every npm publish. If any test fails, publish is blocked.**
+**Pre-publish gate runs all 24 suites before every npm publish. If any test fails, publish is blocked.**
 
 | Suite | Tests | Pass Rate | What it covers |
 |-------|------:|----------:|----------------|
@@ -619,7 +619,7 @@ The AI opens the file and sees:
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
 | **Total** | **1043** | **100%** | **24 suites, 15+ domains** |
 
-**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.6.1. Zero false positives. Zero missed violations. 15.7ms per check.
+**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.7.0. Zero false positives. Zero missed violations. 15.7ms per check.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
@@ -647,7 +647,7 @@ Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aero
 
 ## Changelog
 
-Prior-version feature tours. The Quick Start and What's New sections above cover v5.6.1 — this section preserves details on features shipped in v5.0–v5.5.
+Prior-version feature tours. The Quick Start and What's New sections above cover v5.7.0 — this section preserves details on features shipped in v5.0–v5.5.
 
 ### v5.4 — Drift Score, Lock Coverage, Lock Strengthener
 

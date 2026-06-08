@@ -113,7 +113,7 @@ It's not replacing your rule files. It's making them actually *work*.
 
 ## The Numbers
 
-- **991 tests** passing
+- **1043 tests** passing
 - **51 MCP tools**
 - **Zero-config** setup via `npx speclock protect`
 - **MIT licensed** — fully open source

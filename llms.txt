@@ -4,7 +4,7 @@
 
 SpecLock is the only tool that stops AI coding assistants from breaking things you told them not to touch. It provides semantic conflict detection, hard enforcement, tamper-proof audit trails, and universal rules sync across all major AI coding tools.
 
-- **Version:** 5.6.1
+- **Version:** 5.7.0
 - **Author:** Sandeep Roy
 - **License:** MIT
 - **npm:** [speclock](https://www.npmjs.com/package/speclock)
@@ -12,7 +12,7 @@ SpecLock is the only tool that stops AI coding assistants from breaking things y
 - **Official MCP Registry:** io.github.sgroy10/speclock
 - **Website:** [sgroy10.github.io/speclock](https://sgroy10.github.io/speclock/)
 - **Smithery:** [sgroy10/speclock](https://smithery.ai/servers/sgroy10/speclock)
-- **Tests:** 1034 tests across 23 suites, 0 false positives
+- **Tests:** 1043 tests across 24 suites, 0 false positives
 - **MCP Tools:** 51
 
 ## Key Features

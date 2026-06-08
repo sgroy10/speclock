@@ -16,7 +16,7 @@ If you want to help SpecLock spread, pick a section, copy it, and post it. That 
 - Install: `npx speclock protect`
 
 **Real numbers you can quote (all verified):**
-- `1,009` tests passing across 19 suites (99.4% accuracy)
+- `1,043` tests passing across 24 suites (99.4% accuracy)
 - `51` MCP tools
 - `287` CLAUDE.md violations observed across 50 repos in 1,400 prompts (20.5% violation rate)
 - `281` of those 287 caught by SpecLock (97.9% catch rate)
@@ -94,7 +94,7 @@ Compaction can't touch it. Session length doesn't matter. The check happens on t
 - 287 violations observed
 - 281 caught (97.9%)
 - 0 false positives on 1,113 legitimate changes
-- 1,009 tests passing
+- 1,043 tests passing
 
 It catches euphemisms ("clean up"), synonyms ("wipe"/"purge"), and temporal evasion ("temporarily disable").
 
@@ -152,7 +152,7 @@ AI: also touches auth/session.ts, middleware/csrf.ts, jwt helper.
 
 - 281 caught (97.9%)
 - 0 false positives on 1,113 legitimate changes
-- 1,009 tests passing, 99.4% accuracy
+- 1,043 tests passing, 99.4% accuracy
 
 Try it in 30 seconds:
 `npx speclock protect`
@@ -301,7 +301,7 @@ Live browser demo: https://sgroy10.github.io/speclock/demo.html
 >
 > Hall of Fame (the receipts): https://sgroy10.github.io/speclock/hall-of-fame.html — 35 publicly reported GitHub issues where Claude Code, Cursor, and Copilot ignored their own rules, including a production outage (#45893), a Max-Plan user whose 24 hand-written hooks were bypassed (#34358), and a thread documenting the same rule violated across four consecutive sessions (#33603).
 >
-> The numbers behind the engine: across a 50-repo, 1,400-prompt study, AI tools violated CLAUDE.md rules in 287 cases (20.5%, silent in 84% of them). SpecLock's semantic engine caught 281 (97.9%) with zero false positives on 1,113 legitimate changes. The test suite is 1,009 tests across 19 suites. MIT-licensed, works offline, no API key required. `npx speclock protect` installs in 30 seconds against an existing CLAUDE.md or .cursorrules file.
+> The numbers behind the engine: across a 50-repo, 1,400-prompt study, AI tools violated CLAUDE.md rules in 287 cases (20.5%, silent in 84% of them). SpecLock's semantic engine caught 281 (97.9%) with zero false positives on 1,113 legitimate changes. The test suite is 1,043 tests across 24 suites. MIT-licensed, works offline, no API key required. `npx speclock protect` installs in 30 seconds against an existing CLAUDE.md or .cursorrules file.
 >
 > I'd particularly value feedback on two things: (1) edge cases where the semantic engine is wrong — false positive OR false negative — since the taxonomy is empirical and I know it's incomplete, and (2) whether the "text as suggestion vs hook as enforcement" framing holds up under harder scrutiny than I've been able to give it myself.
 
@@ -311,7 +311,7 @@ Live browser demo: https://sgroy10.github.io/speclock/demo.html
 
 **For MCP Discord:**
 
-> Built an MCP server (51 tools) that enforces project rules across AI sessions as pre-commit hooks. Catches "clean up" → delete, "temporarily disable" → disable, and 5 other drift patterns that CLAUDE.md-in-context misses. 97.9% catch rate, 0 false positives on 1,009 tests. Open source. `npx speclock protect`. Live demo: https://sgroy10.github.io/speclock/demo.html — feedback welcome.
+> Built an MCP server (51 tools) that enforces project rules across AI sessions as pre-commit hooks. Catches "clean up" → delete, "temporarily disable" → disable, and 5 other drift patterns that CLAUDE.md-in-context misses. 97.9% catch rate, 0 false positives on 1,043 tests. Open source. `npx speclock protect`. Live demo: https://sgroy10.github.io/speclock/demo.html — feedback welcome.
 
 **For Claude Code Discord:**
 
@@ -387,7 +387,7 @@ Pick one, paste under your existing signature.
 > P.S. — I'm building SpecLock: pre-commit hooks that stop AI coding tools from ignoring your CLAUDE.md. 97.9% catch rate, MIT licensed, 30-second install. github.com/sgroy10/speclock
 
 **Conference / speaker version:**
-> Sandeep Roy — Creator of SpecLock (speclock.dev) — the AI Constraint Engine. 1,009 tests, 51 MCP tools, zero false positives. `npx speclock protect`.
+> Sandeep Roy — Creator of SpecLock (speclock.dev) — the AI Constraint Engine. 1,043 tests, 51 MCP tools, zero false positives. `npx speclock protect`.
 
 ---
 
