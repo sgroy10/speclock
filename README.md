@@ -25,14 +25,15 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1034%20passing-success" alt="Tests" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1043%20passing-success" alt="Tests" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads" /></a>
+  <a href="https://speclock-mcp-production.up.railway.app/saves"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fspeclock-mcp-production.up.railway.app%2Fapi%2Fbadge%2Fsaves" alt="Blocked by SpecLock" /></a>
 </p>
 
 <p align="center"><sub>Browse all badge variants at <a href="https://sgroy10.github.io/speclock/badge.html">sgroy10.github.io/speclock/badge.html</a> &middot; or run <code>speclock badge</code> in your terminal.</sub></p>
 
 <p align="center">
-  <a href="https://sgroy10.github.io/speclock/">Website</a> · <a href="https://www.npmjs.com/package/speclock">npm</a> · <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> · <a href="https://github.com/sgroy10/speclock">GitHub</a>
+  <a href="https://sgroy10.github.io/speclock/">Website</a> · <a href="https://www.npmjs.com/package/speclock">npm</a> · <a href="https://speclock-mcp-production.up.railway.app/saves">Saves Wall</a> · <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> · <a href="https://github.com/sgroy10/speclock">GitHub</a>
 </p>
 
 <p align="center"><strong>Developed by <a href="https://github.com/sgroy10">Sandeep Roy</a></strong> · Free &amp; Open Source (MIT License)</p>
@@ -100,7 +101,7 @@ AI:     ⚠️  BLOCKED — violates lock "Never touch the auth system"
         Should I find another approach?
 ```
 
-**100/100 on Claude's independent test suite. 1034 tests across 23 suites. 0 false positives. 15.7ms per check.**
+**100/100 on Claude's independent test suite. 1043 tests across 24 suites. 0 false positives. 15.7ms per check.**
 
 ## The Problem
 
@@ -616,7 +617,7 @@ The AI opens the file and sees:
 | REST API v2 | 9 | 100% | Typed constraint endpoints, SSE |
 | PII/Export Detection | 8 | 100% | SSN, email export, data access violations |
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
-| **Total** | **1034** | **100%** | **23 suites, 15+ domains** |
+| **Total** | **1043** | **100%** | **24 suites, 15+ domains** |
 
 **External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.6.1. Zero false positives. Zero missed violations. 15.7ms per check.
 
