@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, #FFF8F0 0%, #FFF1E6 55%, #FFE3CC 100%);
+    color: #1A1A1A;
+    position: relative;
+    padding: 64px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  /* subtle corner glow */
+  body::after {
+    content: ""; position: absolute; right: -160px; top: -160px;
+    width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,44,0.18) 0%, rgba(255,107,44,0) 70%);
+  }
+  .brand { display: flex; align-items: center; gap: 18px; z-index: 1; }
+  .lock { font-size: 64px; line-height: 1; }
+  .wordmark { font-size: 60px; font-weight: 900; letter-spacing: -1.5px; }
+  .wordmark .spec { color: #1A1A1A; }
+  .wordmark .lock-text { color: #FF6B2C; }
+  .mid { z-index: 1; }
+  .tagline {
+    font-size: 76px; font-weight: 800; letter-spacing: -2px; line-height: 1.05;
+    max-width: 1000px;
+  }
+  .tagline .em { color: #FF6B2C; }
+  .sub {
+    margin-top: 22px; font-size: 27px; font-weight: 500; color: #4A4039;
+    max-width: 920px; line-height: 1.35;
+  }
+  .receipt {
+    z-index: 1; display: inline-flex; align-items: center; gap: 14px;
+    align-self: flex-start; margin-top: 26px;
+    background: #1A1A1A; color: #fff; border-radius: 12px;
+    padding: 16px 22px; font-family: 'JetBrains Mono', monospace; font-size: 24px;
+    box-shadow: 0 12px 30px rgba(26,26,26,0.22);
+  }
+  .receipt .x { color: #FF5247; font-size: 26px; }
+  .receipt .dim { color: #9aa0a6; }
+  .foot { display: flex; align-items: center; justify-content: space-between; z-index: 1; }
+  .cmd {
+    font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700;
+    color: #1A1A1A; background: rgba(255,107,44,0.14);
+    border: 2px solid rgba(255,107,44,0.5); border-radius: 10px; padding: 12px 20px;
+  }
+  .cmd .p { color: #FF6B2C; }
+  .url { font-size: 24px; font-weight: 600; color: #6b5d52; }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <span class="lock">🔒</span>
+    <span class="wordmark"><span class="spec">Spec</span><span class="lock-text">Lock</span></span>
+  </div>
+
+  <div class="mid">
+    <div class="tagline">Your CLAUDE.md,<br><span class="em">enforced.</span> Not suggested.</div>
+    <div class="sub">Turns the AI rules you already wrote into hard constraints your coding agent physically can't break — across Claude Code, Cursor, Windsurf &amp; more.</div>
+    <div class="receipt">
+      <span class="x">⛔</span> blocked: <span>delete</span> <span class="dim">production</span> patient_records
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="cmd"><span class="p">npx</span> speclock protect</span>
+    <span class="url">sgroy10.github.io/speclock</span>
+  </div>
+</body>
+</html>
