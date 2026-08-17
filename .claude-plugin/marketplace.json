@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "speclock-marketplace",
+  "description": "Official SpecLock plugin for Claude Code constraint enforcement.",
+  "owner": {
+    "name": "Sandeep Roy",
+    "url": "https://github.com/sgroy10"
+  },
+  "plugins": [
+    {
+      "name": "speclock",
+      "source": ".",
+      "description": "Enforce project constraints with semantic checks, Claude Code hooks, Git hooks, and 51 MCP tools.",
+      "version": "5.7.1",
+      "author": {
+        "name": "Sandeep Roy",
+        "url": "https://github.com/sgroy10"
+      },
+      "category": "Security",
+      "homepage": "https://sgroy10.github.io/speclock/"
+    }
+  ]
+}

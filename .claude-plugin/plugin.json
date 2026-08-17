@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "speclock",
+  "version": "5.7.1",
+  "description": "Enforce project constraints from CLAUDE.md, AGENTS.md, and other AI rule files with semantic checks, Git hooks, and MCP tools.",
+  "author": {
+    "name": "Sandeep Roy",
+    "url": "https://github.com/sgroy10"
+  },
+  "homepage": "https://sgroy10.github.io/speclock/",
+  "repository": "https://github.com/sgroy10/speclock",
+  "license": "MIT",
+  "keywords": ["claude-code", "constraints", "guardrails", "hooks", "mcp"]
+}

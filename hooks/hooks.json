@@ -1,0 +1,18 @@
+{
+  "description": "Check Claude Code tool actions against active SpecLock constraints.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/claude-hook.js\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+

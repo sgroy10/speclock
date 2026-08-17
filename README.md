@@ -50,6 +50,30 @@ speclock doctor                   # Verify everything is set up correctly
 
 That's it. Your AI now has rules it can't ignore. Default mode is WARN (loud warnings, no blocks). Opt in to hard enforcement with `speclock protect --strict`.
 
+### Install as a Claude Code plugin
+
+```text
+/plugin marketplace add sgroy10/speclock
+/plugin install speclock@speclock-marketplace
+```
+
+The plugin starts SpecLock's MCP server automatically and checks Claude Code
+`Write`, `Edit`, and `Bash` actions before they run. Advisory mode reports a
+warning; hard mode denies actions that conflict with an active lock.
+
+After installation, protect the current project once:
+
+```bash
+npx speclock protect              # advisory mode
+npx speclock protect --strict     # hard enforcement
+```
+
+## What's New in v5.7.1
+
+- **Native Claude Code plugin** — install SpecLock through its marketplace and automatically connect all 51 MCP tools.
+- **Pre-action enforcement** — `Write`, `Edit`, and `Bash` actions are checked before Claude Code executes them. Advisory mode warns; hard mode denies confirmed conflicts.
+- **Repository isolation** — removed unrelated project constraints from published package metadata and added packaging checks to prevent recurrence.
+
 ## What's New in v5.7.0
 
 - **The Saves Wall** — publish a save to a public, indexable page with `speclock wins --publish` (opt-in). Each gets a shareable URL with a rich social card, and a live "🔒 blocked by speclock · N" badge counts every published block. Browse them at [/saves](https://speclock-mcp-production.up.railway.app/saves).
@@ -142,13 +166,14 @@ npx speclock setup --goal "Build my app" --template nextjs
 Creates `SPECLOCK.md`, injects rules into `package.json`, generates `.speclock/context/latest.md`. The AI reads these automatically.
 
 ### Claude Code
-Add to `.mcp.json`:
+Install the plugin using the commands above. For MCP-only setup without the
+plugin hooks, add this to `.mcp.json`:
 ```json
 {
   "mcpServers": {
     "speclock": {
       "command": "npx",
-      "args": ["-y", "speclock", "serve", "--project", "."]
+      "args": ["--yes", "speclock@5.7.1", "serve", "--project", "."]
     }
   }
 }
@@ -647,7 +672,7 @@ Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aero
 
 ## Changelog
 
-Prior-version feature tours. The Quick Start and What's New sections above cover v5.7.0 — this section preserves details on features shipped in v5.0–v5.5.
+Prior-version feature tours. The Quick Start and What's New sections above cover v5.7.0–v5.7.1 — this section preserves details on features shipped in v5.0–v5.5.
 
 ### v5.4 — Drift Score, Lock Coverage, Lock Strengthener
 
@@ -908,4 +933,4 @@ Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that 
 
 ---
 
-<p align="center"><i>SpecLock v5.7.0 — Your AI has rules. SpecLock makes them unbreakable. 1043 tests, 100% pass rate, 51 MCP tools, Save Receipt (speclock wins), Wrapped recap, Default WARN mode, MCP Autoinstaller, Greenfield support, Doctor health check. Developed by Sandeep Roy.</i></p>
+<p align="center"><i>SpecLock v5.7.1 — Native Claude Code plugin with pre-action constraint enforcement. 1043 core tests, 7 plugin tests, 51 MCP tools. Developed by Sandeep Roy.</i></p>
