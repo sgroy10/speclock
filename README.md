@@ -2,130 +2,136 @@
   <img src="https://img.shields.io/badge/🔒-SpecLock-000000?style=for-the-badge&labelColor=000000&color=4F46E5" alt="SpecLock" height="40" />
 </p>
 
-<h3 align="center">Your AI keeps breaking things you told it not to touch.<br/>SpecLock makes it stop.</h3>
+<h2 align="center">Rules files tell AI what not to change.<br/>SpecLock enforces them.</h2>
+
+<p align="center">
+  Stop Claude Code, Cursor, Codex, Windsurf, and other AI coding tools from crossing project constraints you already wrote in <code>CLAUDE.md</code>, <code>AGENTS.md</code>, and <code>.cursorrules</code>.
+</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock.svg?style=flat-square&color=4F46E5" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock.svg?style=flat-square&color=22C55E" alt="npm downloads" /></a>
+  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/tests-1043%20passing-success?style=flat-square" alt="1,043 tests passing" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License" /></a>
-  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-51_tools-green.svg?style=flat-square" alt="MCP 51 tools" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-51%20tools-green.svg?style=flat-square" alt="MCP 51 tools" /></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/drift_score-12%2F100-brightgreen.svg?style=flat-square" alt="Drift Score" />
-  <img src="https://img.shields.io/badge/lock_coverage-83%25-brightgreen.svg?style=flat-square" alt="Lock Coverage" />
-  <img src="https://img.shields.io/badge/lock_strength-85%2F100-brightgreen.svg?style=flat-square" alt="Lock Strength" />
+  <a href="#60-second-setup"><strong>Install</strong></a> ·
+  <a href="#see-the-difference"><strong>See a block</strong></a> ·
+  <a href="#install-as-a-claude-code-plugin"><strong>Claude Code plugin</strong></a> ·
+  <a href="https://sgroy10.github.io/speclock/"><strong>Website</strong></a> ·
+  <a href="https://speclock-mcp-production.up.railway.app/saves"><strong>Saves Wall</strong></a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat&logo=lock" alt="Protected by SpecLock" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/Protected_by-SpecLock-FF6B2C?style=flat-square&logo=lock" alt="Protected by SpecLock" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/PROTECTED_BY-SPECLOCK-FF6B2C?style=for-the-badge&logo=lock&logoColor=white" alt="Protected by SpecLock" /></a>
-</p>
+> **Why another rules tool?** Rules files are context. They can be forgotten, diluted, or overridden during a long coding session. SpecLock turns those rules into checks that run before edits, shell commands, and commits.
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock?label=SpecLock&color=FF6B2C&logo=lock" alt="SpecLock" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/SpecLock_Tests-1043%20passing-success" alt="Tests" /></a>
-  <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock?label=SpecLock%20downloads&color=FF6B2C" alt="Downloads" /></a>
-  <a href="https://speclock-mcp-production.up.railway.app/saves"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fspeclock-mcp-production.up.railway.app%2Fapi%2Fbadge%2Fsaves" alt="Blocked by SpecLock" /></a>
-</p>
+## See the difference
 
-<p align="center"><sub>Browse all badge variants at <a href="https://sgroy10.github.io/speclock/badge.html">sgroy10.github.io/speclock/badge.html</a> &middot; or run <code>speclock badge</code> in your terminal.</sub></p>
+```text
+CLAUDE.md:  Never modify the authentication system.
 
-<p align="center">
-  <a href="https://sgroy10.github.io/speclock/">Website</a> · <a href="https://www.npmjs.com/package/speclock">npm</a> · <a href="https://speclock-mcp-production.up.railway.app/saves">Saves Wall</a> · <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> · <a href="https://github.com/sgroy10/speclock">GitHub</a>
-</p>
+You:        Add social login to the login page.
 
-<p align="center"><strong>Developed by <a href="https://github.com/sgroy10">Sandeep Roy</a></strong> · Free &amp; Open Source (MIT License)</p>
+Without SpecLock
+Claude:     I'll update the auth flow and add an OAuth provider...
 
----
-
-## Quick Start
-
-```bash
-npx speclock protect              # Install in your project (creates CLAUDE.md if missing)
-speclock mcp install claude-code  # Wire up MCP for Claude Code (or cursor, windsurf, cline, codex)
-speclock doctor                   # Verify everything is set up correctly
+With SpecLock (strict mode)
+SpecLock:   BLOCKED — conflicts with "Never modify the authentication system"
+            Match: login → auth → authentication
+            The action was denied before the files changed.
 ```
 
-That's it. Your AI now has rules it can't ignore. Default mode is WARN (loud warnings, no blocks). Opt in to hard enforcement with `speclock protect --strict`.
+SpecLock uses semantic conflict detection rather than simple keyword matching. It catches indirect actions such as “clean up old patient data,” “streamline checkout,” or “temporarily disable MFA” when they violate an active constraint.
 
-### Install as a Claude Code plugin
+## 60-second setup
+
+Run this from the project you want to protect:
+
+```bash
+npx speclock@latest protect          # reads existing AI rule files; advisory by default
+npx speclock@latest doctor           # confirms rules, hooks, and integration
+```
+
+When the advisory output looks right, enable blocking:
+
+```bash
+npx speclock@latest protect --strict
+```
+
+No account is required. SpecLock runs locally by default, and advisory mode never blocks a change.
+
+## Install as a Claude Code plugin
+
+Inside Claude Code, run:
 
 ```text
 /plugin marketplace add sgroy10/speclock
 /plugin install speclock@speclock-marketplace
 ```
 
-The plugin starts SpecLock's MCP server automatically and checks Claude Code
-`Write`, `Edit`, and `Bash` actions before they run. Advisory mode reports a
-warning; hard mode denies actions that conflict with an active lock.
-
-After installation, protect the current project once:
+Then protect the current project once:
 
 ```bash
-npx speclock protect              # advisory mode
-npx speclock protect --strict     # hard enforcement
+npx speclock@latest protect          # warnings only
+npx speclock@latest protect --strict # block confirmed conflicts
 ```
 
-## What's New in v5.7.1
+The plugin automatically starts SpecLock's MCP server and checks Claude Code `Write`, `Edit`, and `Bash` actions before execution. It includes all 51 MCP tools and works alongside your existing `CLAUDE.md`.
 
-- **Native Claude Code plugin** — install SpecLock through its marketplace and automatically connect all 51 MCP tools.
-- **Pre-action enforcement** — `Write`, `Edit`, and `Bash` actions are checked before Claude Code executes them. Advisory mode warns; hard mode denies confirmed conflicts.
-- **Repository isolation** — removed unrelated project constraints from published package metadata and added packaging checks to prevent recurrence.
+## What you get
 
-## What's New in v5.7.0
+| Capability | What it does |
+|---|---|
+| Pre-action checks | Reviews Claude Code writes, edits, and shell commands before they run |
+| Semantic constraints | Detects synonyms, euphemisms, compound requests, and indirect violations |
+| Git enforcement | Adds a second guard at commit time |
+| Advisory and strict modes | Start with warnings; opt in to hard blocking when ready |
+| Audit trail | Records decisions in a tamper-evident HMAC chain |
+| MCP integration | Exposes 51 tools to Claude Code, Cursor, Codex, Windsurf, and Cline |
+| Shareable save receipts | Shows what SpecLock prevented with `speclock wins` |
 
-- **The Saves Wall** — publish a save to a public, indexable page with `speclock wins --publish` (opt-in). Each gets a shareable URL with a rich social card, and a live "🔒 blocked by speclock · N" badge counts every published block. Browse them at [/saves](https://speclock-mcp-production.up.railway.app/saves).
+## Proven in the open
 
-## What's New in v5.6.1
+- **10,000+ npm downloads** before the native Claude Code plugin release.
+- **1,043 automated tests across 24 suites**, including adversarial conflicts, false-positive cases, patch analysis, enforcement, auth, and compliance.
+- **MIT licensed** and inspectable end to end.
+- **Local-first defaults** with optional remote features clearly separated.
 
-- **`speclock wins`** — a shareable "Save Receipt" of everything SpecLock blocked your AI from doing. Screenshot-ready and screenshot-worthy.
-- **`speclock wrapped`** — a Spotify-Wrapped-style recap of your saves, all-time and monthly (alias: `speclock recap`).
-- **Dynamic "🔒 N violations blocked" README badge** — a new live badge variant that shows the real number of violations SpecLock has blocked for you. Add it with `speclock badge`.
-- **Default WARN mode** — no more false-positive blocks. Loud warnings instead. Opt in to strict with `--strict` or `SPECLOCK_STRICT=1`.
-- **`speclock mcp install <client>`** — autoinstaller for Claude Code, Cursor, Windsurf, Cline, Codex. No more hand-editing JSON.
-- **Greenfield support** — `speclock protect` in fresh projects auto-creates CLAUDE.md with safe defaults.
-- **`speclock doctor`** — health check verifying installation, git hook, rule files, and MCP integration. Prints exact fix commands for any issues.
-
-## What is SpecLock?
-
-**SpecLock is an AI constraint engine that enforces your project rules across every AI coding session.** Your AI keeps breaking things you told it not to touch — SpecLock makes it stop.
-
-## Commands Reference
+## Commands you will use most
 
 ```bash
-speclock protect                      # Install pre-commit hook + extract locks from rule files
-speclock protect --strict             # Hard enforcement mode (blocks violations)
-speclock doctor                       # Health check — verifies install, hooks, rules, MCP
-speclock mcp install <client>         # Wire up MCP server (claude-code, cursor, windsurf, cline, codex)
-speclock check "action description"   # Test if an action would conflict with locks
-speclock add-lock "rule"              # Add a new lock
-speclock list-locks                   # Show all locks
-speclock enforce hard|advisory        # Change enforcement mode
-speclock wins                         # Shareable "Save Receipt" of what SpecLock blocked (screenshot it!)
-speclock wins --publish               # Publish your latest save to the public Saves Wall (opt-in)
-speclock wrapped                      # Spotify-Wrapped-style recap of your saves (alias: recap)
+speclock protect                      # extract constraints and install project protection
+speclock protect --strict             # enable hard enforcement
+speclock doctor                       # verify the complete setup
+speclock check "action description"   # preview whether an action conflicts
+speclock add-lock "rule"              # add a constraint explicitly
+speclock list-locks                    # inspect active constraints
+speclock enforce hard|advisory         # switch enforcement mode
+speclock mcp install <client>          # Claude Code, Cursor, Windsurf, Cline, or Codex
+speclock wins                          # create a shareable save receipt
 ```
 
-Full command reference: `npx speclock help`
+Full reference: `npx speclock@latest help`
 
----
+## New in v5.7.1
 
-```
-You:    "Never touch the auth system"
-AI:     🔒 Locked.
+- Native Claude Code marketplace plugin with automatic MCP startup.
+- Pre-action enforcement for `Write`, `Edit`, and `Bash`.
+- Advisory warnings by default and explicit hard-mode denial.
+- Packaging isolation checks to keep project-specific constraints out of releases.
 
-         ... 5 sessions later ...
+<details>
+<summary><strong>More links and project badges</strong></summary>
 
-You:    "Add social login to the login page"
-AI:     ⚠️  BLOCKED — violates lock "Never touch the auth system"
-        Matched: auth → authentication (synonym), login → auth (concept)
-        Confidence: 100%
-        Should I find another approach?
-```
+<p>
+  <a href="https://speclock-mcp-production.up.railway.app/saves"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fspeclock-mcp-production.up.railway.app%2Fapi%2Fbadge%2Fsaves" alt="Blocked by SpecLock" /></a>
+  <a href="https://smithery.ai/servers/sgroy10/speclock">Smithery</a> ·
+  <a href="https://sgroy10.github.io/speclock/badge.html">Badge gallery</a> ·
+  <a href="https://github.com/sgroy10">Sandeep Roy</a>
+</p>
 
-**100/100 on Claude's independent test suite. 1043 tests across 24 suites. 0 false positives. 15.7ms per check.**
+</details>
 
 ## The Problem
 
