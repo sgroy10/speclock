@@ -19,7 +19,7 @@
         "name": "Sandeep Roy",
         "url": "https://github.com/sgroy10"
       },
-      "softwareVersion": "5.7.0",
+      "softwareVersion": "5.7.1",
       "operatingSystem": "Cross-platform",
       "applicationCategory": "DeveloperApplication"
     }
@@ -1386,10 +1386,11 @@ SPECLOCK_ENCRYPTION_KEY=your-256-bit-key npx speclock init
                     <div class="step">
                         <div class="step-num">1</div>
                         <div class="step-content">
-                            <h4>Install via Smithery</h4>
+                            <h4>Install the native Claude Code plugin</h4>
                             <div class="code-block">
-npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code
-                                <button class="copy-btn" onclick="copyText('npx @anthropic-ai/smithery-cli install sgroy10/speclock --client claude-code')">Copy</button>
+/plugin marketplace add sgroy10/speclock
+/plugin install speclock@speclock-marketplace
+                                <button class="copy-btn" onclick="copyText('/plugin marketplace add sgroy10/speclock\n/plugin install speclock@speclock-marketplace')">Copy</button>
                             </div>
                         </div>
                     </div>
@@ -1837,7 +1838,7 @@ npx speclock setup --goal "My app" --template nextjs
     </section>
 
     <footer>
-        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.7.0 &mdash; AI Constraint Engine &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
+        <p>Built by <strong>Sandeep Roy</strong> &middot; SpecLock v5.7.1 &mdash; Native Claude Code constraint enforcement &middot; <a href="https://smithery.ai/servers/sgroy10/speclock" target="_blank">Smithery</a> &middot; <a href="https://github.com/sgroy10/speclock" target="_blank">GitHub</a> &middot; <a href="https://www.npmjs.com/package/speclock" target="_blank">npm</a></p>
     </footer>
 
     <script>

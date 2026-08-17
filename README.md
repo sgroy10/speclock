@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/v/speclock.svg?style=flat-square&color=4F46E5" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/speclock"><img src="https://img.shields.io/npm/dm/speclock.svg?style=flat-square&color=22C55E" alt="npm downloads" /></a>
-  <a href="https://github.com/sgroy10/speclock"><img src="https://img.shields.io/badge/tests-1043%20passing-success?style=flat-square" alt="1,043 tests passing" /></a>
+  <a href="https://github.com/sgroy10/speclock/actions/workflows/ci.yml"><img src="https://github.com/sgroy10/speclock/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-51%20tools-green.svg?style=flat-square" alt="MCP 51 tools" /></a>
 </p>
@@ -201,7 +201,7 @@ Same config — add to `.cursor/mcp.json` or equivalent.
 |---|:---:|:---:|:---:|:---:|
 | Remembers context | Yes | Yes | Manual | **Yes** |
 | **Blocks the AI from breaking things** | No | No | No | **Yes** |
-| **Semantic conflict detection** | No | No | No | **100/100 score, 0% FP** |
+| **Semantic conflict detection** | No | No | No | **Yes — covered by adversarial tests** |
 | **Tamper-proof audit trail** | No | No | No | **HMAC-SHA256 chain** |
 | **Hard enforcement (AI cannot proceed)** | No | No | No | **Yes** |
 | **SOC 2 / HIPAA compliance exports** | No | No | No | **Yes** |
@@ -216,7 +216,7 @@ Same config — add to `.cursor/mcp.json` or equivalent.
 
 ## Semantic Engine
 
-Not keyword matching — **real semantic analysis** with Gemini Flash hybrid for universal domain coverage. Scored **100/100** on Claude's independent adversarial test battery (7 suites, including false positives, question framing, patch gateway, and diff analysis).
+Not keyword matching — semantic analysis with an optional Gemini Flash hybrid for grey-zone and cross-domain cases. The repository includes adversarial, false-positive, question-framing, patch-gateway, and diff-analysis test suites.
 
 <table>
 <tr><td><b>Category</b></td><td><b>Detection</b></td><td><b>Example</b></td></tr>
@@ -650,18 +650,18 @@ The AI opens the file and sees:
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
 | **Total** | **1043** | **100%** | **24 suites, 15+ domains** |
 
-**External validation:** Claude's independent 7-suite adversarial test battery — **100/100 (100%)** on v5.7.0. Zero false positives. Zero missed violations. 15.7ms per check.
+**Reproducible project test gate:** all 1,043 repository tests pass on v5.7.1. These are project-maintained automated scenarios, not third-party certification; run them yourself with `npm test`.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
 ---
 
-## Real-World Tested
+## Simulated Developer Journeys
 
-### John — Indie developer on Bolt.new
+### John scenario — Indie developer on Bolt.new
 8 sessions building an ecommerce app. 5 locks (auth, Firebase, Supabase, shipping, Stripe). Every direct violation caught. Every euphemistic attack caught ("clean up auth", "modernize database", "streamline serverless"). Zero false positives on safe actions (product page, cart, dark mode). **86/86 tests passed.**
 
-### Sam — Senior engineer building a HIPAA hospital ERP
+### Sam scenario — Senior engineer building a HIPAA hospital ERP
 10 sessions with 8 HIPAA locks. Every violation caught — expose PHI, remove encryption, disable audit, downgrade MFA, bypass FHIR. Euphemistic HIPAA attacks caught ("simplify data flow", "modernize auth"). Full auth + RBAC + encryption + compliance export workflow verified. **124/124 tests passed.**
 
 ---
