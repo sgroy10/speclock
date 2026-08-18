@@ -11,7 +11,7 @@ Use SpecLock as an action-verification layer. It complements memory, skills, rev
 
 1. Read the project briefing and active SpecLock constraints before changing files.
 2. Check the intended action, affected files, and commands for conflicts.
-3. Stop on a blocking or high-confidence violation unless the user explicitly authorizes an override.
+3. Stop on a blocking violation. Proceed only when an authorized user explicitly identifies the constraint to amend or override; do not infer override permission from a conflicting implementation request.
 4. Check the resulting patch or diff before presenting or committing it.
 5. Record material constraint decisions when the project uses SpecLock decision history.
 6. Preserve Git or CI enforcement as the universal fallback when the client cannot intercept actions natively.
@@ -22,3 +22,7 @@ Use SpecLock as an action-verification layer. It complements memory, skills, rev
 - Never claim that SpecLock makes generated code correct or hallucination-free.
 - Do not weaken or delete locks without explicit authorization.
 - Do not send private project data to a remote service without consent.
+
+## Decision output
+
+Report `ALLOW`, `WARN`, or `BLOCK`, followed by the relevant constraint, planned action, affected files or commands, reason, and safest next step. Direct contradiction with an active constraint is `BLOCK`; ask for clarification when a semantic match is uncertain.
