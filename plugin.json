@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "speclock",
+  "version": "5.8.0",
+  "description": "Action guardrails that check AI coding changes against explicit project constraints.",
+  "author": {"name": "Sandeep Roy", "url": "https://github.com/sgroy10"},
+  "homepage": "https://sgroy10.github.io/speclock/",
+  "repository": "https://github.com/sgroy10/speclock",
+  "license": "MIT",
+  "keywords": ["ai-guardrails", "coding-agent", "constraints", "mcp", "claude-code"]
+}

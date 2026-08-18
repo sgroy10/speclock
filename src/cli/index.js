@@ -409,7 +409,7 @@ export function formatBadges(root) {
 
 function printHelp() {
   console.log(`
-SpecLock v5.7.1 — Your AI has rules. SpecLock makes them unbreakable.
+SpecLock v5.8.0 — Your AI has rules. SpecLock makes them unbreakable.
 Developed by Sandeep Roy (github.com/sgroy10)
 
 Usage: speclock <command> [options]

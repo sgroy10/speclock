@@ -1,0 +1,9 @@
+{
+  "name": "speclock",
+  "version": "5.8.0",
+  "description": "Check Gemini CLI coding actions against explicit project constraints with SpecLock.",
+  "mcpServers": {
+    "speclock": {"command": "npx", "args": ["--yes", "speclock@5.8.0", "serve", "--project", "."]}
+  },
+  "contextFileName": "SPECLOCK-GEMINI.md"
+}

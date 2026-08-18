@@ -11,7 +11,7 @@
       "name": "speclock",
       "source": ".",
       "description": "Enforce project constraints with semantic checks, Claude Code hooks, Git hooks, and 51 MCP tools.",
-      "version": "5.7.1",
+      "version": "5.8.0",
       "author": {
         "name": "Sandeep Roy",
         "url": "https://github.com/sgroy10"

@@ -1,0 +1,11 @@
+interface:
+  display_name: "SpecLock Guardrails"
+  short_description: "Verify coding actions against project constraints"
+  default_prompt: "Use $speclock-guardrails to check my planned change against project constraints before editing."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "speclock"
+      description: "SpecLock action-verification MCP server"
+policy:
+  allow_implicit_invocation: true

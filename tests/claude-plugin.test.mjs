@@ -10,7 +10,7 @@ const mcp = JSON.parse(readFileSync(".mcp.json", "utf8"));
 const hooks = JSON.parse(readFileSync("hooks/hooks.json", "utf8"));
 
 assert.equal(manifest.name, "speclock");
-assert.equal(manifest.version, "5.7.1");
+assert.equal(manifest.version, "5.8.0");
 assert.equal(marketplace.plugins[0].source, ".");
 assert.ok(mcp.mcpServers.speclock);
 assert.equal(hooks.hooks.PreToolUse[0].matcher, "Write|Edit|Bash");

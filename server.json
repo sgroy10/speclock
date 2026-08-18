@@ -6,12 +6,12 @@
     "url": "https://github.com/sgroy10/speclock",
     "source": "github"
   },
-  "version": "5.7.1",
+  "version": "5.8.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "speclock",
-      "version": "5.7.1",
+      "version": "5.8.0",
       "transport": {
         "type": "stdio"
       }

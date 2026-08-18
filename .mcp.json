@@ -4,7 +4,7 @@
   "mcpServers": {
     "speclock": {
       "command": "npx",
-      "args": ["--yes", "speclock@5.7.1", "serve"]
+      "args": ["--yes", "speclock@5.8.0", "serve"]
     }
   }
 }

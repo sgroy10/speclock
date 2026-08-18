@@ -1,0 +1,28 @@
+{
+  "name": "speclock",
+  "version": "5.8.0",
+  "description": "Verify Codex coding actions against explicit project constraints with SpecLock MCP tools and a guardrail skill.",
+  "author": {
+    "name": "Sandeep Roy",
+    "url": "https://github.com/sgroy10"
+  },
+  "homepage": "https://sgroy10.github.io/speclock/",
+  "repository": "https://github.com/sgroy10/speclock",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SpecLock Guardrails",
+    "shortDescription": "Check actions against project constraints.",
+    "longDescription": "SpecLock gives Codex an action-verification workflow and MCP tools for checking planned edits, commands, and patches against explicit project constraints.",
+    "developerName": "Sandeep Roy",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://sgroy10.github.io/speclock/",
+    "defaultPrompt": [
+      "Check this planned change against the project's SpecLock constraints before editing.",
+      "Review this patch for constraint violations with SpecLock.",
+      "Show the active SpecLock constraints and explain any conflicts."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

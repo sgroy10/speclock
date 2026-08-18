@@ -79,6 +79,33 @@ npx speclock@latest protect --strict # block confirmed conflicts
 
 The plugin automatically starts SpecLock's MCP server and checks Claude Code `Write`, `Edit`, and `Bash` actions before execution. It includes all 51 MCP tools and works alongside your existing `CLAUDE.md`.
 
+## Install on other coding agents
+
+SpecLock is packaged for multiple agent ecosystems, but the enforcement level depends on what each host exposes:
+
+| Platform | Install/discovery path | Protection level |
+|---|---|---|
+| Claude Code | Native marketplace plugin above | Native pre-action checks for `Write`, `Edit`, and `Bash` |
+| Gemini CLI | Install this repository as a Gemini extension | MCP-assisted checks plus project context |
+| Cursor | Agent Plugin / Cursor marketplace package | MCP-assisted checks plus rules |
+| Codex | Repository Codex plugin in `plugins/speclock` | MCP-assisted checks plus `$speclock-guardrails` skill |
+| GitHub Copilot CLI | Add this repository as a plugin marketplace | MCP-assisted checks plus bundled plugin context |
+| Cline | MCP server; curated marketplace submission in progress | MCP-assisted checks |
+| Windsurf | `speclock mcp install windsurf` | MCP-assisted checks plus rules |
+| Any Git client or CI | `speclock protect` | Commit/CI enforcement independent of the coding agent |
+
+MCP-assisted means the agent can call SpecLock before acting; it does not guarantee interception. Use `speclock protect --strict` and CI when a constraint must be enforced regardless of the client.
+
+SpecLock has a different job from memory and skills: **memory recalls context, skills provide procedures, and SpecLock verifies planned actions against explicit constraints.** It reduces constraint drift; it cannot guarantee factual correctness or make a model hallucination-free.
+
+Repository installs supported by current clients:
+
+```bash
+gemini extensions install https://github.com/sgroy10/speclock
+copilot plugin marketplace add sgroy10/speclock
+copilot plugin install speclock@speclock-marketplace
+```
+
 ## What you get
 
 | Capability | What it does |
@@ -114,12 +141,13 @@ speclock wins                          # create a shareable save receipt
 
 Full reference: `npx speclock@latest help`
 
-## New in v5.7.1
+## New in v5.8.0
 
-- Native Claude Code marketplace plugin with automatic MCP startup.
-- Pre-action enforcement for `Write`, `Edit`, and `Bash`.
-- Advisory warnings by default and explicit hard-mode denial.
-- Packaging isolation checks to keep project-specific constraints out of releases.
+- Portable Agent Plugin packaging for Cursor-compatible discovery.
+- Gemini CLI extension packaging with MCP startup and constraint context.
+- Codex plugin with a `$speclock-guardrails` skill and pinned MCP server.
+- GitHub Copilot CLI compatibility through the repository marketplace.
+- Explicit per-platform enforcement labels: native hook, MCP-assisted, or Git/CI.
 
 <details>
 <summary><strong>More links and project badges</strong></summary>
@@ -179,7 +207,7 @@ plugin hooks, add this to `.mcp.json`:
   "mcpServers": {
     "speclock": {
       "command": "npx",
-      "args": ["--yes", "speclock@5.7.1", "serve", "--project", "."]
+      "args": ["--yes", "speclock@5.8.0", "serve", "--project", "."]
     }
   }
 }
@@ -650,7 +678,7 @@ The AI opens the file and sees:
 | Guardian (Protect) | 47 | 100% | Zero-config rule file extraction |
 | **Total** | **1043** | **100%** | **24 suites, 15+ domains** |
 
-**Reproducible project test gate:** all 1,043 repository tests pass on v5.7.1. These are project-maintained automated scenarios, not third-party certification; run them yourself with `npm test`.
+**Reproducible project test gate:** all 1,043 repository tests pass on v5.8.0. These are project-maintained automated scenarios, not third-party certification; run them yourself with `npm test`.
 
 Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aerospace, payments, payroll, robotics, autonomous systems, telecom, insurance, government. All 11 Indian payment gateways detected. Zero false positives on UI/cosmetic actions.
 
@@ -678,7 +706,7 @@ Tested across: fintech, e-commerce, IoT, healthcare, SaaS, gaming, biotech, aero
 
 ## Changelog
 
-Prior-version feature tours. The Quick Start and What's New sections above cover v5.7.0–v5.7.1 — this section preserves details on features shipped in v5.0–v5.5.
+Prior-version feature tours. The Quick Start and What's New sections above cover v5.7.0–v5.8.0 — this section preserves details on features shipped in v5.0–v5.5.
 
 ### v5.4 — Drift Score, Lock Coverage, Lock Strengthener
 
@@ -939,4 +967,4 @@ Sandeep Roy is the sole developer of SpecLock — the AI Constraint Engine that 
 
 ---
 
-<p align="center"><i>SpecLock v5.7.1 — Native Claude Code plugin with pre-action constraint enforcement. 1043 core tests, 7 plugin tests, 51 MCP tools. Developed by Sandeep Roy.</i></p>
+<p align="center"><i>SpecLock v5.8.0 — Cross-platform action guardrails with native Claude Code enforcement, MCP integrations, 1,043 core tests, and 51 MCP tools. Developed by Sandeep Roy.</i></p>

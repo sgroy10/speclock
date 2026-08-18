@@ -45,6 +45,10 @@ const SUITES = [
   { file: "badge.test.mjs",                 name: "Badge (live variant)",  expected: 6 },
   { file: "saves-wall.test.mjs",            name: "Saves Wall",            expected: 9 },
 
+  // Platform packaging and discovery
+  { file: "claude-plugin.test.mjs",         name: "Claude Plugin",         expected: 7 },
+  { file: "platform-plugins.test.mjs",      name: "Platform Plugins",      expected: null },
+
   // Journey tests (2 tests)
   { file: "john-vibecoder-journey.test.js", name: "John (Vibe Coder)",     expected: null },
   { file: "sam-enterprise-journey.test.js", name: "Sam (Enterprise)",      expected: null },

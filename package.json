@@ -1,6 +1,6 @@
 {
   "name": "speclock",
-  "version": "5.7.1",
+  "version": "5.8.0",
   "mcpName": "io.github.sgroy10/speclock",
   "description": "Enforce project constraints from CLAUDE.md, AGENTS.md, and .cursorrules before AI-generated edits, commands, and commits.",
   "type": "module",
@@ -12,7 +12,7 @@
     "start": "node src/mcp/server.js",
     "serve": "node src/mcp/server.js",
     "test": "node tests/pre-publish-gate.mjs",
-    "test:plugin": "node tests/claude-plugin.test.mjs",
+    "test:plugin": "node tests/claude-plugin.test.mjs && node tests/platform-plugins.test.mjs",
     "prepublishOnly": "node tests/pre-publish-gate.mjs"
   },
   "keywords": [
@@ -72,7 +72,14 @@
   },
   "files": [
     ".claude-plugin/",
+    ".codex-plugin/",
     ".mcp.json",
+    "gemini-extension.json",
+    "mcp.json",
+    "plugin.json",
+    "plugins/",
+    "skills/",
+    "SPECLOCK-GEMINI.md",
     "bin/",
     "hooks/",
     "scripts/",
